@@ -10,87 +10,102 @@
 }
 
 :root {
-  --background: oklch(0.1 0 0);
-  /* Black/Very Dark Grey */
-  --foreground: oklch(0.985 0 0);
-  /* White */
-  --card: oklch(0.15 0 0);
-  /* Dark Grey */
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.15 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.85 0.17 85);
-  /* Gold/Yellow - adjusted for readability */
-  --primary-foreground: oklch(0.1 0 0);
-  /* Black text on Gold */
-  --secondary: oklch(0.25 0 0);
-  /* Lighter Grey */
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.2 0 0);
-  --muted-foreground: oklch(0.7 0 0);
-  --accent: oklch(0.25 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.5 0.2 25);
-  --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(0.25 0 0);
-  --input: oklch(0.25 0 0);
-  --ring: oklch(0.85 0.17 85);
-  /* Gold Ring */
-  --chart-1: oklch(0.85 0.17 85);
-  /* Gold */
-  --chart-2: oklch(0.6 0.15 85);
-  /* Darker Gold */
-  --chart-3: oklch(0.3 0 0);
-  /* Black/Grey */
-  --chart-4: oklch(0.9 0 0);
-  /* White */
-  --chart-5: oklch(0.7 0.15 85);
-  /* Muted Gold */
-  --radius: 0.5rem;
-  --sidebar: oklch(0.12 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.85 0.17 85);
-  --sidebar-primary-foreground: oklch(0.1 0 0);
-  --sidebar-accent: oklch(0.2 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.25 0 0);
-  --sidebar-ring: oklch(0.85 0.17 85);
+  /* Background & Foreground */
+  --background: oklch(0.08 0 0);
+  --foreground: oklch(0.98 0 0);
+
+  /* Card */
+  --card: oklch(0.12 0 0);
+  --card-foreground: oklch(0.98 0 0);
+
+  /* Popover */
+  --popover: oklch(0.12 0 0);
+  --popover-foreground: oklch(0.98 0 0);
+
+  /* Primary - Gold (from logo outline) */
+  --primary: oklch(0.78 0.15 85);
+  --primary-foreground: oklch(0.08 0 0);
+
+  /* Secondary - Dark Grey */
+  --secondary: oklch(0.22 0 0);
+  --secondary-foreground: oklch(0.98 0 0);
+
+  /* Muted */
+  --muted: oklch(0.18 0 0);
+  --muted-foreground: oklch(0.65 0 0);
+
+  /* Accent - Brand Red (from logo) */
+  --accent: oklch(0.50 0.20 25);
+  --accent-foreground: oklch(0.98 0 0);
+
+  /* Destructive */
+  --destructive: oklch(0.55 0.22 25);
+  --destructive-foreground: oklch(0.98 0 0);
+
+  /* Border & Input */
+  --border: oklch(0.22 0 0);
+  --input: oklch(0.22 0 0);
+  --ring: oklch(0.78 0.15 85);
+
+  /* Charts */
+  --chart-1: oklch(0.78 0.15 85);
+  --chart-2: oklch(0.50 0.20 25);
+  --chart-3: oklch(0.30 0 0);
+  --chart-4: oklch(0.90 0 0);
+  --chart-5: oklch(0.65 0.12 85);
+
+  /* Radius */
+  --radius: 0.625rem;
+
+  /* Sidebar */
+  --sidebar: oklch(0.10 0 0);
+  --sidebar-foreground: oklch(0.98 0 0);
+  --sidebar-primary: oklch(0.78 0.15 85);
+  --sidebar-primary-foreground: oklch(0.08 0 0);
+  --sidebar-accent: oklch(0.18 0 0);
+  --sidebar-accent-foreground: oklch(0.98 0 0);
+  --sidebar-border: oklch(0.22 0 0);
+  --sidebar-ring: oklch(0.78 0.15 85);
+
+  /* Brand Colors - RC Fight Club */
+  --brand-red: oklch(0.50 0.22 25);
+  --brand-gold: oklch(0.78 0.15 85);
+  --brand-black: oklch(0.08 0 0);
 }
 
 .dark {
-  /* Dark mode is the default now, so these are essentially duplicates or can be used for explicit dark mode toggling if needed later */
-  --background: oklch(0.1 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.15 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.15 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.85 0.17 85);
-  --primary-foreground: oklch(0.1 0 0);
-  --secondary: oklch(0.25 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.2 0 0);
-  --muted-foreground: oklch(0.7 0 0);
-  --accent: oklch(0.25 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.5 0.2 25);
-  --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(0.25 0 0);
-  --input: oklch(0.25 0 0);
-  --ring: oklch(0.85 0.17 85);
-  --chart-1: oklch(0.85 0.17 85);
-  --chart-2: oklch(0.6 0.15 85);
-  --chart-3: oklch(0.3 0 0);
-  --chart-4: oklch(0.9 0 0);
-  --chart-5: oklch(0.7 0.15 85);
-  --sidebar: oklch(0.12 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.85 0.17 85);
-  --sidebar-primary-foreground: oklch(0.1 0 0);
-  --sidebar-accent: oklch(0.2 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.25 0 0);
-  --sidebar-ring: oklch(0.85 0.17 85);
+  --background: oklch(0.08 0 0);
+  --foreground: oklch(0.98 0 0);
+  --card: oklch(0.12 0 0);
+  --card-foreground: oklch(0.98 0 0);
+  --popover: oklch(0.12 0 0);
+  --popover-foreground: oklch(0.98 0 0);
+  --primary: oklch(0.78 0.15 85);
+  --primary-foreground: oklch(0.08 0 0);
+  --secondary: oklch(0.22 0 0);
+  --secondary-foreground: oklch(0.98 0 0);
+  --muted: oklch(0.18 0 0);
+  --muted-foreground: oklch(0.65 0 0);
+  --accent: oklch(0.50 0.20 25);
+  --accent-foreground: oklch(0.98 0 0);
+  --destructive: oklch(0.55 0.22 25);
+  --destructive-foreground: oklch(0.98 0 0);
+  --border: oklch(0.22 0 0);
+  --input: oklch(0.22 0 0);
+  --ring: oklch(0.78 0.15 85);
+  --chart-1: oklch(0.78 0.15 85);
+  --chart-2: oklch(0.50 0.20 25);
+  --chart-3: oklch(0.30 0 0);
+  --chart-4: oklch(0.90 0 0);
+  --chart-5: oklch(0.65 0.12 85);
+  --sidebar: oklch(0.10 0 0);
+  --sidebar-foreground: oklch(0.98 0 0);
+  --sidebar-primary: oklch(0.78 0.15 85);
+  --sidebar-primary-foreground: oklch(0.08 0 0);
+  --sidebar-accent: oklch(0.18 0 0);
+  --sidebar-accent-foreground: oklch(0.98 0 0);
+  --sidebar-border: oklch(0.22 0 0);
+  --sidebar-ring: oklch(0.78 0.15 85);
 }
 
 @theme inline {
@@ -130,6 +145,11 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Brand colors as utilities */
+  --color-brand-red: var(--brand-red);
+  --color-brand-gold: var(--brand-gold);
+  --color-brand-black: var(--brand-black);
 }
 
 @layer base {
@@ -138,7 +158,52 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  /* Typography Scale - Modern, Athletic */
+  h1 {
+    @apply text-3xl md:text-4xl font-bold tracking-tight;
+    letter-spacing: -0.025em;
+  }
+
+  h2 {
+    @apply text-2xl md:text-3xl font-bold tracking-tight;
+    letter-spacing: -0.02em;
+  }
+
+  h3 {
+    @apply text-xl md:text-2xl font-semibold tracking-tight;
+    letter-spacing: -0.015em;
+  }
+
+  h4 {
+    @apply text-lg md:text-xl font-semibold;
+    letter-spacing: -0.01em;
+  }
+
+  h5 {
+    @apply text-base md:text-lg font-medium;
+  }
+
+  h6 {
+    @apply text-sm md:text-base font-medium uppercase tracking-wide;
+    letter-spacing: 0.05em;
+  }
+
+  /* Improve text rendering */
+  p,
+  span,
+  li {
+    @apply leading-relaxed;
+  }
+
+  /* Monospace elements */
+  code,
+  pre,
+  kbd {
+    @apply font-mono text-sm;
   }
 }
 
@@ -153,12 +218,12 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: hsl(var(--muted));
+  background: var(--muted);
   border-radius: 3px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--muted-foreground));
+  background: var(--muted-foreground);
 }
 
 /* Smooth scroll for html */
@@ -168,7 +233,7 @@ html {
 
 /* Focus visible improvement */
 *:focus-visible {
-  outline: 2px solid hsl(var(--ring));
+  outline: 2px solid var(--ring);
   outline-offset: 2px;
 }
 
@@ -178,8 +243,53 @@ html {
   transition: transform 0.1s ease;
 }
 
-/* Selection color */
+/* Selection color - Brand Gold */
 ::selection {
-  background-color: oklch(0.85 0.17 85 / 0.3);
-  color: oklch(0.985 0 0);
+  background-color: oklch(0.78 0.15 85 / 0.3);
+  color: oklch(0.98 0 0);
+}
+
+/* Brand accent utilities */
+.text-brand-red {
+  color: var(--brand-red);
+}
+
+.text-brand-gold {
+  color: var(--brand-gold);
+}
+
+.bg-brand-red {
+  background-color: var(--brand-red);
+}
+
+.bg-brand-gold {
+  background-color: var(--brand-gold);
+}
+
+/* Calendar specific */
+.calendar-block {
+  @apply rounded-md shadow-sm transition-all duration-150;
+  @apply hover:shadow-md hover:scale-[1.02];
+}
+
+/* Card hover effect */
+.card-hover {
+  @apply transition-all duration-200;
+  @apply hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5;
+}
+
+/* Stat number styling */
+.stat-number {
+  @apply font-bold tabular-nums tracking-tight;
+  font-feature-settings: "tnum";
+}
+
+/* Table improvements */
+.data-row {
+  @apply transition-colors hover:bg-muted/50;
+}
+
+/* Badge improvements */
+.badge-sport {
+  @apply uppercase text-[10px] font-bold tracking-wider px-2 py-0.5 rounded;
 }

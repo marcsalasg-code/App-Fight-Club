@@ -4,15 +4,17 @@ import { cn } from "@/lib/utils";
 
 interface SkeletonProps {
     className?: string;
+    style?: React.CSSProperties;
 }
 
-export function Skeleton({ className }: SkeletonProps) {
+export function Skeleton({ className, style }: SkeletonProps) {
     return (
         <div
             className={cn(
                 "animate-pulse rounded-md bg-muted",
                 className
             )}
+            style={style}
             aria-hidden="true"
         />
     );
@@ -134,3 +136,86 @@ export function ClassCardSkeleton() {
         </div>
     );
 }
+
+export function CalendarSkeleton() {
+    return (
+        <div className="h-full flex flex-col" aria-label="Cargando calendario..." role="status">
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b">
+                <div className="flex items-center gap-4">
+                    <Skeleton className="h-9 w-9 rounded" />
+                    <Skeleton className="h-7 w-40" />
+                    <Skeleton className="h-9 w-9 rounded" />
+                </div>
+                <div className="flex gap-2">
+                    <Skeleton className="h-9 w-20 rounded" />
+                    <Skeleton className="h-9 w-20 rounded" />
+                    <Skeleton className="h-9 w-20 rounded" />
+                </div>
+            </div>
+
+            {/* Week Header */}
+            <div className="grid grid-cols-8 border-b">
+                <div className="p-3 border-r">
+                    <Skeleton className="h-4 w-8" />
+                </div>
+                {Array.from({ length: 7 }).map((_, i) => (
+                    <div key={i} className="p-3 text-center border-r">
+                        <Skeleton className="h-3 w-8 mx-auto mb-1" />
+                        <Skeleton className="h-6 w-6 mx-auto rounded-full" />
+                    </div>
+                ))}
+            </div>
+
+            {/* Time Grid */}
+            <div className="flex-1 grid grid-cols-8">
+                <div className="border-r">
+                    {Array.from({ length: 8 }).map((_, i) => (
+                        <div key={i} className="h-16 border-b p-2 flex justify-end">
+                            <Skeleton className="h-3 w-10" />
+                        </div>
+                    ))}
+                </div>
+                {Array.from({ length: 7 }).map((_, col) => (
+                    <div key={col} className="border-r relative">
+                        {Array.from({ length: 8 }).map((_, row) => (
+                            <div key={row} className="h-16 border-b" />
+                        ))}
+                        {/* Random class blocks */}
+                        {col % 2 === 0 && (
+                            <Skeleton
+                                className="absolute left-1 right-1 h-20 rounded"
+                                style={{ top: `${(col * 30) + 32}px` }}
+                            />
+                        )}
+                        {col % 3 === 0 && (
+                            <Skeleton
+                                className="absolute left-1 right-1 h-16 rounded"
+                                style={{ top: `${(col * 20) + 96}px` }}
+                            />
+                        )}
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+export function PageLoadingSkeleton() {
+    return (
+        <div className="p-6 space-y-6" aria-label="Cargando..." role="status">
+            <div className="flex items-center justify-between">
+                <Skeleton className="h-8 w-48" />
+                <Skeleton className="h-10 w-32 rounded" />
+            </div>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <CardSkeleton />
+                <CardSkeleton />
+                <CardSkeleton />
+                <CardSkeleton />
+            </div>
+            <TableSkeleton rows={6} />
+        </div>
+    );
+}
+

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isSameDay } from "date-fns";
+import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { ClassDetailModal } from "./class-detail-modal";
 
@@ -19,6 +20,17 @@ type Class = {
 type Props = {
     classes: Class[];
     currentDate: Date;
+};
+
+const TYPE_COLORS: Record<string, { bg: string; text: string }> = {
+    "MMA": { bg: "rgba(196, 30, 58, 0.9)", text: "#FFFFFF" },
+    "BJJ": { bg: "rgba(37, 99, 235, 0.9)", text: "#FFFFFF" },
+    "MUAY_THAI": { bg: "rgba(217, 119, 6, 0.9)", text: "#FFFFFF" },
+    "WRESTLING": { bg: "rgba(22, 163, 74, 0.9)", text: "#FFFFFF" },
+    "BOXING": { bg: "rgba(139, 92, 246, 0.9)", text: "#FFFFFF" },
+    "CONDITIONING": { bg: "rgba(212, 175, 55, 0.9)", text: "#000000" },
+    "KIDS": { bg: "rgba(236, 72, 153, 0.9)", text: "#FFFFFF" },
+    "default": { bg: "rgba(212, 175, 55, 0.9)", text: "#000000" }
 };
 
 export function MonthView({ classes, currentDate }: Props) {
@@ -39,58 +51,87 @@ export function MonthView({ classes, currentDate }: Props) {
         setDetailsOpen(true);
     };
 
+    const getTypeColors = (type: string) => {
+        return TYPE_COLORS[type] || TYPE_COLORS.default;
+    };
+
     return (
         <div className="flex h-full flex-col">
             {/* Header */}
-            <div className="grid grid-cols-7 border-b bg-muted/20">
+            <div className="grid grid-cols-7 border-b border-border bg-card/50">
                 {weekDays.map((day) => (
-                    <div key={day} className="p-2 text-center text-sm font-semibold text-muted-foreground">
+                    <div key={day} className="p-3 text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                         {day}
                     </div>
                 ))}
             </div>
 
             {/* Grid */}
-            <div className={cn("flex-1 grid grid-cols-7 bg-muted/20 gap-px overflow-y-auto", calendarDays.length > 35 ? "grid-rows-6" : "grid-rows-5")}>
+            <div className={cn(
+                "flex-1 grid grid-cols-7 gap-px bg-border overflow-y-auto",
+                calendarDays.length > 35 ? "grid-rows-6" : "grid-rows-5"
+            )}>
                 {calendarDays.map((day) => {
-                    const dayNameEn = format(day, 'EEEE').toUpperCase(); // MONDAY, TUESDAY...
-
-                    // Filter classes for this day
-                    const dayClasses = classes.filter(c => c.dayOfWeek === dayNameEn)
+                    const dayNameEn = format(day, 'EEEE').toUpperCase();
+                    const dayClasses = classes
+                        .filter(c => c.dayOfWeek === dayNameEn)
                         .sort((a, b) => a.startTime.localeCompare(b.startTime));
+
+                    const isToday = isSameDay(day, new Date());
+                    const isCurrentMonth = isSameMonth(day, monthStart);
+                    const visibleClasses = dayClasses.slice(0, 3);
+                    const hiddenCount = dayClasses.length - 3;
 
                     return (
                         <div
                             key={day.toISOString()}
                             className={cn(
-                                "bg-background p-1 flex flex-col gap-1 min-h-[100px] hover:bg-muted/5 transition-colors",
-                                !isSameMonth(day, monthStart) && "bg-muted/5 text-muted-foreground",
-                                isSameDay(day, new Date()) && "bg-primary/5"
+                                "bg-background p-2 flex flex-col min-h-[120px] transition-colors",
+                                !isCurrentMonth && "bg-muted/30 opacity-60",
+                                isToday && "bg-primary/5"
                             )}
                         >
-                            <div className="flex justify-between items-start">
+                            {/* Day number */}
+                            <div className="flex justify-between items-start mb-2">
                                 <span className={cn(
-                                    "text-sm font-medium h-6 w-6 flex items-center justify-center rounded-full",
-                                    isSameDay(day, new Date()) && "bg-primary text-primary-foreground"
+                                    "text-sm font-semibold h-7 w-7 flex items-center justify-center rounded-full",
+                                    isToday && "bg-primary text-primary-foreground"
                                 )}>
                                     {format(day, 'd')}
                                 </span>
+                                {dayClasses.length > 0 && (
+                                    <span className="text-[10px] text-muted-foreground font-mono">
+                                        {dayClasses.length} clase{dayClasses.length !== 1 ? 's' : ''}
+                                    </span>
+                                )}
                             </div>
 
-                            <div className="flex-1 flex flex-col gap-1 overflow-y-auto max-h-[140px] custom-scrollbar">
-                                {dayClasses.map(cls => (
-                                    <button
-                                        key={cls.id}
-                                        onClick={(e) => handleClassClick(cls.id, e)}
-                                        className="text-[11px] text-left px-1.5 py-0.5 rounded truncate font-medium hover:brightness-95 transition-all shadow-sm"
-                                        style={{
-                                            backgroundColor: cls.color || "#D4AF37",
-                                            color: 'rgba(0,0,0,0.85)'
-                                        }}
-                                    >
-                                        {cls.startTime} {cls.name}
-                                    </button>
-                                ))}
+                            {/* Classes */}
+                            <div className="flex-1 flex flex-col gap-1 overflow-hidden">
+                                {visibleClasses.map(cls => {
+                                    const colors = getTypeColors(cls.type);
+                                    return (
+                                        <button
+                                            key={cls.id}
+                                            onClick={(e) => handleClassClick(cls.id, e)}
+                                            className="text-[11px] text-left px-2 py-1 rounded-md truncate font-medium transition-all hover:scale-[1.02] hover:shadow-sm"
+                                            style={{
+                                                backgroundColor: cls.color || colors.bg,
+                                                color: colors.text
+                                            }}
+                                        >
+                                            <span className="font-mono opacity-80">{cls.startTime}</span>
+                                            <span className="mx-1">·</span>
+                                            <span>{cls.name}</span>
+                                        </button>
+                                    );
+                                })}
+
+                                {hiddenCount > 0 && (
+                                    <span className="text-[10px] text-muted-foreground font-medium pl-1">
+                                        +{hiddenCount} más
+                                    </span>
+                                )}
                             </div>
                         </div>
                     );

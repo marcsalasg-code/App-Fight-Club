@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Loader2, Clock, User, Trash2, Plus, QrCode, CalendarDays, BarChart3, Edit, X, Users } from "lucide-react";
-import { getClassDetails, cancelClass, addManualAttendance, getActiveAthletes } from "@/app/actions/class-details";
+import { getClassDetails, cancelClass, addManualAttendance, getActiveAthletes, removeAttendance } from "@/app/actions/class-details";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { QrGenerator } from "@/components/checkin/qr-generator";
@@ -299,7 +299,7 @@ export function ClassDetailModal({ classId, open, onOpenChange }: Props) {
                             ) : (
                                 <div className="divide-y">
                                     {data?.attendances?.map((att: any) => (
-                                        <div key={att.id} className="flex items-center justify-between p-4 hover:bg-muted/30 transition-colors">
+                                        <div key={att.id} className="flex items-center justify-between p-4 hover:bg-muted/30 transition-colors group">
                                             <div className="flex items-center gap-3">
                                                 <Avatar>
                                                     <AvatarImage src={att.athlete.photoUrl} />
@@ -316,7 +316,26 @@ export function ClassDetailModal({ classId, open, onOpenChange }: Props) {
                                                     </div>
                                                 </div>
                                             </div>
-                                            {/* We could add Remove Attendance button here later */}
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive hover:bg-destructive/10"
+                                                onClick={async () => {
+                                                    const result = await removeAttendance(att.id);
+                                                    if (result.success) {
+                                                        toast.success("Asistencia eliminada");
+                                                        // Refresh data
+                                                        if (classId) {
+                                                            const refreshed = await getClassDetails(classId);
+                                                            if (refreshed.success) setData(refreshed.data);
+                                                        }
+                                                    } else {
+                                                        toast.error(result.error);
+                                                    }
+                                                }}
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
                                         </div>
                                     ))}
                                 </div>

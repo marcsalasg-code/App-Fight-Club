@@ -109,3 +109,17 @@ export async function getActiveAthletes() {
         return { success: false, error: "Error al cargar atletas" };
     }
 }
+
+export async function removeAttendance(attendanceId: string) {
+    try {
+        await prisma.attendance.delete({
+            where: { id: attendanceId }
+        });
+
+        revalidatePath('/calendario');
+        return { success: true, message: "Asistencia eliminada" };
+    } catch (error) {
+        console.error("Error removing attendance:", error);
+        return { success: false, error: "Error al eliminar asistencia" };
+    }
+}

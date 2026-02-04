@@ -1,16 +1,18 @@
 "use client";
 
 import { useState } from "react";
+import { cn } from "@/lib/utils";
 import { ClassDetailModal } from "./class-detail-modal";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { Users, Clock } from "lucide-react";
 
 type Class = {
     id: string;
     name: string;
     type: string;
     dayOfWeek: string;
-    startTime: string; // "HH:mm"
+    startTime: string;
     endTime: string;
     color: string;
     _count: { attendances: number };
@@ -23,7 +25,19 @@ type Props = {
 
 const START_HOUR = 6;
 const END_HOUR = 22;
+const HOUR_HEIGHT = 72;
 const HOURS = Array.from({ length: END_HOUR - START_HOUR + 1 }, (_, i) => START_HOUR + i);
+
+const TYPE_COLORS: Record<string, { bg: string; border: string; text: string }> = {
+    "MMA": { bg: "rgba(196, 30, 58, 0.95)", border: "#C41E3A", text: "#FFFFFF" },
+    "BJJ": { bg: "rgba(37, 99, 235, 0.95)", border: "#2563EB", text: "#FFFFFF" },
+    "MUAY_THAI": { bg: "rgba(217, 119, 6, 0.95)", border: "#D97706", text: "#FFFFFF" },
+    "WRESTLING": { bg: "rgba(22, 163, 74, 0.95)", border: "#16A34A", text: "#FFFFFF" },
+    "BOXING": { bg: "rgba(139, 92, 246, 0.95)", border: "#8B5CF6", text: "#FFFFFF" },
+    "CONDITIONING": { bg: "rgba(212, 175, 55, 0.95)", border: "#D4AF37", text: "#000000" },
+    "KIDS": { bg: "rgba(236, 72, 153, 0.95)", border: "#EC4899", text: "#FFFFFF" },
+    "default": { bg: "rgba(212, 175, 55, 0.95)", border: "#D4AF37", text: "#000000" }
+};
 
 export function DayView({ classes, currentDate }: Props) {
     const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
@@ -35,68 +49,112 @@ export function DayView({ classes, currentDate }: Props) {
     };
 
     const dayNameEnActual = format(currentDate, 'EEEE').toUpperCase();
-
-    // Filter only classes for this day
     const dayClasses = classes.filter(c => c.dayOfWeek === dayNameEnActual);
 
+    const getTypeColors = (type: string) => {
+        return TYPE_COLORS[type] || TYPE_COLORS.default;
+    };
+
     return (
-        <div className="flex h-full flex-col overflow-auto">
-            <div className="grid grid-cols-[60px_1fr] border-b bg-muted/40 text-center text-sm font-medium sticky top-0 z-10 backdrop-blur-sm">
-                <div className="p-2 border-r h-12 flex items-center justify-center text-xs text-muted-foreground">Hora</div>
-                <div className="p-2 h-12 flex flex-col items-center justify-center text-primary font-bold">
-                    <span className="capitalize">{format(currentDate, 'EEEE d MMMM', { locale: es })}</span>
+        <div className="flex h-full flex-col overflow-auto custom-scrollbar">
+            {/* Header */}
+            <div className="grid grid-cols-[64px_1fr] border-b border-border bg-card/80 sticky top-0 z-10 backdrop-blur-md">
+                <div className="p-3 border-r border-border h-16 flex items-center justify-center text-xs font-medium text-muted-foreground">
+                    <Clock className="h-4 w-4" />
+                </div>
+                <div className="p-4 h-16 flex flex-col justify-center">
+                    <span className="text-2xl font-bold tracking-tight capitalize">
+                        {format(currentDate, 'EEEE d', { locale: es })}
+                    </span>
+                    <span className="text-sm text-muted-foreground capitalize">
+                        {format(currentDate, 'MMMM yyyy', { locale: es })}
+                    </span>
                 </div>
             </div>
 
-            <div className="grid grid-cols-[60px_1fr] grid-rows-[repeat(17,60px)] divide-y divide-x min-w-[300px]">
-                {/* Time Column */}
-                {HOURS.map((hour) => (
-                    <div key={hour} className="row-span-1 border-r bg-muted/10 p-2 text-xs text-right text-muted-foreground font-mono sticky left-0 bg-background/95">
-                        {hour}:00
-                    </div>
-                ))}
-
-                {/* Grid Cells Background */}
-                {/* We rely on the container grid, but we need horizontal lines. */}
-                {/* Actually, the divide-y creates lines between rows. */}
-
-                {/* Classes Layer */}
-                {/* Since we have only 1 day column, we can iterate classes and place them. */}
-                {dayClasses.map((cls) => {
-                    const [startH, startM] = cls.startTime.split(":").map(Number);
-                    const [endH, endM] = cls.endTime.split(":").map(Number);
-
-                    const rowStart = (startH - START_HOUR) + 1;
-
-                    const durationMin = (endH * 60 + endM) - (startH * 60 + startM);
-                    const heightPixels = durationMin * (60 / 60);
-                    const topOffset = (startM / 60) * 60;
-
-                    return (
+            {/* Body */}
+            <div className="flex-1 relative">
+                <div className="grid grid-cols-[64px_1fr]">
+                    {/* Time Column */}
+                    {HOURS.map((hour) => (
                         <div
-                            key={cls.id}
-                            onClick={(e) => { e.stopPropagation(); handleClassClick(cls.id); }}
-                            className="mr-4 ml-1 rounded p-2 text-sm font-medium shadow-sm hover:brightness-110 cursor-pointer overflow-hidden transition-all relative group z-10 hover:z-20 border border-black/10"
-                            style={{
-                                gridColumn: 2,
-                                gridRow: `${rowStart} / span 1`,
-                                height: `${heightPixels}px`,
-                                marginTop: `${topOffset}px`,
-                                backgroundColor: cls.color || "#D4AF37",
-                                color: 'rgba(0,0,0,0.85)',
-                                opacity: 0.95
-                            }}
+                            key={hour}
+                            className="contents"
                         >
-                            <div className="font-bold flex justify-between">
-                                <span>{cls.name}</span>
-                                <span className="opacity-80 text-xs">{cls.startTime} - {cls.endTime}</span>
+                            <div
+                                className="border-r border-b border-border/50 bg-card/30 flex items-start justify-end pr-2 pt-1"
+                                style={{ height: `${HOUR_HEIGHT}px` }}
+                            >
+                                <span className="text-xs text-muted-foreground font-mono tabular-nums">
+                                    {String(hour).padStart(2, '0')}:00
+                                </span>
                             </div>
-                            <div className="mt-1 text-xs opacity-80 flex items-center gap-1">
-                                <span>👥 {cls._count.attendances} Atletas</span>
+                            <div
+                                className="border-b border-border/40 relative"
+                                style={{ height: `${HOUR_HEIGHT}px` }}
+                            >
+                                {/* Half hour line */}
+                                <div
+                                    className="absolute w-full border-b border-border/20"
+                                    style={{ top: `${HOUR_HEIGHT / 2}px` }}
+                                />
                             </div>
                         </div>
-                    );
-                })}
+                    ))}
+                </div>
+
+                {/* Classes Layer - Absolute positioned over grid */}
+                <div
+                    className="absolute inset-0 grid grid-cols-[64px_1fr] pointer-events-none"
+                    style={{ height: `${HOURS.length * HOUR_HEIGHT}px` }}
+                >
+                    <div /> {/* Spacer for time column */}
+                    <div className="relative">
+                        {dayClasses.map((cls) => {
+                            const [startH, startM] = cls.startTime.split(":").map(Number);
+                            const [endH, endM] = cls.endTime.split(":").map(Number);
+
+                            const startMinutes = (startH - START_HOUR) * 60 + startM;
+                            const durationMin = (endH * 60 + endM) - (startH * 60 + startM);
+
+                            const top = (startMinutes / 60) * HOUR_HEIGHT;
+                            const height = (durationMin / 60) * HOUR_HEIGHT;
+                            const colors = getTypeColors(cls.type);
+
+                            return (
+                                <div
+                                    key={cls.id}
+                                    onClick={(e) => { e.stopPropagation(); handleClassClick(cls.id); }}
+                                    className="calendar-block absolute left-2 right-4 px-4 py-2 cursor-pointer overflow-hidden pointer-events-auto"
+                                    style={{
+                                        top: `${top}px`,
+                                        height: `${Math.max(height, 40)}px`,
+                                        backgroundColor: cls.color || colors.bg,
+                                        borderLeft: `4px solid ${colors.border}`,
+                                        color: colors.text
+                                    }}
+                                >
+                                    <div className="flex justify-between items-start">
+                                        <div className="flex-1 min-w-0">
+                                            <div className="font-bold text-base truncate">
+                                                {cls.name}
+                                            </div>
+                                            <div className="text-sm opacity-90 mt-0.5">
+                                                {cls.startTime} - {cls.endTime}
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-1.5 text-sm opacity-90 shrink-0 ml-4">
+                                            <Users className="h-4 w-4" />
+                                            <span className="font-mono tabular-nums font-semibold">
+                                                {cls._count.attendances}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
             </div>
 
             <ClassDetailModal
