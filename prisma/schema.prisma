@@ -265,11 +265,29 @@ model Device {
 // ==========================================================
 // COMPETITIONS (For Competitor Athletes)
 // ==========================================================
+model CompetitionEvent {
+  id          String   @id @default(cuid())
+  name        String
+  date        DateTime
+  location    String?
+  type        String?
+  status      String   @default("UPCOMING") // UPCOMING, COMPLETED, CANCELLED
+  weighInDate DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  competitions Competition[]
+}
+
 model Competition {
   id        String   @id @default(cuid())
   athleteId String
-  eventName String
-  date      DateTime
+  eventId   String?
+  
+  // Legacy fields (kept for compatibility, but moving towards Event-based)
+  eventName String?
+  date      DateTime 
+  
   result    String   @default("PENDING") // WON, LOST, DRAW, PENDING
   category  String?
   weight    Float?
@@ -278,6 +296,7 @@ model Competition {
   updatedAt DateTime @updatedAt
 
   athlete Athlete @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+  event   CompetitionEvent? @relation(fields: [eventId], references: [id])
 }
 
 // ==========================================================

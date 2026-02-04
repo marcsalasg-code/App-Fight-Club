@@ -6,6 +6,14 @@ import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { ClassDetailModal } from "./class-detail-modal";
 
+
+type CalendarEvent = {
+    id: string;
+    name: string;
+    date: Date;
+    status: string;
+};
+
 type Class = {
     id: string;
     name: string;
@@ -19,25 +27,28 @@ type Class = {
 
 type Props = {
     classes: Class[];
+    events: CalendarEvent[];
     currentDate: Date;
 };
 
-const TYPE_COLORS: Record<string, { bg: string; text: string }> = {
-    "MMA": { bg: "rgba(196, 30, 58, 0.9)", text: "#FFFFFF" },
-    "BJJ": { bg: "rgba(37, 99, 235, 0.9)", text: "#FFFFFF" },
-    "MUAY_THAI": { bg: "rgba(217, 119, 6, 0.9)", text: "#FFFFFF" },
-    "WRESTLING": { bg: "rgba(22, 163, 74, 0.9)", text: "#FFFFFF" },
-    "BOXING": { bg: "rgba(139, 92, 246, 0.9)", text: "#FFFFFF" },
-    "CONDITIONING": { bg: "rgba(212, 175, 55, 0.9)", text: "#000000" },
-    "KIDS": { bg: "rgba(236, 72, 153, 0.9)", text: "#FFFFFF" },
-    "default": { bg: "rgba(212, 175, 55, 0.9)", text: "#000000" }
+// Type colors based on class type
+const TYPE_COLORS: Record<string, { bg: string; border: string; text: string }> = {
+    "MMA": { bg: "rgba(196, 30, 58, 0.9)", border: "#C41E3A", text: "#FFFFFF" },
+    "BJJ": { bg: "rgba(37, 99, 235, 0.9)", border: "#2563EB", text: "#FFFFFF" },
+    "MUAY_THAI": { bg: "rgba(217, 119, 6, 0.9)", border: "#D97706", text: "#FFFFFF" },
+    "WRESTLING": { bg: "rgba(22, 163, 74, 0.9)", border: "#16A34A", text: "#FFFFFF" },
+    "BOXING": { bg: "rgba(139, 92, 246, 0.9)", border: "#8B5CF6", text: "#FFFFFF" },
+    "CONDITIONING": { bg: "rgba(212, 175, 55, 0.9)", border: "#D4AF37", text: "#000000" },
+    "KIDS": { bg: "rgba(236, 72, 153, 0.9)", border: "#EC4899", text: "#FFFFFF" },
+    "default": { bg: "rgba(212, 175, 55, 0.9)", border: "#D4AF37", text: "#000000" }
 };
 
-export function MonthView({ classes, currentDate }: Props) {
+export function MonthView({ classes, events, currentDate }: Props) {
     const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
     const [detailsOpen, setDetailsOpen] = useState(false);
 
     const monthStart = startOfMonth(currentDate);
+    // ... (date calcs)
     const monthEnd = endOfMonth(monthStart);
     const startDate = startOfWeek(monthStart, { weekStartsOn: 1 });
     const endDate = endOfWeek(monthEnd, { weekStartsOn: 1 });
@@ -77,10 +88,18 @@ export function MonthView({ classes, currentDate }: Props) {
                         .filter(c => c.dayOfWeek === dayNameEn)
                         .sort((a, b) => a.startTime.localeCompare(b.startTime));
 
+                    const dayEvents = events.filter(e => isSameDay(new Date(e.date), day));
+                    /* Mix events and classes count? or separate */
+
                     const isToday = isSameDay(day, new Date());
                     const isCurrentMonth = isSameMonth(day, monthStart);
-                    const visibleClasses = dayClasses.slice(0, 3);
-                    const hiddenCount = dayClasses.length - 3;
+
+                    const totalItems = dayEvents.length + dayClasses.length;
+                    /* Display priority: Events first, then classes */
+                    const visibleEvents = dayEvents.slice(0, 3);
+                    const remainingSlots = 3 - visibleEvents.length;
+                    const visibleClasses = dayClasses.slice(0, remainingSlots);
+                    const hiddenCount = totalItems - (visibleEvents.length + visibleClasses.length);
 
                     return (
                         <div
@@ -99,15 +118,20 @@ export function MonthView({ classes, currentDate }: Props) {
                                 )}>
                                     {format(day, 'd')}
                                 </span>
-                                {dayClasses.length > 0 && (
-                                    <span className="text-[10px] text-muted-foreground font-mono">
-                                        {dayClasses.length} clase{dayClasses.length !== 1 ? 's' : ''}
-                                    </span>
-                                )}
                             </div>
 
-                            {/* Classes */}
+                            {/* Content */}
                             <div className="flex-1 flex flex-col gap-1 overflow-hidden">
+                                {visibleEvents.map(evt => (
+                                    <div
+                                        key={evt.id}
+                                        className="text-[11px] text-left px-2 py-1 rounded-md truncate font-medium bg-red-600 text-white shadow-sm"
+                                    >
+                                        <span className="font-mono opacity-80 mr-1">🏆</span>
+                                        <span>{evt.name}</span>
+                                    </div>
+                                ))}
+
                                 {visibleClasses.map(cls => {
                                     const colors = getTypeColors(cls.type);
                                     return (

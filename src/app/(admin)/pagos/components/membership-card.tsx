@@ -57,51 +57,53 @@ export function MembershipCard({ membership }: { membership: Membership }) {
     }
 
     return (
-        <div className="h-full">
-            <Card className="h-full hover:shadow-lg transition-shadow relative group flex flex-col justify-between">
-                <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                        {membership.name}
-                        {membership.active && <Badge variant="outline" className="bg-green-500/10 text-green-700 border-green-200">Activa</Badge>}
-                    </CardTitle>
-                    <div className="absolute top-4 right-4">
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-8 w-8">
-                                    <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => setEditOpen(true)}>
-                                    <Pencil className="mr-2 h-4 w-4" />
-                                    Editar
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => setDeleteOpen(true)} className="text-destructive">
-                                    <Trash2 className="mr-2 h-4 w-4" />
-                                    Eliminar
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </div>
-                </CardHeader>
-                <CardContent>
-                    <div className="space-y-3">
-                        <p className="text-3xl font-bold text-primary">
-                            €{membership.price.toFixed(2)}
-                        </p>
-                        <div className="text-sm text-muted-foreground">
-                            {membership.durationDays && <p>Duración: {membership.durationDays} días</p>}
-                            {membership.classCount && <p>Clases: {membership.classCount}</p>}
-                            {!membership.durationDays && !membership.classCount && (
-                                <p>Sin límite de tiempo ni clases</p>
+        <>
+            <div className="h-full">
+                <Card className="h-full hover:shadow-lg transition-shadow relative group flex flex-col justify-between">
+                    <CardHeader>
+                        <CardTitle className="flex items-center justify-between">
+                            {membership.name}
+                            {membership.active && <Badge variant="outline" className="bg-green-500/10 text-green-700 border-green-200">Activa</Badge>}
+                        </CardTitle>
+                        <div className="absolute top-4 right-4">
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                                        <MoreHorizontal className="h-4 w-4" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    <DropdownMenuItem onClick={() => setEditOpen(true)}>
+                                        <Pencil className="mr-2 h-4 w-4" />
+                                        Editar
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => setDeleteOpen(true)} className="text-destructive">
+                                        <Trash2 className="mr-2 h-4 w-4" />
+                                        Eliminar
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="space-y-3">
+                            <p className="text-3xl font-bold text-primary">
+                                €{membership.price.toFixed(2)}
+                            </p>
+                            <div className="text-sm text-muted-foreground">
+                                {membership.durationDays && <p>Duración: {membership.durationDays} días</p>}
+                                {membership.classCount && <p>Clases: {membership.classCount}</p>}
+                                {!membership.durationDays && !membership.classCount && (
+                                    <p>Sin límite de tiempo ni clases</p>
+                                )}
+                            </div>
+                            {membership.description && (
+                                <p className="text-sm">{membership.description}</p>
                             )}
                         </div>
-                        {membership.description && (
-                            <p className="text-sm">{membership.description}</p>
-                        )}
-                    </div>
-                </CardContent>
-            </Card>
+                    </CardContent>
+                </Card>
+            </div>
 
             <MembershipDialog
                 membership={membership}

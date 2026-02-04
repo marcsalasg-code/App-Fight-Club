@@ -31,7 +31,13 @@ type Athlete = {
     competitionCategory: string | null;
 };
 
-export function NewCompetitionModal() {
+
+interface Props {
+    eventId?: string;
+    onSuccess?: () => void;
+}
+
+export function NewCompetitionModal({ eventId, onSuccess }: Props) {
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [athletes, setAthletes] = useState<Athlete[]>([]);
@@ -54,6 +60,7 @@ export function NewCompetitionModal() {
             athleteId: formData.get("athleteId") as string,
             eventName: formData.get("eventName") as string,
             date: formData.get("date") as string,
+            eventId: eventId, // Pass eventId from props
             result: formData.get("result") as string || undefined,
             category: formData.get("category") as string || undefined,
             weight: formData.get("weight") ? parseFloat(formData.get("weight") as string) : undefined,
@@ -66,6 +73,7 @@ export function NewCompetitionModal() {
         if (result.success) {
             toast.success("Competencia registrada");
             setOpen(false);
+            if (onSuccess) onSuccess();
             router.refresh();
         } else {
             toast.error(result.error || "Error al crear");
@@ -77,17 +85,19 @@ export function NewCompetitionModal() {
             <DialogTrigger asChild>
                 <Button className="gap-2">
                     <Plus className="h-4 w-4" />
-                    Nueva Competencia
+                    {eventId ? "Añadir Combate" : "Nueva Competencia"}
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-lg">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
                         <Trophy className="h-5 w-5 text-yellow-500" />
-                        Nueva Competencia
+                        {eventId ? "Añadir Combate a Velada" : "Nueva Competencia"}
                     </DialogTitle>
                     <DialogDescription>
-                        Registra una nueva competencia para un atleta
+                        {eventId
+                            ? "Registra un nuevo combate para este evento"
+                            : "Registra una nueva competencia para un atleta"}
                     </DialogDescription>
                 </DialogHeader>
 
@@ -164,6 +174,15 @@ export function NewCompetitionModal() {
                                 placeholder="Ej: 67.5"
                             />
                         </div>
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="notes">Notas</Label>
+                        <Input
+                            id="notes"
+                            name="notes"
+                            placeholder="Detalles adicionales..."
+                        />
                     </div>
 
                     <div className="flex justify-end gap-2 pt-4">

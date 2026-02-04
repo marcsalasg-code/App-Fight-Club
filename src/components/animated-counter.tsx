@@ -13,7 +13,8 @@ export function AnimatedCounter({ value, duration = 1, className }: Props) {
     const [isClient, setIsClient] = useState(false);
 
     useEffect(() => {
-        setIsClient(true);
+        const timer = setTimeout(() => setIsClient(true), 0);
+        return () => clearTimeout(timer);
     }, []);
 
     const spring = useSpring(0, {

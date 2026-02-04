@@ -2,7 +2,8 @@
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { competitionSchema, validateData } from "@/lib/schemas";
+import { competitionSchema, eventSchema, validateData } from "@/lib/schemas";
+
 
 export type CompetitionFormData = {
     athleteId: string;
@@ -12,6 +13,7 @@ export type CompetitionFormData = {
     category?: string;
     weight?: number;
     notes?: string;
+    eventId?: string;
 };
 
 export async function createCompetition(data: CompetitionFormData) {
@@ -40,6 +42,7 @@ export async function createCompetition(data: CompetitionFormData) {
                 category: data.category || null,
                 weight: data.weight || null,
                 notes: data.notes || null,
+                eventId: data.eventId || null,
             },
         });
         revalidatePath("/competencias");
@@ -77,6 +80,23 @@ export async function updateCompetition(id: string, data: CompetitionFormData) {
         console.error("Error updating competition:", error);
         return { success: false, error: "Error al actualizar la competencia" };
     }
+
+}
+
+export async function updateCompetitionResult(id: string, result: string) {
+    if (!id || !result) return { success: false, error: "Datos incompletos" };
+
+    try {
+        await prisma.competition.update({
+            where: { id },
+            data: { result },
+        });
+        revalidatePath("/competencias");
+        return { success: true };
+    } catch (error) {
+        console.error("Error updating result:", error);
+        return { success: false, error: "Error al actualizar resultado" };
+    }
 }
 
 export async function deleteCompetition(id: string) {
@@ -103,5 +123,74 @@ export async function getCompetitorAthletes() {
     } catch (error) {
         console.error("Error fetching competitors:", error);
         return { success: false, error: "Error al obtener competidores" };
+    }
+}
+
+export type EventFormData = {
+    name: string;
+    date: string;
+    location?: string;
+    type?: string;
+    weighInDate?: string;
+};
+
+export async function createEvent(data: EventFormData) {
+    if (!data.name || !data.date) {
+        return { success: false, error: "Nombre y fecha requeridos" };
+    }
+
+    try {
+        await prisma.competitionEvent.create({
+            data: {
+                name: data.name,
+                date: new Date(data.date),
+                location: data.location,
+                type: data.type,
+                weighInDate: data.weighInDate ? new Date(data.weighInDate) : null,
+            },
+        });
+        revalidatePath("/competencias");
+        return { success: true };
+    } catch (error) {
+        console.error("Error creating event:", error);
+        return { success: false, error: "Error al crear el evento" };
+    }
+}
+
+
+export async function updateEvent(id: string, data: EventFormData) {
+    const validation = validateData(eventSchema, data);
+    if (!validation.success) {
+        return { success: false, error: validation.error };
+    }
+
+    try {
+        await prisma.competitionEvent.update({
+            where: { id },
+            data: {
+                name: data.name,
+                date: new Date(data.date),
+                location: data.location || null,
+                type: data.type || null,
+                weighInDate: data.weighInDate ? new Date(data.weighInDate) : null,
+            },
+        });
+        revalidatePath("/competencias");
+        revalidatePath(`/competencias/${id}`);
+        return { success: true };
+    } catch (error) {
+        console.error("Error updating event:", error);
+        return { success: false, error: "Error al actualizar evento" };
+    }
+}
+
+export async function deleteEvent(id: string) {
+    try {
+        await prisma.competitionEvent.delete({ where: { id } });
+        revalidatePath("/competencias");
+        return { success: true };
+    } catch (error) {
+        console.error("Error deleting event:", error);
+        return { success: false, error: "Error al eliminar el evento" };
     }
 }

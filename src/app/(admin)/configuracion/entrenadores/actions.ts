@@ -151,6 +151,7 @@ export async function assignCoachesToClasses(
     }
 
     try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const whereClause: any = {
             dayOfWeek: { in: filters.days },
             active: true, // Only assign to active classes

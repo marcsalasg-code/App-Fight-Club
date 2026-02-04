@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useState, Suspense, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { PinKeypad } from "@/components/checkin/pin-keypad";
 import { performCheckInWithPin } from "@/app/actions/checkin";
@@ -22,20 +22,24 @@ function CheckInContent() {
     });
     const [athleteName, setAthleteName] = useState("");
 
+    const prevTokenRef = useRef<string | null>(null);
+
     useEffect(() => {
-        if (token) {
-            // Only update if needed upon subsequent navigation
-            if (status === 'error' || status === 'idle') {
-                setStatus('input');
-                setMessage("");
-            }
-        } else {
-            if (status !== 'error') {
-                setStatus('error');
-                setMessage("No se ha detectado ningún código de clase.");
-            }
+        // Did the token actually change?
+        if (token !== prevTokenRef.current) {
+            prevTokenRef.current = token;
+
+            setTimeout(() => {
+                if (token) {
+                    setStatus('input');
+                    setMessage("");
+                } else {
+                    setStatus('error');
+                    setMessage("No se ha detectado ningún código de clase.");
+                }
+            }, 0);
         }
-    }, [token, status]);
+    }, [token]);
 
     const handlePinSubmit = async (pin: string) => {
         if (!token) return;

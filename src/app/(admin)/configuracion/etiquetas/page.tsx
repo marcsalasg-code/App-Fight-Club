@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -34,17 +34,17 @@ export default function TagsPage() {
     const [newColor, setNewColor] = useState(COLORS[0].value);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        loadTags();
-    }, []);
-
-    async function loadTags() {
+    const loadTags = useCallback(async () => {
         const res = await getTags();
         if (res.success && res.data) {
             setTags(res.data);
         }
         setLoading(false);
-    }
+    }, []);
+
+    useEffect(() => {
+        setTimeout(() => loadTags(), 0);
+    }, [loadTags]);
 
     async function handleCreate(e: React.FormEvent) {
         e.preventDefault();

@@ -175,9 +175,9 @@ export const columns: ColumnDef<AthleteColumn>[] = [
             return (
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Abrir menú</span>
-                            <MoreHorizontal className="h-4 w-4" />
+                        <Button variant="outline" size="sm" className="h-8 gap-2 px-3 data-[state=open]:bg-muted">
+                            <span className="text-xs font-medium">Gestionar</span>
+                            <MoreHorizontal className="h-3.5 w-3.5 text-muted-foreground" />
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">

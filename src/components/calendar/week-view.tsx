@@ -18,8 +18,17 @@ type Class = {
     _count: { attendances: number };
 };
 
+
+type CalendarEvent = {
+    id: string;
+    name: string;
+    date: Date;
+    status: string;
+};
+
 type Props = {
     classes: Class[];
+    events: CalendarEvent[];
     currentDate: Date;
 };
 

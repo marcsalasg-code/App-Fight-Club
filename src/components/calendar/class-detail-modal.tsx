@@ -57,10 +57,38 @@ type Athlete = {
     photoUrl: string | null;
 };
 
+type Coach = {
+    id: string;
+    name: string;
+};
+
+type Attendance = {
+    id: string;
+    athleteId: string;
+    classId: string;
+    checkInTime: Date;
+    method: string;
+    athlete: Athlete;
+};
+
+type ClassDetails = {
+    id: string;
+    name: string;
+    type: string;
+    dayOfWeek: string;
+    startTime: string;
+    endTime: string;
+    levelRequired: string | null;
+    maxCapacity: number;
+    color: string;
+    active: boolean;
+    coaches: Coach[];
+    attendances: Attendance[];
+};
+
 export function ClassDetailModal({ classId, open, onOpenChange }: Props) {
     const [loading, setLoading] = useState(false);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const [data, setData] = useState<any>(null);
+    const [data, setData] = useState<ClassDetails | null>(null);
     const [canceling, setCanceling] = useState(false);
     const [addingAttendance, setAddingAttendance] = useState(false);
     const [athletes, setAthletes] = useState<Athlete[]>([]);
@@ -74,11 +102,13 @@ export function ClassDetailModal({ classId, open, onOpenChange }: Props) {
     const router = useRouter();
 
     useEffect(() => {
+        let active = true;
         if (open && classId) {
-            setLoading(true);
+            setTimeout(() => setLoading(true), 0);
             getClassDetails(classId).then((result) => {
-                if (result.success) {
-                    setData(result.data);
+                if (!active) return;
+                if (result.success && result.data) {
+                    setData(result.data as ClassDetails);
                 } else {
                     toast.error(result.error);
                     onOpenChange(false);
@@ -86,6 +116,7 @@ export function ClassDetailModal({ classId, open, onOpenChange }: Props) {
                 setLoading(false);
             });
         }
+        return () => { active = false; };
     }, [open, classId, onOpenChange]);
 
     const handleCancelClass = async () => {
@@ -124,7 +155,7 @@ export function ClassDetailModal({ classId, open, onOpenChange }: Props) {
             setShowAddAthlete(false);
             // Refresh data
             const refreshed = await getClassDetails(classId);
-            if (refreshed.success) setData(refreshed.data);
+            if (refreshed.success && refreshed.data) setData(refreshed.data as ClassDetails);
         } else {
             toast.error(result.error);
         }
@@ -166,7 +197,7 @@ export function ClassDetailModal({ classId, open, onOpenChange }: Props) {
                             </span>
                             <span className="flex items-center gap-1">
                                 <User className="h-4 w-4" />
-                                {data?.coaches?.map((c: any) => c.name).join(", ") || "Sin Coach"}
+                                {data?.coaches?.map((c) => c.name).join(", ") || "Sin Coach"}
                             </span>
                         </div>
                     </div>
@@ -236,7 +267,7 @@ export function ClassDetailModal({ classId, open, onOpenChange }: Props) {
                                     }}
                                     onSuccess={() => {
                                         getClassDetails(classId!).then((result) => {
-                                            if (result.success) setData(result.data);
+                                            if (result.success && result.data) setData(result.data as ClassDetails);
                                         });
                                     }}
                                 >
@@ -338,11 +369,11 @@ export function ClassDetailModal({ classId, open, onOpenChange }: Props) {
                                 </div>
                             ) : (
                                 <div className="divide-y">
-                                    {data?.attendances?.map((att: any) => (
+                                    {data?.attendances?.map((att) => (
                                         <div key={att.id} className="flex items-center justify-between p-4 hover:bg-muted/30 transition-colors group">
                                             <div className="flex items-center gap-3">
                                                 <Avatar>
-                                                    <AvatarImage src={att.athlete.photoUrl} />
+                                                    <AvatarImage src={att.athlete.photoUrl || undefined} />
                                                     <AvatarFallback>{att.athlete.firstName[0]}{att.athlete.lastName[0]}</AvatarFallback>
                                                 </Avatar>
                                                 <div>
@@ -367,7 +398,7 @@ export function ClassDetailModal({ classId, open, onOpenChange }: Props) {
                                                         // Refresh data
                                                         if (classId) {
                                                             const refreshed = await getClassDetails(classId);
-                                                            if (refreshed.success) setData(refreshed.data);
+                                                            if (refreshed.success && refreshed.data) setData(refreshed.data as ClassDetails);
                                                         }
                                                     } else {
                                                         toast.error(result.error);

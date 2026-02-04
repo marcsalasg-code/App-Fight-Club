@@ -115,6 +115,19 @@ export const coachSchema = z.object({
 export type CoachInput = z.infer<typeof coachSchema>;
 
 // ==========================================================
+// EVENT SCHEMAS
+// ==========================================================
+export const eventSchema = z.object({
+    name: z.string().min(1, "Nombre requerido"),
+    date: z.string().min(1, "Fecha requerida"),
+    location: z.string().optional().or(z.literal("")),
+    type: z.string().optional().or(z.literal("")),
+    weighInDate: z.string().optional().or(z.literal("")),
+});
+
+export type EventInput = z.infer<typeof eventSchema>;
+
+// ==========================================================
 // HELPER: Safe Parse with Error Messages
 // ==========================================================
 export function validateData<T>(schema: z.ZodSchema<T>, data: unknown): { success: true; data: T } | { success: false; error: string } {

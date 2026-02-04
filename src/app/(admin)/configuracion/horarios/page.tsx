@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Plus, Trash2, Calendar, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -58,18 +58,18 @@ export default function PatternsPage() {
     const [selectedDays, setSelectedDays] = useState<string[]>([]);
     const [formColor, setFormColor] = useState("#D4AF37");
 
-    const loadData = async () => {
+    const loadData = useCallback(async () => {
         setLoading(true);
         const res = await getPatterns();
         if (res.success && res.data) {
             setPatterns(res.data);
         }
         setLoading(false);
-    };
+    }, []);
 
     useEffect(() => {
-        loadData();
-    }, []);
+        setTimeout(() => loadData(), 0);
+    }, [loadData]);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -225,7 +225,7 @@ export default function PatternsPage() {
             <Card>
                 <CardHeader>
                     <CardTitle>Patrones Definidos</CardTitle>
-                    <CardDescription>Estos son los horarios base. Usa "Generar" para crear las clases reales en el calendario.</CardDescription>
+                    <CardDescription>Estos son los horarios base. Usa &quot;Generar&quot; para crear las clases reales en el calendario.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <Table>

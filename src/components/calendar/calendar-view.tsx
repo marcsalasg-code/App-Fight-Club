@@ -15,6 +15,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 type ViewMode = 'year' | 'month' | 'week' | 'day';
 
+
+
 type Class = {
     id: string;
     name: string;
@@ -26,13 +28,23 @@ type Class = {
     _count: { attendances: number };
 };
 
-type Props = {
-    classes: Class[];
+type CalendarEvent = {
+    id: string;
+    name: string;
+    date: Date;
+    status: string;
 };
 
-export function CalendarView({ classes }: Props) {
+type Props = {
+    classes: Class[];
+    events: CalendarEvent[];
+};
+
+export function CalendarView({ classes, events }: Props) {
     const [date, setDate] = useState(new Date());
     const [view, setView] = useState<ViewMode>('week');
+
+    // ... (rest of simple state hooks)
 
     // Load saved view preference from localStorage
     useEffect(() => {
@@ -103,10 +115,10 @@ export function CalendarView({ classes }: Props) {
 
             {/* Views */}
             <div className="flex-1 min-h-[600px] bg-background rounded-lg border shadow-sm isolate">
-                {view === 'week' && <WeekView classes={classes} currentDate={date} />}
-                {view === 'month' && <MonthView classes={classes} currentDate={date} />}
+                {view === 'week' && <WeekView classes={classes} events={events} currentDate={date} />}
+                {view === 'month' && <MonthView classes={classes} events={events} currentDate={date} />}
                 {view === 'year' && <YearView currentDate={date} onMonthSelect={(d) => { setDate(d); setView('month'); }} />}
-                {view === 'day' && <DayView classes={classes} currentDate={date} />}
+                {view === 'day' && <DayView classes={classes} events={events} currentDate={date} />}
             </div>
         </div>
     );
