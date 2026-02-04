@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { ClassDetailSheet } from "./class-detail-sheet";
+import { ClassDetailModal } from "./class-detail-modal";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
@@ -105,7 +105,7 @@ export function DayView({ classes, currentDate }: Props) {
                 })}
             </div>
 
-            <ClassDetailSheet
+            <ClassDetailModal
                 classId={selectedClassId}
                 open={detailsOpen}
                 onOpenChange={setDetailsOpen}

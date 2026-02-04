@@ -3,13 +3,30 @@ import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { CommandPalette } from "@/components/command-palette";
 
+import Link from "next/link"; // Not needed but harmless if auto-added
+import Image from "next/image";
+// ... imports
+
 export default function AdminLayout({
     children,
 }: Readonly<{
     children: React.ReactNode;
 }>) {
     return (
-        <div className="flex min-h-screen">
+        <div className="flex min-h-screen relative isolation-auto">
+            {/* Background Watermark */}
+            <div className="fixed inset-0 z-[-1] pointer-events-none flex items-center justify-center overflow-hidden">
+                <div className="relative w-[80vh] h-[80vh] opacity-[0.03] blur-sm grayscale hover:grayscale-0 transition-all duration-1000 animate-in fade-in zoom-in-50 duration-1000">
+                    <Image
+                        src="/logo.png"
+                        alt="Background Logo"
+                        fill
+                        className="object-contain"
+                        priority
+                    />
+                </div>
+            </div>
+
             <CommandPalette />
 
             {/* Skip to main content - Accessibility */}

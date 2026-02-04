@@ -48,9 +48,10 @@ type ClassData = {
 type Props = {
     classData: ClassData;
     onSuccess?: () => void;
+    children?: React.ReactNode;
 };
 
-export function EditClassModal({ classData, onSuccess }: Props) {
+export function EditClassModal({ classData, onSuccess, children }: Props) {
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [coaches, setCoaches] = useState<{ id: string; name: string }[]>([]);
@@ -122,10 +123,12 @@ export function EditClassModal({ classData, onSuccess }: Props) {
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>
-                <Button variant="outline" className="gap-2">
-                    <Edit className="h-4 w-4" />
-                    Editar clase
-                </Button>
+                {children || (
+                    <Button variant="outline" className="gap-2">
+                        <Edit className="h-4 w-4" />
+                        Editar clase
+                    </Button>
+                )}
             </DialogTrigger>
             <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
                 <DialogHeader>

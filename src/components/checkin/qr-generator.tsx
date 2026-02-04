@@ -8,10 +8,11 @@ import { Loader2 } from "lucide-react";
 
 export interface QrGeneratorProps {
     classId: string;
-    className: string;
+    className?: string;
+    size?: number;
 }
 
-export function QrGenerator({ classId, className }: QrGeneratorProps) {
+export function QrGenerator({ classId, className, size = 256 }: QrGeneratorProps) {
     const [token, setToken] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
 
@@ -43,7 +44,9 @@ export function QrGenerator({ classId, className }: QrGeneratorProps) {
     return (
         <Card className="w-full max-w-md mx-auto text-center border-2 border-primary/20 shadow-xl">
             <CardHeader>
-                <CardTitle className="text-2xl font-bold text-primary">Check-in: {className}</CardTitle>
+                <CardTitle className="text-2xl font-bold text-primary">
+                    {className ? `Check-in: ${className}` : "Check-in"}
+                </CardTitle>
                 <p className="text-sm text-muted-foreground">Escanea este código para registrar tu asistencia</p>
             </CardHeader>
             <CardContent className="flex flex-col items-center justify-center min-h-[300px]">
@@ -51,7 +54,7 @@ export function QrGenerator({ classId, className }: QrGeneratorProps) {
                     <div className="text-red-500">{error}</div>
                 ) : token ? (
                     <div className="p-4 bg-white rounded-xl">
-                        <QRCode value={token} size={256} />
+                        <QRCode value={token} size={size} />
                     </div>
                 ) : (
                     <div className="flex flex-col items-center gap-2 text-muted-foreground">

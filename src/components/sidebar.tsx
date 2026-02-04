@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
     Users,
@@ -85,8 +86,14 @@ export function Sidebar() {
         <>
             {/* Logo/Brand */}
             <div className="flex items-center gap-3 px-3 py-4 border-b border-sidebar-border">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg">
-                    <span className="text-primary-foreground font-bold text-lg">RC</span>
+                <div className="relative w-10 h-10 flex-shrink-0">
+                    <Image
+                        src="/logo.png"
+                        alt="RC Fight Club"
+                        fill
+                        className="object-contain"
+                        priority
+                    />
                 </div>
                 <div className="flex flex-col">
                     <span className="font-bold text-sidebar-foreground">RC Fight Club</span>
@@ -132,8 +139,13 @@ export function Sidebar() {
             {/* Mobile Header */}
             <header className="fixed top-0 left-0 right-0 z-40 flex items-center justify-between h-14 px-4 bg-background/95 backdrop-blur-lg border-b md:hidden">
                 <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center">
-                        <span className="text-primary-foreground font-bold text-sm">RC</span>
+                    <div className="relative w-8 h-8 flex-shrink-0">
+                        <Image
+                            src="/logo.png"
+                            alt="RC Fight Club"
+                            fill
+                            className="object-contain"
+                        />
                     </div>
                     <span className="font-semibold">RC Fight Club</span>
                 </div>

@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isSameDay } from "date-fns";
 import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
-import { ClassDetailSheet } from "./class-detail-sheet";
+import { ClassDetailModal } from "./class-detail-modal";
 
 type Class = {
     id: string;
@@ -120,7 +120,7 @@ export function MonthView({ classes, currentDate }: Props) {
                 })}
             </div>
 
-            <ClassDetailSheet
+            <ClassDetailModal
                 classId={selectedClassId}
                 open={detailsOpen}
                 onOpenChange={setDetailsOpen}

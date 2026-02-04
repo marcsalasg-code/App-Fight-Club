@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { ClassDetailSheet } from "./class-detail-sheet";
+import { ClassDetailModal } from "./class-detail-modal";
 import { format, startOfWeek, addDays, isSameDay } from "date-fns";
 import { es } from "date-fns/locale";
 
@@ -150,7 +150,7 @@ export function WeekView({ classes, currentDate }: Props) {
                 ))}
             </div>
 
-            <ClassDetailSheet
+            <ClassDetailModal
                 classId={selectedClassId}
                 open={detailsOpen}
                 onOpenChange={setDetailsOpen}
