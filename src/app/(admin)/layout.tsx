@@ -5,7 +5,7 @@ import { CommandPalette } from "@/components/command-palette";
 
 import Link from "next/link"; // Not needed but harmless if auto-added
 import Image from "next/image";
-import { AnimatedLayout } from "@/components/animated-layout";
+
 
 export default function AdminLayout({
     children,
@@ -13,10 +13,11 @@ export default function AdminLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <div className="flex min-h-screen relative isolation-auto">
+
+        <div className="flex min-h-screen relative bg-background">
             {/* Background Watermark */}
-            <div className="fixed inset-0 z-[-1] pointer-events-none flex items-center justify-center overflow-hidden">
-                <div className="relative w-[80vh] h-[80vh] opacity-[0.03] blur-sm grayscale hover:grayscale-0 transition-all duration-1000 animate-in fade-in zoom-in-50 duration-1000">
+            <div className="fixed inset-0 z-0 pointer-events-none flex items-center justify-center overflow-hidden">
+                <div className="relative w-[80vh] h-[80vh] opacity-[0.03] blur-sm grayscale">
                     <Image
                         src="/logo.png"
                         alt="Background Logo"
@@ -39,12 +40,10 @@ export default function AdminLayout({
 
             <Sidebar />
 
-            <main id="main-content" className="flex-1 md:ml-64 pb-20 md:pb-0">
+            <main id="main-content" className="flex-1 md:ml-64 pb-20 md:pb-0 relative z-10">
                 <div className="p-4 md:p-8 pt-16 md:pt-8">
                     <Breadcrumbs />
-                    <AnimatedLayout>
-                        {children}
-                    </AnimatedLayout>
+                    {children}
                 </div>
             </main>
 
