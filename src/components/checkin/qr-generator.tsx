@@ -65,11 +65,6 @@ export function QrGenerator({ classId, className, size = 256 }: QrGeneratorProps
                 <p className="mt-6 text-xs text-muted-foreground animate-pulse">
                     El código se actualiza automáticamente cada 25 segundos
                 </p>
-
-                <div className="mt-4 p-2 bg-muted rounded text-[10px] break-all max-w-[250px] text-center border">
-                    <p className="font-bold mb-1">Debug URL:</p>
-                    {token}
-                </div>
             </CardContent>
         </Card>
     );

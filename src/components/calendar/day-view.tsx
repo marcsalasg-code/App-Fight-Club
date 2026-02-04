@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { cn } from "@/lib/utils";
 import { ClassDetailModal } from "./class-detail-modal";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -35,12 +34,6 @@ export function DayView({ classes, currentDate }: Props) {
         setDetailsOpen(true);
     };
 
-    const currentDayName = format(currentDate, 'EEEE', { locale: es }).toUpperCase(); // "LUNES"...
-    // Fix: format is localized. DB is English "MONDAY".
-    // We need map or get English name.
-    const dayNameEn = format(currentDate, 'EEEE').toUpperCase();
-    // Actually, 'date-fns' default is En-US if no locale passed, but here I imported 'es'.
-    // Wait, to get English I should NOT pass locale.
     const dayNameEnActual = format(currentDate, 'EEEE').toUpperCase();
 
     // Filter only classes for this day
@@ -83,13 +76,14 @@ export function DayView({ classes, currentDate }: Props) {
                         <div
                             key={cls.id}
                             onClick={(e) => { e.stopPropagation(); handleClassClick(cls.id); }}
-                            className="mr-4 ml-1 rounded p-2 text-sm font-medium text-black shadow-sm hover:brightness-110 cursor-pointer overflow-hidden transition-all relative group z-10 hover:z-20 border border-black/10"
+                            className="mr-4 ml-1 rounded p-2 text-sm font-medium shadow-sm hover:brightness-110 cursor-pointer overflow-hidden transition-all relative group z-10 hover:z-20 border border-black/10"
                             style={{
                                 gridColumn: 2,
                                 gridRow: `${rowStart} / span 1`,
                                 height: `${heightPixels}px`,
                                 marginTop: `${topOffset}px`,
                                 backgroundColor: cls.color || "#D4AF37",
+                                color: 'rgba(0,0,0,0.85)',
                                 opacity: 0.95
                             }}
                         >

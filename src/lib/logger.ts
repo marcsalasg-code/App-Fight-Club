@@ -8,7 +8,7 @@ export async function logAction(
     entity: AuditEntity,
     entityId: string,
     performedBy: string,
-    details?: any
+    details?: Record<string, unknown>
 ) {
     try {
         // Enforce asynchronous logging to not split/block main thread

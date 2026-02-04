@@ -1,8 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isSameDay } from "date-fns";
-import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { ClassDetailModal } from "./class-detail-modal";
 
@@ -20,16 +19,6 @@ type Class = {
 type Props = {
     classes: Class[];
     currentDate: Date;
-};
-
-const DAYS_MAP: Record<string, string> = {
-    "MONDAY": "lunes",
-    "TUESDAY": "martes",
-    "WEDNESDAY": "miércoles",
-    "THURSDAY": "jueves",
-    "FRIDAY": "viernes",
-    "SATURDAY": "sábado",
-    "SUNDAY": "domingo"
 };
 
 export function MonthView({ classes, currentDate }: Props) {
@@ -62,23 +51,8 @@ export function MonthView({ classes, currentDate }: Props) {
             </div>
 
             {/* Grid */}
-            <div className="flex-1 grid grid-cols-7 grid-rows-5 bg-muted/20 gap-px border-b overflow-hidden">
-                {/* Explicitly set min-height or auto-rows if needed, but flex-1 handles full height */}
-                {/* Actually, if a month spans 6 weeks, grid-rows-5 might cut it off. Let's make it flexible. */}
-                {/* Re-calculated grid rows based on calendarDays length (35 or 42) */}
-            </div>
-
             <div className={cn("flex-1 grid grid-cols-7 bg-muted/20 gap-px overflow-y-auto", calendarDays.length > 35 ? "grid-rows-6" : "grid-rows-5")}>
-                {calendarDays.map((day, i) => {
-                    const dayName = format(day, 'EEEE', { locale: es }).toUpperCase(); // "LUNES"... maybe. es locale output is lowercase usually.
-                    // date-fns v3 es locale: lunes, martes...
-                    // Our DB uses "MONDAY", "TUESDAY" (English).
-                    // We need to map `day` to our DB enum.
-
-                    const dayEnum = format(day, 'EEEE').toUpperCase();
-                    // Wait, format(day, 'EEEE') with default locale (en-US) gives "Monday". 
-                    // If we don't pass locale, it uses en-US.
-
+                {calendarDays.map((day) => {
                     const dayNameEn = format(day, 'EEEE').toUpperCase(); // MONDAY, TUESDAY...
 
                     // Filter classes for this day
@@ -108,8 +82,11 @@ export function MonthView({ classes, currentDate }: Props) {
                                     <button
                                         key={cls.id}
                                         onClick={(e) => handleClassClick(cls.id, e)}
-                                        className="text-[10px] text-left px-1.5 py-0.5 rounded truncate font-medium text-black hover:brightness-95 transition-all shadow-sm"
-                                        style={{ backgroundColor: cls.color || "#D4AF37" }}
+                                        className="text-[11px] text-left px-1.5 py-0.5 rounded truncate font-medium hover:brightness-95 transition-all shadow-sm"
+                                        style={{
+                                            backgroundColor: cls.color || "#D4AF37",
+                                            color: 'rgba(0,0,0,0.85)'
+                                        }}
                                     >
                                         {cls.startTime} {cls.name}
                                     </button>

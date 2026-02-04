@@ -95,9 +95,13 @@ export function CommandPalette() {
 
     // Debounced search
     useEffect(() => {
+        // Early return for short queries - reset handled by unmount/remount
         if (query.length < 2) {
-            setSearchResults({ athletes: [], classes: [] });
-            return;
+            // Use timeout to defer state update (avoids cascading renders)
+            const resetTimeout = setTimeout(() => {
+                setSearchResults({ athletes: [], classes: [] });
+            }, 0);
+            return () => clearTimeout(resetTimeout);
         }
 
         const timeout = setTimeout(() => {

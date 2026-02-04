@@ -137,7 +137,7 @@ export function ClassDetailModal({ classId, open, onOpenChange }: Props) {
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-[70vw] w-full h-[80vh] flex flex-col p-0 gap-0 overflow-hidden">
+            <DialogContent className="w-full max-w-[95vw] md:max-w-[80vw] lg:max-w-[70vw] h-[90vh] md:h-[85vh] flex flex-col p-0 gap-0 overflow-hidden">
                 {/* Header Section - Sticky Top */}
                 <div className="p-6 border-b bg-muted/10  flex justify-between items-start shrink-0">
                     <div>
@@ -172,8 +172,8 @@ export function ClassDetailModal({ classId, open, onOpenChange }: Props) {
                     {/* Close button provided by DialogContent by default, but we can have extra actions */}
                 </div>
 
-                {/* Main Body - Grid 40/60 */}
-                <div className="flex-1 grid grid-cols-5 h-full overflow-hidden">
+                {/* Main Body - Responsive Grid */}
+                <div className="flex-1 grid grid-cols-1 md:grid-cols-5 h-full overflow-hidden">
 
                     {/* LEFT COLUMN (40% -> col-span-2) */}
                     <div className="col-span-2 border-r bg-muted/5 p-6 flex flex-col gap-6 overflow-y-auto">
@@ -196,22 +196,21 @@ export function ClassDetailModal({ classId, open, onOpenChange }: Props) {
 
                         <Separator />
 
-                        {/* QR Code Section */}
+                        {/* QR Code Section - Button Only */}
                         <div className="space-y-3">
                             <h3 className="font-semibold flex items-center gap-2">
                                 <QrCode className="h-4 w-4" /> QR de Acceso
                             </h3>
-                            <div
-                                className="border rounded-lg p-4 bg-white flex justify-center cursor-pointer hover:border-primary transition-colors hover:shadow-sm"
+                            <Button
+                                variant="outline"
+                                className="w-full"
                                 onClick={() => setShowFullQr(true)}
                             >
-                                <div className="opacity-50 pointer-events-none scale-75">
-                                    {data?.id && <QrGenerator classId={data.id} className="preview" size={150} />}
-                                </div>
-                                <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-black/5 rounded-lg">
-                                    <span className="bg-white px-3 py-1 rounded shadow text-xs font-medium">Ampliar</span>
-                                </div>
-                            </div>
+                                <QrCode className="mr-2 h-4 w-4" /> Ver código QR completo
+                            </Button>
+                            <p className="text-xs text-muted-foreground">
+                                Click para mostrar el QR que los atletas escanean
+                            </p>
                         </div>
 
                         <Separator />

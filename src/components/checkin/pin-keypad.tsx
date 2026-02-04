@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Check, Delete, X } from "lucide-react";
+import { Delete, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface PinKeypadProps {
@@ -23,10 +23,6 @@ export function PinKeypad({ onComplete, onCancel, isLoading }: PinKeypadProps) {
 
     const handleDelete = () => {
         setPin(pin.slice(0, -1));
-    };
-
-    const handleClear = () => {
-        setPin("");
     };
 
     return (

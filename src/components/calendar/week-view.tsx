@@ -72,7 +72,7 @@ export function WeekView({ classes, currentDate }: Props) {
                     <div
                         key={i}
                         className={cn(
-                            "flex-1 p-2 text-center border-r min-w-[100px]",
+                            "flex-1 p-2 text-center border-r min-w-[130px]",
                             isSameDay(day, new Date()) && "bg-primary/10"
                         )}
                     >
@@ -109,7 +109,7 @@ export function WeekView({ classes, currentDate }: Props) {
                     <div
                         key={day}
                         className={cn(
-                            "flex-1 border-r relative min-w-[100px]",
+                            "flex-1 border-r relative min-w-[130px]",
                             isSameDay(weekDays[dayIndex], new Date()) && "bg-primary/5"
                         )}
                         style={{ height: `${TOTAL_HOURS * HOUR_HEIGHT}px` }}
@@ -130,17 +130,18 @@ export function WeekView({ classes, currentDate }: Props) {
                                 <div
                                     key={cls.id}
                                     onClick={() => handleClassClick(cls.id)}
-                                    className="absolute left-1 right-1 rounded-md px-2 py-1 text-xs font-medium text-black shadow-sm hover:brightness-110 cursor-pointer overflow-hidden transition-all border border-black/10 z-10"
+                                    className="absolute left-1 right-1 rounded-md px-2 py-1 text-sm font-medium shadow-sm hover:brightness-110 cursor-pointer overflow-hidden transition-all border border-black/10 z-10"
                                     style={{
                                         ...style,
                                         backgroundColor: cls.color || "#D4AF37",
+                                        color: 'rgba(0,0,0,0.85)'
                                     }}
                                 >
                                     <div className="font-bold truncate">{cls.name}</div>
-                                    <div className="truncate opacity-80 text-[10px]">
+                                    <div className="truncate opacity-80 text-xs">
                                         {cls.startTime} - {cls.endTime}
                                     </div>
-                                    <div className="absolute bottom-1 right-1 bg-black/20 px-1 rounded text-[9px] text-white/90 font-mono">
+                                    <div className="absolute bottom-1 right-1 bg-black/20 px-1 rounded text-[10px] text-white/90 font-mono">
                                         {cls._count.attendances}
                                     </div>
                                 </div>
