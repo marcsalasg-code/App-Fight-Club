@@ -57,12 +57,12 @@ export function MembershipCard({ membership }: { membership: Membership }) {
     }
 
     return (
-        <>
-            <Card className="hover:shadow-lg transition-shadow relative group">
+        <div className="h-full">
+            <Card className="h-full hover:shadow-lg transition-shadow relative group flex flex-col justify-between">
                 <CardHeader>
                     <CardTitle className="flex items-center justify-between">
                         {membership.name}
-                        <Badge variant="outline" className="bg-green-500/10 text-green-700 border-green-200">Activa</Badge>
+                        {membership.active && <Badge variant="outline" className="bg-green-500/10 text-green-700 border-green-200">Activa</Badge>}
                     </CardTitle>
                     <div className="absolute top-4 right-4">
                         <DropdownMenu>
@@ -90,12 +90,8 @@ export function MembershipCard({ membership }: { membership: Membership }) {
                             €{membership.price.toFixed(2)}
                         </p>
                         <div className="text-sm text-muted-foreground">
-                            {membership.durationDays && (
-                                <p>Duración: {membership.durationDays} días</p>
-                            )}
-                            {membership.classCount && (
-                                <p>Clases: {membership.classCount}</p>
-                            )}
+                            {membership.durationDays && <p>Duración: {membership.durationDays} días</p>}
+                            {membership.classCount && <p>Clases: {membership.classCount}</p>}
                             {!membership.durationDays && !membership.classCount && (
                                 <p>Sin límite de tiempo ni clases</p>
                             )}
@@ -111,6 +107,7 @@ export function MembershipCard({ membership }: { membership: Membership }) {
                 membership={membership}
                 open={editOpen}
                 onOpenChange={setEditOpen}
+                trigger={<span className="hidden" />}
             />
 
             <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>

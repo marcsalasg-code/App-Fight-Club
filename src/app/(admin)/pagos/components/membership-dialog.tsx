@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { createMembership, updateMembership, MembershipFormData } from "../actions";
 import { toast } from "sonner";
-import { Loader2, Plus } from "lucide-react";
+import { Loader2, Plus, Pencil } from "lucide-react";
 
 type Props = {
     membership?: {
@@ -75,9 +75,9 @@ export function MembershipDialog({ membership, trigger, open: controlledOpen, on
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 {trigger || (
-                    <Button className="gap-2">
-                        <Plus className="h-4 w-4" />
-                        Nueva Membresía
+                    <Button className="gap-2" variant={isEditing ? "outline" : "default"}>
+                        {isEditing ? <Pencil className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                        {isEditing ? "Editar Membresía" : "Nueva Membresía"}
                     </Button>
                 )}
             </DialogTrigger>
