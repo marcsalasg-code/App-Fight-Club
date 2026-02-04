@@ -51,14 +51,95 @@ model Athlete {
   status              String   @default("ACTIVE") // ACTIVE, INACTIVE, SUSPENDED
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
-
+  
   subscriptions Subscription[]
   payments      Payment[]
   attendances   Attendance[]
   competitions  Competition[]
   evaluations   Evaluation[]
   devices       Device[]
+  weighIns      WeighIn[]
+  tags          Tag[]
 }
+
+// ==========================================================
+// TAGS (Athlete Labels)
+// ==========================================================
+model Tag {
+  id        String   @id @default(cuid())
+  label     String
+  color     String   @default("#EF4444") // Red
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  athletes  Athlete[]
+}
+
+// ... existing models (Membership, Subscription, Payment, Class, Attendance, Device, Competition)
+
+// ==========================================================
+// AUDIT LOGS (Security & Activity Tracking)
+// ==========================================================
+model AuditLog {
+  id          String   @id @default(cuid())
+  action      String   // CREATE, UPDATE, DELETE
+  entity      String   // User, Class, Payment, etc.
+  entityId    String
+  performedBy String   // User ID (Coach/Admin)
+  details     Json?    // Specific changes (oldVal, newVal)
+  createdAt   DateTime @default(now())
+
+  @@index([entity, entityId])
+  @@index([performedBy])
+  @@index([createdAt])
+}
+
+// ==========================================================
+// CLASS PATTERNS (Recurring Classes)
+// ==========================================================
+model ClassPattern {
+  id            String   @id @default(cuid())
+  name          String
+  type          String
+  daysOfWeek    String[] // ["MONDAY", "WEDNESDAY", "FRIDAY"]
+  startTime     String
+  endTime       String
+  levelRequired String?
+  maxCapacity   Int      @default(20)
+  color         String   @default("#D4AF37")
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// ==========================================================
+// WEIGH-INS (Competitor Weight History)
+// ==========================================================
+model WeighIn {
+  id        String   @id @default(cuid())
+  athleteId String
+  date      DateTime @default(now())
+  weight    Float
+  notes     String?
+  createdAt DateTime @default(now())
+
+  athlete   Athlete  @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+  
+  @@index([athleteId, date])
+}
+
+// ==========================================================
+// CONFIGURATION (Global App Settings)
+// ==========================================================
+model GymSettings {
+  id                  String   @id @default(cuid())
+  gymName             String   @default("RC Fight Club")
+  timezone            String   @default("Europe/Madrid")
+  checkInEarlyMinutes Int      @default(15)
+  checkInLateMinutes  Int      @default(40)
+  updatedAt           DateTime @updatedAt
+}
+
 
 // ==========================================================
 // MEMBERSHIPS (Subscription Types)
@@ -217,14 +298,4 @@ model Evaluation {
   athlete Athlete @relation(fields: [athleteId], references: [id], onDelete: Cascade)
 }
 
-// ==========================================================
-// CONFIGURATION (Global App Settings)
-// ==========================================================
-model GymSettings {
-  id                  String   @id @default(cuid())
-  gymName             String   @default("RC Fight Club")
-  timezone            String   @default("Europe/Madrid")
-  checkInEarlyMinutes Int      @default(15)
-  checkInLateMinutes  Int      @default(40)
-  updatedAt           DateTime @updatedAt
-}
+

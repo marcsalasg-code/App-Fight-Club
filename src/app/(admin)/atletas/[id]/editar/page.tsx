@@ -6,10 +6,14 @@ import { AthleteForm } from "../../components/athlete-form";
 
 export const dynamic = 'force-dynamic';
 
-async function getAthlete(id: string) {
-    return prisma.athlete.findUnique({
+async function getData(id: string) {
+    const athlete = await prisma.athlete.findUnique({
         where: { id },
+        include: { tags: true }
     });
+    const tags = await prisma.tag.findMany({ orderBy: { label: "asc" } });
+
+    return { athlete, tags };
 }
 
 type Props = {
@@ -18,7 +22,7 @@ type Props = {
 
 export default async function EditAthletePage({ params }: Props) {
     const { id } = await params;
-    const athlete = await getAthlete(id);
+    const { athlete, tags } = await getData(id);
 
     if (!athlete) {
         notFound();
@@ -41,7 +45,7 @@ export default async function EditAthletePage({ params }: Props) {
                 </div>
             </div>
 
-            <AthleteForm athlete={athlete} />
+            <AthleteForm athlete={athlete} availableTags={tags} />
         </div>
     );
 }

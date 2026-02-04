@@ -75,8 +75,15 @@ export function DashboardSkeleton() {
             {/* Alert skeleton */}
             <Skeleton className="h-14 w-full rounded-lg" />
 
-            {/* Stats grid */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {/* Primary Stats - High Priority */}
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <CardSkeleton />
+                <CardSkeleton />
+                <CardSkeleton />
+            </div>
+
+            {/* Secondary Stats - Info */}
+            <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
                 <CardSkeleton />
                 <CardSkeleton />
                 <CardSkeleton />

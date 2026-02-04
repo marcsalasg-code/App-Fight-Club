@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, CreditCard, CalendarCheck, Trophy, TrendingUp, AlertTriangle, Clock, AlertCircle, ChevronRight } from "lucide-react";
+import { Users, CalendarCheck, Trophy, AlertTriangle, Clock, AlertCircle, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import prisma from "@/lib/prisma";
 import { format } from "date-fns";
@@ -30,8 +30,6 @@ async function getDashboardStats() {
     todayAttendance,
     expiredSubscriptions,
     expiringSubscriptions,
-    totalRevenue,
-    lastMonthRevenue,
     todayClasses,
   ] = await Promise.all([
     prisma.athlete.count(),
@@ -55,21 +53,6 @@ async function getDashboardStats() {
         },
       },
     }),
-    prisma.payment.aggregate({
-      _sum: { amount: true },
-      where: {
-        paymentDate: { gte: new Date(now.getFullYear(), now.getMonth(), 1) },
-      },
-    }),
-    prisma.payment.aggregate({
-      _sum: { amount: true },
-      where: {
-        paymentDate: {
-          gte: new Date(now.getFullYear(), now.getMonth() - 1, 1),
-          lt: new Date(now.getFullYear(), now.getMonth(), 1),
-        },
-      },
-    }),
     prisma.class.findMany({
       where: { dayOfWeek: todayDayOfWeek, active: true },
       orderBy: { startTime: "asc" },
@@ -85,10 +68,6 @@ async function getDashboardStats() {
     }),
   ]);
 
-  const thisMonth = totalRevenue._sum.amount || 0;
-  const lastMonth = lastMonthRevenue._sum.amount || 0;
-  const trend = lastMonth > 0 ? ((thisMonth - lastMonth) / lastMonth) * 100 : 0;
-
   return {
     totalAthletes,
     activeAthletes,
@@ -96,8 +75,6 @@ async function getDashboardStats() {
     todayAttendance,
     expiredSubscriptions,
     expiringSubscriptions,
-    monthlyRevenue: thisMonth,
-    trend,
     todayClasses,
   };
 }
@@ -151,8 +128,8 @@ async function DashboardContent() {
       {/* Alert Banner */}
       <AlertBanner expired={stats.expiredSubscriptions} expiring={stats.expiringSubscriptions} />
 
-      {/* Primary Stats - Larger */}
-      <div className="grid gap-4 md:grid-cols-2">
+      {/* Primary Stats - High Priority */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Link href="/atletas">
           <Card className="hover:shadow-lg transition-all cursor-pointer hover:border-primary/50 hover:scale-[1.02]">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -172,45 +149,45 @@ async function DashboardContent() {
           </Card>
         </Link>
 
-        <Link href="/pagos">
+        <Link href="/calendario">
           <Card className="hover:shadow-lg transition-all cursor-pointer hover:border-primary/50 hover:scale-[1.02]">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
-                Ingresos del Mes
+                Check-ins Hoy
               </CardTitle>
-              <div className="h-10 w-10 rounded-full bg-green-500/10 flex items-center justify-center">
-                <CreditCard className="h-5 w-5 text-green-500" aria-hidden="true" />
+              <div className="h-10 w-10 rounded-full bg-blue-500/10 flex items-center justify-center">
+                <CalendarCheck className="h-5 w-5 text-blue-500" aria-hidden="true" />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold">€{stats.monthlyRevenue.toFixed(0)}</div>
-              <div className="flex items-center gap-2 mt-1">
-                <TrendingUp className={`h-4 w-4 ${stats.trend >= 0 ? "text-green-500" : "text-red-500"}`} aria-hidden="true" />
-                <span className={`text-sm ${stats.trend >= 0 ? "text-green-600" : "text-red-600"}`}>
-                  {stats.trend >= 0 ? "+" : ""}{stats.trend.toFixed(0)}% vs mes anterior
-                </span>
-              </div>
+              <div className="text-4xl font-bold">{stats.todayAttendance}</div>
+              <p className="text-sm text-muted-foreground mt-1">
+                atletas entrenando
+              </p>
             </CardContent>
           </Card>
         </Link>
+
+        <Card className="hover:shadow-lg transition-all hover:border-primary/50">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Clases Hoy
+            </CardTitle>
+            <div className="h-10 w-10 rounded-full bg-purple-500/10 flex items-center justify-center">
+              <Clock className="h-5 w-5 text-purple-500" aria-hidden="true" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-4xl font-bold">{stats.todayClasses.length}</div>
+            <p className="text-sm text-muted-foreground mt-1">
+              sesiones programadas
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Secondary Stats - Smaller */}
-      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-        <Link href="/calendario">
-          <Card className="hover:shadow-md transition-all cursor-pointer hover:border-primary/30">
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-3">
-                <CalendarCheck className="h-5 w-5 text-blue-500" aria-hidden="true" />
-                <div>
-                  <p className="text-2xl font-bold">{stats.todayAttendance}</p>
-                  <p className="text-xs text-muted-foreground">Check-ins hoy</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
-
+      {/* Secondary Stats - Info */}
+      <div className="grid gap-4 grid-cols-2">
         <Link href="/competencias">
           <Card className="hover:shadow-md transition-all cursor-pointer hover:border-primary/30">
             <CardContent className="pt-6">
@@ -224,18 +201,6 @@ async function DashboardContent() {
             </CardContent>
           </Card>
         </Link>
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <Clock className="h-5 w-5 text-purple-500" aria-hidden="true" />
-              <div>
-                <p className="text-2xl font-bold">{stats.todayClasses.length}</p>
-                <p className="text-xs text-muted-foreground">Clases hoy</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
 
         <Link href="/pagos">
           <Card className={`hover:shadow-md transition-all cursor-pointer ${stats.expiredSubscriptions > 0 ? "border-red-200 bg-red-50/50 dark:bg-red-950/20" : ""}`}>

@@ -35,14 +35,18 @@ type Athlete = {
     competitionCategory: string | null;
 };
 
+type Tag = { id: string; label: string; color: string; };
+
 type Props = {
-    athlete?: Athlete;
+    athlete?: Athlete & { tags: Tag[] };
+    availableTags: Tag[];
 };
 
-export function AthleteForm({ athlete }: Props) {
+export function AthleteForm({ athlete, availableTags }: Props) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [isCompetitor, setIsCompetitor] = useState(athlete?.isCompetitor || false);
+    const [selectedTags, setSelectedTags] = useState<string[]>(athlete?.tags.map(t => t.id) || []);
 
     async function handleSubmit(formData: FormData) {
         setLoading(true);
@@ -62,6 +66,7 @@ export function AthleteForm({ athlete }: Props) {
             goal: formData.get("goal") as string,
             isCompetitor: formData.get("isCompetitor") === "on",
             competitionCategory: formData.get("competitionCategory") as string,
+            tagIds: selectedTags,
         };
 
         const result = athlete
@@ -77,6 +82,14 @@ export function AthleteForm({ athlete }: Props) {
             toast.error(result.error);
         }
     }
+
+    const toggleTag = (tagId: string) => {
+        setSelectedTags(prev =>
+            prev.includes(tagId)
+                ? prev.filter(id => id !== tagId)
+                : [...prev, tagId]
+        );
+    };
 
     return (
         <form action={handleSubmit}>
@@ -158,6 +171,38 @@ export function AthleteForm({ athlete }: Props) {
                                 name="emergencyContact"
                                 defaultValue={athlete?.emergencyContact || ""}
                             />
+                        </div>
+
+                        {/* Tag Selector */}
+                        <div className="space-y-2 pt-2 border-t">
+                            <Label>Etiquetas</Label>
+                            <div className="flex flex-wrap gap-2">
+                                {availableTags.map(tag => {
+                                    const isSelected = selectedTags.includes(tag.id);
+                                    return (
+                                        <button
+                                            key={tag.id}
+                                            type="button"
+                                            onClick={() => toggleTag(tag.id)}
+                                            className={`px-3 py-1 rounded-full text-sm border transition-all ${isSelected
+                                                    ? 'brightness-100 ring-2 ring-offset-1 border-transparent text-white font-medium'
+                                                    : 'bg-transparent border-input text-muted-foreground hover:bg-accent'
+                                                }`}
+                                            style={{
+                                                backgroundColor: isSelected ? tag.color : undefined,
+                                                borderColor: isSelected ? tag.color : undefined
+                                            }}
+                                        >
+                                            {tag.label}
+                                        </button>
+                                    );
+                                })}
+                                {availableTags.length === 0 && (
+                                    <p className="text-sm text-muted-foreground italic">
+                                        No hay etiquetas creadas. Ve a Configuración {'>'} Etiquetas.
+                                    </p>
+                                )}
+                            </div>
                         </div>
                     </CardContent>
                 </Card>

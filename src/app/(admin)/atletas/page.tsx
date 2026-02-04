@@ -29,7 +29,9 @@ async function getAthletes(search?: string) {
                 where: { status: "ACTIVE" },
                 take: 1,
                 orderBy: { endDate: "desc" },
+
             },
+            tags: true,
         },
     });
 }
@@ -51,7 +53,9 @@ export default async function AthletesPage({ searchParams }: Props) {
         status: a.status,
         level: a.level,
         isCompetitor: a.isCompetitor,
-        hasActiveSubscription: a.subscriptions.length > 0
+
+        hasActiveSubscription: a.subscriptions.length > 0,
+        tags: a.tags.map(t => ({ label: t.label, color: t.color }))
     }));
 
     return (

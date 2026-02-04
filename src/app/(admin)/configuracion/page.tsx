@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getGymSettings, updateGymSettings, GymSettingsData } from "@/app/actions/settings";
 import { toast } from "sonner";
-import { Loader2, Save, Settings as SettingsIcon } from "lucide-react";
+import { Loader2, Save, Settings as SettingsIcon, Tag as TagIcon, Users, CalendarClock } from "lucide-react";
 
 export default function SettingsPage() {
     const [loading, setLoading] = useState(true);
@@ -143,16 +143,50 @@ export default function SettingsPage() {
                 <CardHeader>
                     <CardTitle>Gestión</CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="grid gap-4 sm:grid-cols-2">
                     <a
                         href="/configuracion/entrenadores"
                         className="flex items-center justify-between p-4 rounded-lg border hover:bg-accent transition-colors"
                     >
-                        <div>
-                            <p className="font-medium">Entrenadores</p>
-                            <p className="text-sm text-muted-foreground">Gestiona el equipo de coaches</p>
+                        <div className="flex items-center gap-3">
+                            <div className="bg-primary/10 p-2 rounded-full">
+                                <Users className="h-4 w-4 text-primary" />
+                            </div>
+                            <div>
+                                <p className="font-medium">Entrenadores</p>
+                                <p className="text-xs text-muted-foreground">Gestiona el equipo</p>
+                            </div>
                         </div>
-                        <span className="text-muted-foreground">→</span>
+                    </a>
+
+                    <a
+                        href="/configuracion/etiquetas"
+                        className="flex items-center justify-between p-4 rounded-lg border hover:bg-accent transition-colors"
+                    >
+                        <div className="flex items-center gap-3">
+                            <div className="bg-primary/10 p-2 rounded-full">
+                                <TagIcon className="h-4 w-4 text-primary" />
+                            </div>
+                            <div>
+                                <p className="font-medium">Etiquetas</p>
+                                <p className="text-xs text-muted-foreground">Categorías de atletas</p>
+                            </div>
+                        </div>
+                    </a>
+
+                    <a
+                        href="/configuracion/horarios"
+                        className="flex items-center justify-between p-4 rounded-lg border hover:bg-accent transition-colors"
+                    >
+                        <div className="flex items-center gap-3">
+                            <div className="bg-primary/10 p-2 rounded-full">
+                                <CalendarClock className="h-4 w-4 text-primary" />
+                            </div>
+                            <div>
+                                <p className="font-medium">Horarios</p>
+                                <p className="text-xs text-muted-foreground">Patrones de clases</p>
+                            </div>
+                        </div>
                     </a>
                 </CardContent>
             </Card>

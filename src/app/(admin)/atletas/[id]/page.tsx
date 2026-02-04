@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AttendanceTab } from "./components/attendance-tab";
+import { WeighInHistory } from "../components/weigh-in-history";
 
 export const dynamic = 'force-dynamic';
 
@@ -41,6 +42,9 @@ async function getAthlete(id: string) {
                 include: { class: true },
             },
             competitions: {
+                orderBy: { date: "desc" },
+            },
+            weighIns: {
                 orderBy: { date: "desc" },
             },
         },
@@ -131,6 +135,7 @@ export default async function AthleteDetailPage({ params }: Props) {
                 <TabsList className="grid w-full grid-cols-2 lg:w-[400px]">
                     <TabsTrigger value="general">General</TabsTrigger>
                     <TabsTrigger value="attendance">Asistencia</TabsTrigger>
+                    {athlete.isCompetitor && <TabsTrigger value="weighins">Pesajes</TabsTrigger>}
                 </TabsList>
 
                 <TabsContent value="general" className="space-y-6 mt-6">
@@ -394,6 +399,12 @@ export default async function AthleteDetailPage({ params }: Props) {
                 <TabsContent value="attendance">
                     <AttendanceTab attendances={athlete.attendances} />
                 </TabsContent>
+
+                {athlete.isCompetitor && (
+                    <TabsContent value="weighins">
+                        <WeighInHistory athleteId={athlete.id} weighIns={athlete.weighIns} />
+                    </TabsContent>
+                )}
             </Tabs>
         </div>
     );

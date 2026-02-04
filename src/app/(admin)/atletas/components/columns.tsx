@@ -33,7 +33,9 @@ export type AthleteColumn = {
     status: string
     level: string
     isCompetitor: boolean
+
     hasActiveSubscription: boolean
+    tags?: { label: string; color: string }[]
 }
 
 export const columns: ColumnDef<AthleteColumn>[] = [
@@ -85,6 +87,33 @@ export const columns: ColumnDef<AthleteColumn>[] = [
                 </div>
             )
         },
+    },
+
+    {
+        id: "tags",
+        header: "Etiquetas",
+        cell: ({ row }) => {
+            const tags = row.original.tags || [];
+            if (tags.length === 0) return null;
+            return (
+                <div className="flex flex-wrap gap-1">
+                    {tags.slice(0, 2).map((tag, i) => (
+                        <div
+                            key={i}
+                            className="px-2 py-0.5 rounded-full text-[10px] font-medium text-white whitespace-nowrap"
+                            style={{ backgroundColor: tag.color }}
+                        >
+                            {tag.label}
+                        </div>
+                    ))}
+                    {tags.length > 2 && (
+                        <span className="text-[10px] text-muted-foreground self-center">
+                            +{tags.length - 2}
+                        </span>
+                    )}
+                </div>
+            );
+        }
     },
     {
         accessorKey: "email",

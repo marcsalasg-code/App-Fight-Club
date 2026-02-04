@@ -137,6 +137,70 @@ export async function updateCoach(id: string, data: CoachFormData) {
     }
 }
 
+export async function assignCoachesToClasses(
+    coachId: string,
+    filters: {
+        days: string[];
+        startTime?: string;
+        endTime?: string;
+        type?: string;
+    }
+) {
+    if (!coachId || filters.days.length === 0) {
+        return { success: false, error: "Faltan datos requeridos (Entrenador o Días)" };
+    }
+
+    try {
+        const whereClause: any = {
+            dayOfWeek: { in: filters.days },
+            active: true, // Only assign to active classes
+        };
+
+        if (filters.startTime) {
+            whereClause.startTime = { gte: filters.startTime };
+        }
+        if (filters.endTime) {
+            whereClause.endTime = { lte: filters.endTime };
+        }
+        if (filters.type && filters.type !== "ALL") {
+            whereClause.type = filters.type;
+        }
+
+        // Find classes to update (for logging/count)
+        const classesToUpdate = await prisma.class.findMany({
+            where: whereClause,
+            select: { id: true }
+        });
+
+        if (classesToUpdate.length === 0) {
+            return { success: false, error: "No se encontraron clases con estos filtros" };
+        }
+
+        // Update all matching classes
+        const updatePromises = classesToUpdate.map(cls =>
+            prisma.class.update({
+                where: { id: cls.id },
+                data: {
+                    coaches: {
+                        connect: { id: coachId }
+                    }
+                }
+            })
+        );
+
+        await prisma.$transaction(updatePromises);
+
+        revalidatePath("/clases");
+        revalidatePath("/calendario");
+        revalidatePath("/configuracion/entrenadores");
+
+        return { success: true, count: classesToUpdate.length };
+    } catch (error) {
+        console.error("Error doing bulk assignment:", error);
+        return { success: false, error: "Error al asignar clases masivamente" };
+    }
+}
+
 export async function deleteCoach(id: string) {
     if (!id) return { success: false, error: "ID requerido" };
 

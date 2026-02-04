@@ -34,6 +34,7 @@ import { Users, Plus, Trash2, PenSquare, Mail, Calendar, Dumbbell } from "lucide
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { createCoach, updateCoach, deleteCoach, CoachFormData } from "./actions";
+import { BulkAssignDialog } from "./bulk-assign-dialog";
 
 type Coach = {
     id: string;
@@ -190,22 +191,7 @@ export function CoachesClient({ initialCoaches }: Props) {
                                     minLength={6}
                                 />
                             </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="role">Rol</Label>
-                                <Select
-                                    value={formData.role}
-                                    onValueChange={(v) => setFormData(prev => ({ ...prev, role: v }))}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="COACH">Entrenador</SelectItem>
-                                        <SelectItem value="ADMIN">Administrador</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div className="flex justify-end gap-2">
+                            <div className="flex justify-end gap-2 pt-4">
                                 <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                                     Cancelar
                                 </Button>
@@ -225,11 +211,10 @@ export function CoachesClient({ initialCoaches }: Props) {
                             <div className="flex items-start justify-between">
                                 <div>
                                     <CardTitle className="text-lg">{coach.name}</CardTitle>
-                                    <Badge variant={coach.role === "ADMIN" ? "default" : "secondary"} className="mt-1">
-                                        {coach.role === "ADMIN" ? "Administrador" : "Entrenador"}
-                                    </Badge>
+                                    <p className="text-xs text-muted-foreground">Entrenador</p>
                                 </div>
                                 <div className="flex gap-1">
+                                    <BulkAssignDialog coachId={coach.id} coachName={coach.name} />
                                     <Button
                                         variant="ghost"
                                         size="icon"

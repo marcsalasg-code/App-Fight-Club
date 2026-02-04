@@ -17,6 +17,12 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "RC Fight Club",
   description: "Sistema de gestión para RC Fight Club - Muay Thai & Kickboxing",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "RC Fight Club",
+  },
 };
 
 export default function RootLayout({

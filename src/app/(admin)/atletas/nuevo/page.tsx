@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { AthleteForm } from "../components/athlete-form";
+import prisma from "@/lib/prisma";
 
-export default function NewAthletePage() {
+export default async function NewAthletePage() {
+    const tags = await prisma.tag.findMany({ orderBy: { label: "asc" } });
+
     return (
         <div className="space-y-6">
             <div className="flex items-center gap-4">
@@ -20,7 +23,7 @@ export default function NewAthletePage() {
                 </div>
             </div>
 
-            <AthleteForm />
+            <AthleteForm availableTags={tags} />
         </div>
     );
 }
