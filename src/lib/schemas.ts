@@ -48,10 +48,7 @@ export const membershipSchema = z.object({
     durationDays: z.number().min(1).max(365).optional(),
     classCount: z.number().min(1).max(100).optional(),
     description: z.string().max(500).optional().or(z.literal("")),
-}).refine(
-    (data) => data.durationDays || data.classCount,
-    { message: "Debe especificar duración en días o cantidad de clases" }
-);
+});
 
 export type MembershipInput = z.infer<typeof membershipSchema>;
 

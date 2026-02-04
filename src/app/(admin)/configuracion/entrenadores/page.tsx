@@ -17,5 +17,10 @@ export default async function CoachesPage() {
         },
     });
 
-    return <CoachesClient initialCoaches={coaches} />;
+    const serializedCoaches = coaches.map(coach => ({
+        ...coach,
+        createdAt: coach.createdAt.toISOString()
+    }));
+
+    return <CoachesClient initialCoaches={serializedCoaches} />;
 }

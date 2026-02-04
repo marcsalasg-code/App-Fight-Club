@@ -40,7 +40,7 @@ type Coach = {
     name: string;
     email: string;
     role: string;
-    createdAt: Date;
+    createdAt: string | Date;
     _count: { classes: number };
 };
 
