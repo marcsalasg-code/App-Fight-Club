@@ -266,6 +266,7 @@ model Device {
 // COMPETITIONS (For Competitor Athletes)
 // ==========================================================
 model CompetitionEvent {
+  // Trigger rebuild
   id          String   @id @default(cuid())
   name        String
   date        DateTime
