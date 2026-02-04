@@ -102,7 +102,7 @@ export function CalendarView({ classes }: Props) {
             </div>
 
             {/* Views */}
-            <div className="h-[calc(100vh-16rem)] bg-background rounded-lg border shadow-sm overflow-hidden">
+            <div className="flex-1 min-h-[600px] bg-background rounded-lg border shadow-sm isolate">
                 {view === 'week' && <WeekView classes={classes} currentDate={date} />}
                 {view === 'month' && <MonthView classes={classes} currentDate={date} />}
                 {view === 'year' && <YearView currentDate={date} onMonthSelect={(d) => { setDate(d); setView('month'); }} />}
