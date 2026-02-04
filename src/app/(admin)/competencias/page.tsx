@@ -107,7 +107,7 @@ export default async function CompetitionsPage() {
                 {/* EVENTS TAB */}
                 <TabsContent value="events" className="space-y-4">
                     <div className="flex justify-end">
-                        <NewEventModal />
+                        {/* <NewEventModal /> */}
                     </div>
 
                     {events.length === 0 ? (
@@ -161,7 +161,7 @@ export default async function CompetitionsPage() {
                 {/* HISTORY TAB */}
                 <TabsContent value="history" className="space-y-4">
                     <div className="flex justify-end">
-                        <NewCompetitionModal />
+                        {/* <NewCompetitionModal /> */}
                     </div>
                     <Card>
                         <CardHeader>
