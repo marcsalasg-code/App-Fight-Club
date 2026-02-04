@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, Clock, User, Trash2, Plus, QrCode, CalendarDays, BarChart3, Edit, X, Users } from "lucide-react";
+import { Loader2, Clock, User, Trash2, Plus, QrCode, CalendarDays, BarChart3, Edit, X, Users, Search } from "lucide-react";
 import { getClassDetails, cancelClass, addManualAttendance, getActiveAthletes, removeAttendance } from "@/app/actions/class-details";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -42,6 +42,7 @@ import {
     CommandList,
     CommandSeparator,
 } from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 type Props = {
     classId: string | null;
@@ -272,22 +273,61 @@ export function ClassDetailModal({ classId, open, onOpenChange }: Props) {
 
                     {/* RIGHT COLUMN (60% -> col-span-3) */}
                     <div className="col-span-3 p-6 flex flex-col h-full overflow-hidden bg-background">
-                        {/* Toolbar */}
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="font-semibold text-lg flex items-center gap-2">
-                                <Users className="h-5 w-5" /> Asistencia
+                        {/* Search Bar (Inline Add) */}
+                        <div className="mb-4">
+                            <Popover open={showAddAthlete} onOpenChange={setShowAddAthlete}>
+                                <PopoverTrigger asChild>
+                                    <Button
+                                        variant="outline"
+                                        role="combobox"
+                                        aria-expanded={showAddAthlete}
+                                        className="w-full justify-between text-muted-foreground bg-muted/10 h-10 border-dashed hover:bg-muted/20 hover:text-foreground"
+                                        onClick={() => loadAthletes()}
+                                    >
+                                        <span className="flex items-center gap-2">
+                                            <Search className="h-4 w-4" />
+                                            Buscar atleta para añadir...
+                                        </span>
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-[300px] p-0" align="start">
+                                    <Command>
+                                        <CommandInput placeholder="Nombre del atleta..." />
+                                        <CommandList>
+                                            <CommandEmpty>No encontrado.</CommandEmpty>
+                                            <CommandGroup heading="Atletas Activos">
+                                                {athletes.map((athlete) => (
+                                                    <CommandItem
+                                                        key={athlete.id}
+                                                        onSelect={() => handleAddAttendance(athlete.id)}
+                                                        className="cursor-pointer"
+                                                    >
+                                                        <Avatar className="h-6 w-6 mr-2">
+                                                            <AvatarImage src={athlete.photoUrl || undefined} />
+                                                            <AvatarFallback>{athlete.firstName[0]}</AvatarFallback>
+                                                        </Avatar>
+                                                        {athlete.firstName} {athlete.lastName}
+                                                    </CommandItem>
+                                                ))}
+                                            </CommandGroup>
+                                        </CommandList>
+                                    </Command>
+                                </PopoverContent>
+                            </Popover>
+                        </div>
+
+                        {/* Header for list */}
+                        <div className="flex items-center justify-between mb-2 px-1">
+                            <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                                <Users className="h-4 w-4" /> Asistencia Actual
                             </h3>
-                            <Button
-                                size="sm"
-                                onClick={() => { loadAthletes(); setShowAddAthlete(true); }}
-                                className="gap-2"
-                            >
-                                <Plus className="h-4 w-4" /> Añadir Atleta
-                            </Button>
+                            <Badge variant="secondary" className="font-mono">
+                                {data?.attendances?.length || 0}
+                            </Badge>
                         </div>
 
                         {/* List */}
-                        <div className="flex-1 overflow-y-auto pr-2 rounded-md border">
+                        <div className="flex-1 overflow-y-auto pr-2 rounded-md border bg-card/50">
                             {data?.attendances?.length === 0 ? (
                                 <div className="h-full flex flex-col items-center justify-center text-muted-foreground p-8">
                                     <Users className="h-12 w-12 opacity-20 mb-4" />
@@ -342,6 +382,7 @@ export function ClassDetailModal({ classId, open, onOpenChange }: Props) {
                             )}
                         </div>
                     </div>
+
                 </div>
 
                 {/* Loading Overlay */}
@@ -352,30 +393,7 @@ export function ClassDetailModal({ classId, open, onOpenChange }: Props) {
                 )}
             </DialogContent>
 
-            {/* Quick Add Athlete Dialog (Command Palette) */}
-            <CommandDialog open={showAddAthlete} onOpenChange={setShowAddAthlete}>
-                <DialogTitle className="sr-only">Buscar Atleta</DialogTitle>
-                <Command>
-                    <CommandInput placeholder="Buscar atleta por nombre..." />
-                    <CommandList>
-                        <CommandEmpty>No se encontraron resultados.</CommandEmpty>
-                        <CommandGroup heading="Atletas Activos">
-                            {athletes.map((athlete) => (
-                                <CommandItem
-                                    key={athlete.id}
-                                    onSelect={() => handleAddAttendance(athlete.id)}
-                                >
-                                    <Avatar className="h-6 w-6 mr-2">
-                                        <AvatarImage src={athlete.photoUrl || undefined} />
-                                        <AvatarFallback>{athlete.firstName[0]}</AvatarFallback>
-                                    </Avatar>
-                                    {athlete.firstName} {athlete.lastName}
-                                </CommandItem>
-                            ))}
-                        </CommandGroup>
-                    </CommandList>
-                </Command>
-            </CommandDialog>
+            {/* Quick Add Athlete Dialog (Command Palette) - REMOVED */}
 
             {/* Full QR Dialog */}
             <Dialog open={showFullQr} onOpenChange={setShowFullQr}>
