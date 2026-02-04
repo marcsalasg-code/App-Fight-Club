@@ -1,0 +1,230 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_PRISMA_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
+}
+
+// ==========================================================
+// USERS (Administrators and Coaches)
+// ==========================================================
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      String   @default("COACH") // ADMIN, COACH
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  classes Class[] @relation("ClassCoaches")
+}
+
+// ==========================================================
+// ATHLETES (Gym Members)
+// ==========================================================
+model Athlete {
+  id                  String   @id @default(cuid())
+  firstName           String
+  lastName            String
+  dateOfBirth         DateTime?
+  email               String?
+  phone               String?
+  emergencyContact    String?
+  medicalConditions   String?
+  height              Float?
+  weight              Float?
+  photoUrl            String?
+  pin                 String?  @unique // PIN for Check-in
+  startDate           DateTime @default(now())
+  level               String   @default("BEGINNER") // BEGINNER, INTERMEDIATE, ADVANCED
+  goal                String   @default("RECREATIONAL") // RECREATIONAL, FITNESS, COMPETITION
+  isCompetitor        Boolean  @default(false)
+  competitionCategory String?
+  status              String   @default("ACTIVE") // ACTIVE, INACTIVE, SUSPENDED
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  subscriptions Subscription[]
+  payments      Payment[]
+  attendances   Attendance[]
+  competitions  Competition[]
+  evaluations   Evaluation[]
+  devices       Device[]
+}
+
+// ==========================================================
+// MEMBERSHIPS (Subscription Types)
+// ==========================================================
+model Membership {
+  id           String   @id @default(cuid())
+  name         String
+  price        Float
+  durationDays Int? // null for class-based passes
+  classCount   Int? // null for time-based memberships
+  description  String?
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  subscriptions Subscription[]
+}
+
+// ==========================================================
+// SUBSCRIPTIONS (Active Athlete Subscriptions)
+// ==========================================================
+model Subscription {
+  id           String   @id @default(cuid())
+  athleteId    String
+  membershipId String
+  startDate    DateTime @default(now())
+  endDate      DateTime?
+  classesUsed  Int      @default(0)
+  status       String   @default("ACTIVE") // ACTIVE, EXPIRED, CANCELLED
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  athlete    Athlete    @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+  membership Membership @relation(fields: [membershipId], references: [id])
+  payments   Payment[]
+}
+
+// ==========================================================
+// PAYMENTS (Payment Records)
+// ==========================================================
+model Payment {
+  id             String    @id @default(cuid())
+  athleteId      String
+  subscriptionId String?
+  amount         Float
+  paymentMethod  String // CASH, CARD, TRANSFER
+  paymentDate    DateTime  @default(now())
+  periodStart    DateTime?
+  periodEnd      DateTime?
+  receiptNumber  String?
+  notes          String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  athlete      Athlete       @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+  subscription Subscription? @relation(fields: [subscriptionId], references: [id])
+
+  @@index([paymentDate])
+  @@index([athleteId, paymentDate])
+}
+
+// ==========================================================
+// CLASSES (Training Sessions)
+// ==========================================================
+model Class {
+  id            String   @id @default(cuid())
+  name          String
+  type          String // MUAY_THAI, KICKBOXING, SPARRING, CONDITIONING, COMPETITION
+  dayOfWeek     String // MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY
+  startTime     String // e.g., "18:00"
+  endTime       String // e.g., "19:30"
+  // coachId       String? // Removed in favor of coaches relation
+  // levelRequired String? // Keeping this
+  levelRequired String? // BEGINNER, INTERMEDIATE, ADVANCED
+  maxCapacity   Int      @default(20)
+  color         String   @default("#D4AF37") // Default Gold
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  coaches     User[]       @relation("ClassCoaches")
+  attendances Attendance[]
+}
+
+// ==========================================================
+// ATTENDANCE (Class Attendance Records)
+// ==========================================================
+model Attendance {
+  id          String   @id @default(cuid())
+  athleteId   String
+  classId     String
+  date        DateTime
+  checkInTime DateTime @default(now())
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  athlete Athlete @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+  class   Class   @relation(fields: [classId], references: [id], onDelete: Cascade)
+
+  method  String @default("MANUAL") // MANUAL, QR
+  
+  @@unique([athleteId, classId, date])
+  @@index([date])
+  @@index([athleteId, date])
+}
+
+// ==========================================================
+// DEVICES (Registered User Devices)
+// ==========================================================
+model Device {
+  id        String   @id @default(cuid())
+  athleteId String
+  deviceId  String   @unique // UUID stored on client
+  userAgent String?
+  trusted   Boolean  @default(true)
+  lastUsed  DateTime @default(now())
+  createdAt DateTime @default(now())
+  
+  athlete   Athlete  @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+}
+
+// ==========================================================
+// COMPETITIONS (For Competitor Athletes)
+// ==========================================================
+model Competition {
+  id        String   @id @default(cuid())
+  athleteId String
+  eventName String
+  date      DateTime
+  result    String   @default("PENDING") // WON, LOST, DRAW, PENDING
+  category  String?
+  weight    Float?
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  athlete Athlete @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+}
+
+// ==========================================================
+// EVALUATIONS (Physical and Technical Evaluations)
+// ==========================================================
+model Evaluation {
+  id             String   @id @default(cuid())
+  athleteId      String
+  date           DateTime @default(now())
+  weight         Float?
+  height         Float?
+  bodyFat        Float?
+  technicalNotes String?
+  coachNotes     String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  athlete Athlete @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+}
+
+// ==========================================================
+// CONFIGURATION (Global App Settings)
+// ==========================================================
+model GymSettings {
+  id                  String   @id @default(cuid())
+  gymName             String   @default("RC Fight Club")
+  timezone            String   @default("Europe/Madrid")
+  checkInEarlyMinutes Int      @default(15)
+  checkInLateMinutes  Int      @default(40)
+  updatedAt           DateTime @updatedAt
+}

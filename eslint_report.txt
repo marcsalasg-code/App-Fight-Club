@@ -1,0 +1,70 @@
+[0m[0m
+[0m[4mC:\Users\Marc\Desktop\App\gym-manager\src\app\checkin\page.tsx[24m[0m
+[0m   [2m8:29[22m  [33mwarning[39m  'CardHeader' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m   [2m8:41[22m  [33mwarning[39m  'CardTitle' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m10:24[22m  [33mwarning[39m  'UserPlus' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m32:13[22m  [31merror[39m    Error: Cannot access variable before it is declared[0m
+[0m[0m
+[0m`handleScan` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.[0m
+[0m[0m
+[0mC:\Users\Marc\Desktop\App\gym-manager\src\app\checkin\page.tsx:32:13[0m
+[0m  30 |         // Auto-checkin if token is present in URL[0m
+[0m  31 |         if (urlToken && storedId) {[0m
+[0m> 32 |             handleScan(urlToken, storedId);[0m
+[0m     |             ^^^^^^^^^^ `handleScan` accessed before it is declared[0m
+[0m  33 |         }[0m
+[0m  34 |     }, [urlToken]);[0m
+[0m  35 |[0m
+[0m[0m
+[0mC:\Users\Marc\Desktop\App\gym-manager\src\app\checkin\page.tsx:36:5[0m
+[0m  34 |     }, [urlToken]);[0m
+[0m  35 |[0m
+[0m> 36 |     const handleScan = async (token: string, currentDeviceId?: string) => {[0m
+[0m     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 37 |         const idToUse = currentDeviceId || deviceId;[0m
+[0m     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 38 |         if (!idToUse) return;[0m
+[0m     …[0m
+[0m     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 62 |         }[0m
+[0m     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+[0m> 63 |     };[0m
+[0m     | ^^^^^^^ `handleScan` is declared here[0m
+[0m  64 |[0m
+[0m  65 |     return ([0m
+[0m  66 |         <div className="container max-w-lg min-h-screen py-8 px-4 flex flex-col items-center justify-center space-y-6">  [2mreact-hooks/immutability[22m[0m
+[0m  [2m34:8[22m   [33mwarning[39m  React Hook useEffect has a missing dependency: 'handleScan'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      [2mreact-hooks/exhaustive-deps[22m[0m
+[0m  [2m59:18[22m  [33mwarning[39m  'error' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4mC:\Users\Marc\Desktop\App\gym-manager\src\app\checkin\register\page.tsx[24m[0m
+[0m  [2m43:18[22m  [33mwarning[39m  'e' is defined but never used  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4mC:\Users\Marc\Desktop\App\gym-manager\src\app\page.tsx[24m[0m
+[0m  [2m132:13[22m  [31merror[39m  Do not use an `<a>` element to navigate to `/atletas/nuevo/`. Use `<Link />` from `next/link` instead. See: https://nextjs.org/docs/messages/no-html-link-for-pages  [2m@next/next/no-html-link-for-pages[22m[0m
+[0m[0m
+[0m[4mC:\Users\Marc\Desktop\App\gym-manager\src\app\pagos\components\payment-form.tsx[24m[0m
+[0m  [2m251:57[22m  [31merror[39m  Error: Cannot call impure function during render[0m
+[0m[0m
+[0m`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).[0m
+[0m[0m
+[0mC:\Users\Marc\Desktop\App\gym-manager\src\app\pagos\components\payment-form.tsx:251:57[0m
+[0m  249 |                                                 <span>[0m
+[0m  250 |                                                     {new Date([0m
+[0m> 251 |                                                         Date.now() +[0m
+[0m      |                                                         ^^^^^^^^^^ Cannot call impure function[0m
+[0m  252 |                                                         selectedMembership.durationDays * 24 * 60 * 60 * 1000[0m
+[0m  253 |                                                     ).toLocaleDateString("es-ES")}[0m
+[0m  254 |                                                 </span>  [2mreact-hooks/purity[22m[0m
+[0m[0m
+[0m[4mC:\Users\Marc\Desktop\App\gym-manager\src\components\checkin\qr-generator.tsx[24m[0m
+[0m  [2m39:9[22m  [31merror[39m  'intervalId' is never reassigned. Use 'const' instead  [2mprefer-const[22m[0m
+[0m[0m
+[0m[4mC:\Users\Marc\Desktop\App\gym-manager\src\components\checkin\qr-scanner.tsx[24m[0m
+[0m   [2m3:21[22m  [33mwarning[39m  'useRef' is defined but never used  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m27:14[22m  [33mwarning[39m  'error' is defined but never used   [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4mC:\Users\Marc\Desktop\App\gym-manager\src\lib\jwt.ts[24m[0m
+[0m  [2m12:14[22m  [33mwarning[39m  'error' is defined but never used  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[31m[1m✖ 13 problems (4 errors, 9 warnings)[22m[39m[0m
+[0m[31m[1m[22m[39m[0m

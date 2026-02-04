@@ -1,0 +1,80 @@
+
+> gym-manager@0.1.0 lint
+> eslint
+
+
+C:\Users\Marc\Desktop\App\gym-manager\src\app\actions\checkin.ts
+   62:20  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  118:14  warning  'e' is defined but never used             @typescript-eslint/no-unused-vars
+  128:20  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  160:14  warning  'e' is defined but never used             @typescript-eslint/no-unused-vars
+
+C:\Users\Marc\Desktop\App\gym-manager\src\app\checkin\page.tsx
+   8:29  warning  'CardHeader' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             @typescript-eslint/no-unused-vars
+   8:41  warning  'CardTitle' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              @typescript-eslint/no-unused-vars
+  10:24  warning  'UserPlus' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               @typescript-eslint/no-unused-vars
+  32:13  error    Error: Cannot access variable before it is declared
+
+`handleScan` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+C:\Users\Marc\Desktop\App\gym-manager\src\app\checkin\page.tsx:32:13
+  30 |         // Auto-checkin if token is present in URL
+  31 |         if (urlToken && storedId) {
+> 32 |             handleScan(urlToken, storedId);
+     |             ^^^^^^^^^^ `handleScan` accessed before it is declared
+  33 |         }
+  34 |     }, [urlToken]);
+  35 |
+
+C:\Users\Marc\Desktop\App\gym-manager\src\app\checkin\page.tsx:36:5
+  34 |     }, [urlToken]);
+  35 |
+> 36 |     const handleScan = async (token: string, currentDeviceId?: string) => {
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 37 |         const idToUse = currentDeviceId || deviceId;
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 38 |         if (!idToUse) return;
+     ÔÇª
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 62 |         }
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 63 |     };
+     | ^^^^^^^ `handleScan` is declared here
+  64 |
+  65 |     return (
+  66 |         <div className="container max-w-lg min-h-screen py-8 px-4 flex flex-col items-center justify-center space-y-6">  react-hooks/immutability
+  34:8   warning  React Hook useEffect has a missing dependency: 'handleScan'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      react-hooks/exhaustive-deps
+  59:18  warning  'error' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  @typescript-eslint/no-unused-vars
+
+C:\Users\Marc\Desktop\App\gym-manager\src\app\checkin\register\page.tsx
+  43:18  warning  'e' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Marc\Desktop\App\gym-manager\src\app\page.tsx
+  132:13  error  Do not use an `<a>` element to navigate to `/atletas/nuevo/`. Use `<Link />` from `next/link` instead. See: https://nextjs.org/docs/messages/no-html-link-for-pages  @next/next/no-html-link-for-pages
+
+C:\Users\Marc\Desktop\App\gym-manager\src\app\pagos\components\payment-form.tsx
+  251:57  error  Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\Marc\Desktop\App\gym-manager\src\app\pagos\components\payment-form.tsx:251:57
+  249 |                                                 <span>
+  250 |                                                     {new Date(
+> 251 |                                                         Date.now() +
+      |                                                         ^^^^^^^^^^ Cannot call impure function
+  252 |                                                         selectedMembership.durationDays * 24 * 60 * 60 * 1000
+  253 |                                                     ).toLocaleDateString("es-ES")}
+  254 |                                                 </span>  react-hooks/purity
+
+C:\Users\Marc\Desktop\App\gym-manager\src\components\checkin\qr-generator.tsx
+  39:9  error  'intervalId' is never reassigned. Use 'const' instead  prefer-const
+
+C:\Users\Marc\Desktop\App\gym-manager\src\components\checkin\qr-scanner.tsx
+   3:21  warning  'useRef' is defined but never used  @typescript-eslint/no-unused-vars
+  27:14  warning  'error' is defined but never used   @typescript-eslint/no-unused-vars
+
+C:\Users\Marc\Desktop\App\gym-manager\src\lib\jwt.ts
+  12:14  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+Ô£û 17 problems (6 errors, 11 warnings)
+
