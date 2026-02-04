@@ -87,106 +87,162 @@ export function WeekView({ classes, currentDate }: Props) {
 
     return (
         <div className="flex h-full flex-col overflow-auto custom-scrollbar">
-            {/* Header */}
-            <div className="flex border-b border-border bg-card/80 sticky top-0 z-20 backdrop-blur-md">
-                <div className="w-14 shrink-0 p-3 text-center text-xs font-medium text-muted-foreground border-r border-border">
-                    <span className="hidden sm:inline">Hora</span>
-                </div>
-                {weekDays.map((day, i) => (
-                    <div
-                        key={i}
-                        className={cn(
-                            "flex-1 py-3 px-2 text-center border-r border-border min-w-[140px] transition-colors",
-                            isSameDay(day, new Date()) && "bg-primary/10"
-                        )}
-                    >
-                        <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                            {format(day, 'EEE', { locale: es })}
+            {/* Mobile: Vertical day schedule */}
+            <div className="md:hidden">
+                <div className="p-4 border-b border-border bg-card/80">
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <div className="text-lg font-bold capitalize">
+                                {format(currentDate, 'EEEE', { locale: es })}
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                                {format(currentDate, 'd MMMM', { locale: es })}
+                            </div>
                         </div>
-                        <div className={cn(
-                            "text-xl font-bold mt-0.5",
-                            isSameDay(day, new Date()) ? "text-primary" : "text-foreground"
-                        )}>
-                            {format(day, 'd')}
+                        <div className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
+                            {classesByDay[format(currentDate, 'EEEE').toUpperCase()]?.length || 0} clases
                         </div>
                     </div>
-                ))}
-            </div>
-
-            {/* Body */}
-            <div className="flex flex-1 min-w-[900px]">
-                {/* Time column */}
-                <div className="w-14 shrink-0 border-r border-border bg-card/50">
-                    {Array.from({ length: TOTAL_HOURS }, (_, i) => (
-                        <div
-                            key={i}
-                            className="border-b border-border/50 text-xs text-right pr-2 text-muted-foreground font-mono flex items-start justify-end pt-1"
-                            style={{ height: `${HOUR_HEIGHT}px` }}
-                        >
-                            <span className="tabular-nums">{String(START_HOUR + i).padStart(2, '0')}:00</span>
-                        </div>
-                    ))}
                 </div>
-
-                {/* Day columns */}
-                {DAYS.map((day, dayIndex) => (
-                    <div
-                        key={day}
-                        className={cn(
-                            "flex-1 border-r border-border relative min-w-[140px]",
-                            isSameDay(weekDays[dayIndex], new Date()) && "bg-primary/5"
-                        )}
-                        style={{ height: `${TOTAL_HOURS * HOUR_HEIGHT}px` }}
-                    >
-                        {/* Hour grid lines */}
-                        {Array.from({ length: TOTAL_HOURS }, (_, i) => (
-                            <div
-                                key={i}
-                                className="absolute w-full border-b border-border/40"
-                                style={{ top: `${i * HOUR_HEIGHT}px`, height: `${HOUR_HEIGHT}px` }}
-                            />
-                        ))}
-
-                        {/* Half-hour lines */}
-                        {Array.from({ length: TOTAL_HOURS }, (_, i) => (
-                            <div
-                                key={`half-${i}`}
-                                className="absolute w-full border-b border-border/20"
-                                style={{ top: `${i * HOUR_HEIGHT + HOUR_HEIGHT / 2}px` }}
-                            />
-                        ))}
-
-                        {/* Classes */}
-                        {classesByDay[day]?.map((cls) => {
-                            const style = getClassStyle(cls);
+                <div className="p-4 space-y-3">
+                    {(classesByDay[format(currentDate, 'EEEE').toUpperCase()] || [])
+                        .sort((a, b) => a.startTime.localeCompare(b.startTime))
+                        .map((cls) => {
                             const colors = getTypeColors(cls.type);
                             return (
                                 <div
                                     key={cls.id}
                                     onClick={() => handleClassClick(cls.id)}
-                                    className="calendar-block absolute left-1 right-1 px-2.5 py-1.5 cursor-pointer overflow-hidden z-10 group"
-                                    style={{
-                                        ...style,
-                                        backgroundColor: cls.color || colors.bg,
-                                        borderLeft: `3px solid ${colors.border}`,
-                                        color: colors.text
-                                    }}
+                                    className="flex items-center gap-3 p-3 rounded-lg border cursor-pointer hover:bg-accent/50 transition-colors"
+                                    style={{ borderLeftWidth: 4, borderLeftColor: colors.border }}
                                 >
-                                    <div className="font-bold text-sm truncate leading-tight">
-                                        {cls.name}
+                                    <div className="text-sm font-mono text-muted-foreground shrink-0 w-16">
+                                        {cls.startTime}
                                     </div>
-                                    <div className="text-xs opacity-90 truncate mt-0.5">
-                                        {cls.startTime} - {cls.endTime}
+                                    <div className="flex-1 min-w-0">
+                                        <p className="font-medium truncate">{cls.name}</p>
+                                        <p className="text-xs text-muted-foreground">
+                                            {cls.startTime} - {cls.endTime}
+                                        </p>
                                     </div>
-                                    <div className="absolute bottom-1.5 right-2 flex items-center gap-1 text-[10px] opacity-80">
-                                        <Users className="h-3 w-3" />
-                                        <span className="font-mono tabular-nums">{cls._count.attendances}</span>
+                                    <div className="flex items-center gap-1 text-sm text-muted-foreground shrink-0">
+                                        <Users className="h-4 w-4" />
+                                        <span>{cls._count.attendances}</span>
                                     </div>
                                 </div>
                             );
                         })}
+                    {(!classesByDay[format(currentDate, 'EEEE').toUpperCase()] ||
+                        classesByDay[format(currentDate, 'EEEE').toUpperCase()].length === 0) && (
+                            <div className="text-center py-8 text-muted-foreground">
+                                No hay clases programadas para este día
+                            </div>
+                        )}
+                </div>
+            </div>
+
+            {/* Desktop: Full week grid */}
+            <div className="hidden md:block">
+                {/* Header */}
+                <div className="flex border-b border-border bg-card/80 sticky top-0 z-20 backdrop-blur-md">
+                    <div className="w-14 shrink-0 p-3 text-center text-xs font-medium text-muted-foreground border-r border-border">
+                        <span>Hora</span>
                     </div>
-                ))}
+                    {weekDays.map((day, i) => (
+                        <div
+                            key={i}
+                            className={cn(
+                                "flex-1 py-3 px-2 text-center border-r border-border min-w-[140px] transition-colors",
+                                isSameDay(day, new Date()) && "bg-primary/10"
+                            )}
+                        >
+                            <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                                {format(day, 'EEE', { locale: es })}
+                            </div>
+                            <div className={cn(
+                                "text-xl font-bold mt-0.5",
+                                isSameDay(day, new Date()) ? "text-primary" : "text-foreground"
+                            )}>
+                                {format(day, 'd')}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+                {/* Body */}
+                <div className="flex flex-1 min-w-[900px]">
+                    {/* Time column */}
+                    <div className="w-14 shrink-0 border-r border-border bg-card/50">
+                        {Array.from({ length: TOTAL_HOURS }, (_, i) => (
+                            <div
+                                key={i}
+                                className="border-b border-border/50 text-xs text-right pr-2 text-muted-foreground font-mono flex items-start justify-end pt-1"
+                                style={{ height: `${HOUR_HEIGHT}px` }}
+                            >
+                                <span className="tabular-nums">{String(START_HOUR + i).padStart(2, '0')}:00</span>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Day columns */}
+                    {DAYS.map((day, dayIndex) => (
+                        <div
+                            key={day}
+                            className={cn(
+                                "flex-1 border-r border-border relative min-w-[140px]",
+                                isSameDay(weekDays[dayIndex], new Date()) && "bg-primary/5"
+                            )}
+                            style={{ height: `${TOTAL_HOURS * HOUR_HEIGHT}px` }}
+                        >
+                            {/* Hour grid lines */}
+                            {Array.from({ length: TOTAL_HOURS }, (_, i) => (
+                                <div
+                                    key={i}
+                                    className="absolute w-full border-b border-border/40"
+                                    style={{ top: `${i * HOUR_HEIGHT}px`, height: `${HOUR_HEIGHT}px` }}
+                                />
+                            ))}
+
+                            {/* Half-hour lines */}
+                            {Array.from({ length: TOTAL_HOURS }, (_, i) => (
+                                <div
+                                    key={`half-${i}`}
+                                    className="absolute w-full border-b border-border/20"
+                                    style={{ top: `${i * HOUR_HEIGHT + HOUR_HEIGHT / 2}px` }}
+                                />
+                            ))}
+
+                            {/* Classes */}
+                            {classesByDay[day]?.map((cls) => {
+                                const style = getClassStyle(cls);
+                                const colors = getTypeColors(cls.type);
+                                return (
+                                    <div
+                                        key={cls.id}
+                                        onClick={() => handleClassClick(cls.id)}
+                                        className="calendar-block absolute left-1 right-1 px-2.5 py-1.5 cursor-pointer overflow-hidden z-10 group"
+                                        style={{
+                                            ...style,
+                                            backgroundColor: cls.color || colors.bg,
+                                            borderLeft: `3px solid ${colors.border}`,
+                                            color: colors.text
+                                        }}
+                                    >
+                                        <div className="font-bold text-sm truncate leading-tight">
+                                            {cls.name}
+                                        </div>
+                                        <div className="text-xs opacity-90 truncate mt-0.5">
+                                            {cls.startTime} - {cls.endTime}
+                                        </div>
+                                        <div className="absolute bottom-1.5 right-2 flex items-center gap-1 text-[10px] opacity-80">
+                                            <Users className="h-3 w-3" />
+                                            <span className="font-mono tabular-nums">{cls._count.attendances}</span>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    ))}
+                </div>
             </div>
 
             <ClassDetailModal
@@ -197,3 +253,4 @@ export function WeekView({ classes, currentDate }: Props) {
         </div>
     );
 }
+

@@ -196,53 +196,96 @@ export default async function PaymentsPage() {
                             </Link>
                         </div>
                     ) : (
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Atleta</TableHead>
-                                    <TableHead>Membresía</TableHead>
-                                    <TableHead>Monto</TableHead>
-                                    <TableHead>Método</TableHead>
-                                    <TableHead>Fecha</TableHead>
-                                    <TableHead>Recibo</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
+                        <>
+                            {/* Desktop Table */}
+                            <div className="hidden md:block">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Atleta</TableHead>
+                                            <TableHead>Membresía</TableHead>
+                                            <TableHead>Monto</TableHead>
+                                            <TableHead>Método</TableHead>
+                                            <TableHead>Fecha</TableHead>
+                                            <TableHead>Recibo</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {stats.recentPayments.map((payment) => (
+                                            <TableRow key={payment.id}>
+                                                <TableCell>
+                                                    <Link
+                                                        href={`/atletas/${payment.athleteId}`}
+                                                        className="hover:underline font-medium"
+                                                    >
+                                                        {payment.athlete.firstName} {payment.athlete.lastName}
+                                                    </Link>
+                                                </TableCell>
+                                                <TableCell>
+                                                    {payment.subscription?.membership.name || "-"}
+                                                </TableCell>
+                                                <TableCell className="font-medium">
+                                                    €{payment.amount.toFixed(2)}
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Badge variant="outline">
+                                                        {paymentMethodLabels[payment.paymentMethod] ||
+                                                            payment.paymentMethod}
+                                                    </Badge>
+                                                </TableCell>
+                                                <TableCell>
+                                                    {new Date(payment.paymentDate).toLocaleDateString("es-ES")}
+                                                </TableCell>
+                                                <TableCell className="text-muted-foreground text-sm">
+                                                    {payment.receiptNumber}
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
+
+                            {/* Mobile Cards */}
+                            <div className="md:hidden space-y-3">
                                 {stats.recentPayments.map((payment) => (
-                                    <TableRow key={payment.id}>
-                                        <TableCell>
-                                            <Link
-                                                href={`/atletas/${payment.athleteId}`}
-                                                className="hover:underline font-medium"
-                                            >
-                                                {payment.athlete.firstName} {payment.athlete.lastName}
-                                            </Link>
-                                        </TableCell>
-                                        <TableCell>
-                                            {payment.subscription?.membership.name || "-"}
-                                        </TableCell>
-                                        <TableCell className="font-medium">
-                                            €{payment.amount.toFixed(2)}
-                                        </TableCell>
-                                        <TableCell>
-                                            <Badge variant="outline">
-                                                {paymentMethodLabels[payment.paymentMethod] ||
-                                                    payment.paymentMethod}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell>
-                                            {new Date(payment.paymentDate).toLocaleDateString("es-ES")}
-                                        </TableCell>
-                                        <TableCell className="text-muted-foreground text-sm">
-                                            {payment.receiptNumber}
-                                        </TableCell>
-                                    </TableRow>
+                                    <Link
+                                        key={payment.id}
+                                        href={`/atletas/${payment.athleteId}`}
+                                        className="block"
+                                    >
+                                        <div className="p-4 rounded-lg border hover:bg-accent/50 transition-colors">
+                                            <div className="flex justify-between items-start gap-3">
+                                                <div className="min-w-0 flex-1">
+                                                    <p className="font-medium truncate">
+                                                        {payment.athlete.firstName} {payment.athlete.lastName}
+                                                    </p>
+                                                    <p className="text-sm text-muted-foreground">
+                                                        {payment.subscription?.membership.name || "Pago único"}
+                                                    </p>
+                                                    <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+                                                        <span>{new Date(payment.paymentDate).toLocaleDateString("es-ES")}</span>
+                                                        <span>•</span>
+                                                        <Badge variant="outline" className="text-xs py-0">
+                                                            {paymentMethodLabels[payment.paymentMethod] || payment.paymentMethod}
+                                                        </Badge>
+                                                    </div>
+                                                </div>
+                                                <div className="text-right shrink-0">
+                                                    <p className="text-lg font-bold">€{payment.amount.toFixed(2)}</p>
+                                                    {payment.receiptNumber && (
+                                                        <p className="text-xs text-muted-foreground">#{payment.receiptNumber}</p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </Link>
                                 ))}
-                            </TableBody>
-                        </Table>
+                            </div>
+                        </>
                     )}
                 </CardContent>
             </Card>
         </div>
     );
 }
+
