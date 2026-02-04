@@ -10,30 +10,53 @@ import { Button } from "@/components/ui/button";
 export const dynamic = 'force-dynamic';
 
 async function getCompetitions() {
-    return prisma.competition.findMany({
-        orderBy: { date: "desc" },
-        include: {
-            athlete: { select: { firstName: true, lastName: true } },
-        },
-    });
+    console.log("Fetching Competitions...");
+    try {
+        const data = await prisma.competition.findMany({
+            orderBy: { date: "desc" },
+            include: {
+                athlete: { select: { firstName: true, lastName: true } },
+            },
+        });
+        console.log(`Competitions fetched: ${data.length}`);
+        return data;
+    } catch (e) {
+        console.error("Error fetching competitions:", e);
+        throw e;
+    }
 }
 
 async function getEvents() {
-    return prisma.competitionEvent.findMany({
-        orderBy: { date: "desc" },
-        include: {
-            _count: { select: { competitions: true } }
-        }
-    });
+    console.log("Fetching Events...");
+    try {
+        const data = await prisma.competitionEvent.findMany({
+            orderBy: { date: "desc" },
+            include: {
+                _count: { select: { competitions: true } }
+            }
+        });
+        console.log(`Events fetched: ${data.length}`);
+        return data;
+    } catch (e) {
+        console.error("Error fetching events:", e);
+        throw e;
+    }
 }
 
 async function getStats() {
-    const [total, wins, competitors] = await Promise.all([
-        prisma.competition.count(),
-        prisma.competition.count({ where: { result: "WON" } }),
-        prisma.athlete.count({ where: { isCompetitor: true } }),
-    ]);
-    return { total, wins, competitors };
+    console.log("Fetching Stats...");
+    try {
+        const [total, wins, competitors] = await Promise.all([
+            prisma.competition.count(),
+            prisma.competition.count({ where: { result: "WON" } }),
+            prisma.athlete.count({ where: { isCompetitor: true } }),
+        ]);
+        console.log("Stats fetched");
+        return { total, wins, competitors };
+    } catch (e) {
+        console.error("Error fetching stats:", e);
+        throw e;
+    }
 }
 
 const resultColors: Record<string, string> = {
