@@ -6,6 +6,7 @@ import { Plus } from "lucide-react";
 import { ExportButton } from "@/components/ui/export-button";
 import { AthletesTable } from "./components/athletes-table";
 import { AthleteColumn } from "./components/columns";
+import { AthleteCard } from "@/components/athlete-card";
 
 export const dynamic = 'force-dynamic';
 
@@ -32,6 +33,7 @@ async function getAthletes(search?: string) {
 
             },
             tags: true,
+            _count: { select: { attendances: true } },
         },
     });
 }
@@ -56,6 +58,18 @@ export default async function AthletesPage({ searchParams }: Props) {
 
         hasActiveSubscription: a.subscriptions.length > 0,
         tags: a.tags.map(t => ({ label: t.label, color: t.color }))
+    }));
+
+    // Transform for mobile cards
+    const athleteCards = athletes.map(a => ({
+        id: a.id,
+        name: `${a.firstName} ${a.lastName}`,
+        email: a.email,
+        phone: a.phone,
+        status: a.status,
+        isCompetitor: a.isCompetitor,
+        _count: a._count,
+        tags: a.tags.map(t => ({ id: t.id, name: t.label, color: t.color })),
     }));
 
     return (
@@ -90,8 +104,8 @@ export default async function AthletesPage({ searchParams }: Props) {
                 </div>
             </div>
 
-            {/* Athletes Table Component */}
-            <Card>
+            {/* Desktop Table */}
+            <Card className="hidden md:block">
                 <CardHeader>
                     <CardTitle>
                         {athletes.length} {athletes.length === 1 ? "atleta" : "atletas"}
@@ -101,6 +115,24 @@ export default async function AthletesPage({ searchParams }: Props) {
                     <AthletesTable data={formattedAthletes} />
                 </CardContent>
             </Card>
+
+            {/* Mobile Cards */}
+            <div className="md:hidden space-y-3">
+                <p className="text-sm text-muted-foreground">
+                    {athletes.length} {athletes.length === 1 ? "atleta" : "atletas"}
+                </p>
+                {athleteCards.map((athlete) => (
+                    <AthleteCard key={athlete.id} athlete={athlete} />
+                ))}
+                {athleteCards.length === 0 && (
+                    <Card>
+                        <CardContent className="py-8 text-center text-muted-foreground">
+                            No hay atletas registrados
+                        </CardContent>
+                    </Card>
+                )}
+            </div>
         </div>
     );
 }
+

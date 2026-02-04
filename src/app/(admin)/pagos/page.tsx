@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/table";
 import { Plus, CreditCard, Settings, TrendingUp } from "lucide-react";
 import { ExportButton } from "@/components/ui/export-button";
+import { PaymentsExportButton } from "@/components/payments-export-button";
 
 export const dynamic = 'force-dynamic';
 
@@ -106,6 +107,7 @@ export default async function PaymentsPage() {
                         fileName="reporte_pagos"
                         title="Historial de Pagos"
                     />
+                    <PaymentsExportButton />
                     <Link href="/pagos/membresias">
                         <Button variant="outline" size="icon" title="Configurar Membresías">
                             <Settings className="h-4 w-4" />

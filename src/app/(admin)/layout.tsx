@@ -5,7 +5,7 @@ import { CommandPalette } from "@/components/command-palette";
 
 import Link from "next/link"; // Not needed but harmless if auto-added
 import Image from "next/image";
-// ... imports
+import { AnimatedLayout } from "@/components/animated-layout";
 
 export default function AdminLayout({
     children,
@@ -42,7 +42,9 @@ export default function AdminLayout({
             <main id="main-content" className="flex-1 md:ml-64 pb-20 md:pb-0">
                 <div className="p-4 md:p-8 pt-16 md:pt-8">
                     <Breadcrumbs />
-                    {children}
+                    <AnimatedLayout>
+                        {children}
+                    </AnimatedLayout>
                 </div>
             </main>
 
