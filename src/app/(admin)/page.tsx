@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Users, CalendarCheck, Trophy, AlertTriangle, Clock, AlertCircle, ChevronRight, Activity } from "lucide-react";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import prisma from "@/lib/prisma";
 import { format, subDays } from "date-fns";
 import { es } from "date-fns/locale";
@@ -159,7 +160,66 @@ async function DashboardContent() {
       {/* Alert Banner */}
       <AlertBanner expired={stats.expiredSubscriptions} expiring={stats.expiringSubscriptions} />
 
-      {/* Primary Stats - High Priority */}
+      {/* Today's Classes - High Priority (Moved to Top) */}
+      <Card className="w-full border-primary/20 bg-primary/5 shadow-sm">
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <Clock className="h-5 w-5 text-primary" />
+              Clases de Hoy
+            </CardTitle>
+            <CardDescription className="mt-1.5">
+              {stats.todayClasses.length} sesiones programadas para hoy
+            </CardDescription>
+          </div>
+          <Link href="/calendario">
+            <Button variant="outline" size="sm" className="gap-2 bg-background">
+              Ver Calendario
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </Link>
+        </CardHeader>
+        <CardContent>
+          {stats.todayClasses.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <p>No hay clases para hoy</p>
+            </div>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {stats.todayClasses.map((cls) => (
+                <Link
+                  key={cls.id}
+                  href={`/clases/${cls.id}/checkin`}
+                  className="group flex flex-col justify-between p-4 rounded-xl bg-card border hover:border-primary/50 transition-all hover:shadow-md"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div
+                        className="px-2 py-1 rounded-md text-xs font-medium bg-secondary"
+                      >
+                        {cls.startTime} - {cls.endTime}
+                      </div>
+                      <div className="h-2 w-2 rounded-full" style={{ backgroundColor: cls.color || "#D4AF37" }} />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold group-hover:text-primary transition-colors">{cls.name}</h4>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {cls._count.attendances} / {cls.maxCapacity} asistentes
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-4 pt-3 border-t flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground">Ir al check-in</span>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Primary Stats */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Link href="/atletas">
           <Card className="hover:shadow-lg transition-all cursor-pointer hover:border-primary/50 hover:scale-[1.02]">
@@ -231,63 +291,9 @@ async function DashboardContent() {
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-
+      <div className="grid gap-4">
         {/* Chart Column */}
         <WeeklyActivityChart data={stats.weeklyActivity} />
-
-        {/* Today's Classes Column */}
-        <Card className="col-span-3">
-          <CardHeader>
-            <CardTitle>Clases de Hoy</CardTitle>
-            <CardDescription>
-              {stats.todayClasses.length} sesiones programadas
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {stats.todayClasses.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" aria-hidden="true" />
-                <p>No hay clases para hoy</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {stats.todayClasses.map((cls) => (
-                  <Link
-                    key={cls.id}
-                    href={`/clases/${cls.id}/checkin`}
-                    className="flex items-center justify-between p-2 rounded-lg hover:bg-muted transition-colors border-b last:border-0"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div
-                        className="w-1 h-10 rounded-full"
-                        style={{ backgroundColor: cls.color || "#D4AF37" }}
-                      />
-                      <div>
-                        <p className="font-medium text-sm">{cls.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {cls.startTime} - {cls.endTime}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-xs bg-secondary px-2 py-1 rounded-md">
-                      {cls._count.attendances} / {cls.maxCapacity}
-                    </div>
-                  </Link>
-                ))}
-                <div className="pt-2">
-                  <Link
-                    href="/calendario"
-                    className="text-xs text-primary hover:underline flex items-center justify-center gap-1 w-full"
-                  >
-                    Ver calendario completo
-                    <ChevronRight className="h-3 w-3" />
-                  </Link>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
       </div>
     </div>
   );
