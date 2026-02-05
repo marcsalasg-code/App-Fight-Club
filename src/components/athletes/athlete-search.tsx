@@ -73,7 +73,7 @@ export function AthleteSearch({ onSelect, className, placeholder = "Buscar atlet
 
     return (
         <div className={cn("relative w-full", className)}>
-            <Command className="rounded-lg border shadow-md">
+            <Command shouldFilter={false} className="rounded-lg border shadow-md">
                 <CommandInput
                     placeholder={placeholder}
                     value={query}

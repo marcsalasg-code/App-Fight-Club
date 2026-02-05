@@ -77,6 +77,7 @@ export function AthleteForm({ athlete, availableTags }: Props) {
 
         if (result.success) {
             toast.success(athlete ? "Atleta actualizado" : "Atleta creado");
+            router.refresh();
             router.push("/atletas");
         } else {
             toast.error(result.error);
@@ -185,8 +186,8 @@ export function AthleteForm({ athlete, availableTags }: Props) {
                                             type="button"
                                             onClick={() => toggleTag(tag.id)}
                                             className={`px-3 py-1 rounded-full text-sm border transition-all ${isSelected
-                                                    ? 'brightness-100 ring-2 ring-offset-1 border-transparent text-white font-medium'
-                                                    : 'bg-transparent border-input text-muted-foreground hover:bg-accent'
+                                                ? 'brightness-100 ring-2 ring-offset-1 border-transparent text-white font-medium'
+                                                : 'bg-transparent border-input text-muted-foreground hover:bg-accent'
                                                 }`}
                                             style={{
                                                 backgroundColor: isSelected ? tag.color : undefined,

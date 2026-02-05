@@ -2,7 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { athleteSchema, validateData } from "@/lib/schemas";
+
 
 export type AthleteFormData = {
     firstName: string;

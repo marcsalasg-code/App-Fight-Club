@@ -22,6 +22,19 @@ export const metadata: Metadata = {
     capable: true,
     statusBarStyle: "black-translucent",
     title: "RC Fight Club",
+    startupImage: [], // iOS will fallback to background color if empty, or we can add specific paths later
+  },
+  formatDetection: {
+    telephone: false,
+  },
+  icons: {
+    icon: "/icon.png",
+    shortcut: "/icon.png",
+    apple: "/icon.png", // iOS will automatically round this
+    other: {
+      rel: "apple-touch-icon-precomposed",
+      url: "/icon.png",
+    },
   },
 };
 

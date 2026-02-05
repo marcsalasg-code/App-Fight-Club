@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isSameDay } from "date-fns";
-import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { ClassDetailModal } from "./class-detail-modal";
 import { MobileMonthSplitView } from "./mobile-month-split-view";

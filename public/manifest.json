@@ -1,11 +1,11 @@
 {
     "name": "Fight Club Manager",
     "short_name": "Fight Club",
-    "start_url": "/checkin",
+    "start_url": "/",
     "display": "standalone",
     "background_color": "#09090b",
     "theme_color": "#09090b",
-    "orientation": "landscape",
+    "orientation": "portrait-primary",
     "icons": [
         {
             "src": "/icon.png",

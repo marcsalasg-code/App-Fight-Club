@@ -4,7 +4,7 @@ import { useState } from "react";
 import { CheckCircle2, UserPlus, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { registerAttendance } from "@/app/(admin)/clases/actions";
-import { AthleteSearchPopover } from "@/components/athlete-search";
+import { AthleteSearchPopover } from "@/components/athletes/athlete-search";
 
 import { useRouter } from "next/navigation";
 
@@ -35,7 +35,7 @@ export function ManualCheckIn({ classId }: ManualCheckInProps) {
                     icon: <AlertCircle className="h-4 w-4 text-destructive" />,
                 });
             }
-        } catch (err) {
+        } catch {
             toast.error("Error de conexión");
         } finally {
             setIsLoading(false);

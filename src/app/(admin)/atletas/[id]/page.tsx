@@ -51,23 +51,15 @@ async function getAthlete(id: string) {
     });
 }
 
-const statusColors: Record<string, string> = {
-    ACTIVE: "bg-green-500/10 text-green-700",
-    INACTIVE: "bg-gray-500/10 text-gray-700",
-    SUSPENDED: "bg-red-500/10 text-red-700",
-};
-
-const statusLabels: Record<string, string> = {
-    ACTIVE: "Activo",
-    INACTIVE: "Inactivo",
-    SUSPENDED: "Suspendido",
-};
+import { getStatusColor, STATUS_LABELS, STATUS_COLORS } from "@/lib/status-colors";
 
 const levelLabels: Record<string, string> = {
     BEGINNER: "Principiante",
     INTERMEDIATE: "Intermedio",
     ADVANCED: "Avanzado",
 };
+
+
 
 const goalLabels: Record<string, string> = {
     RECREATIONAL: "Recreativo",
@@ -115,8 +107,8 @@ export default async function AthleteDetailPage({ params }: Props) {
                                 )}
                             </h1>
                             <div className="flex items-center gap-2">
-                                <Badge className={statusColors[athlete.status]}>
-                                    {statusLabels[athlete.status]}
+                                <Badge className={getStatusColor(athlete.status)}>
+                                    {STATUS_LABELS[athlete.status] || athlete.status}
                                 </Badge>
                                 <Badge variant="outline">{levelLabels[athlete.level]}</Badge>
                             </div>
@@ -287,11 +279,11 @@ export default async function AthleteDetailPage({ params }: Props) {
                                 <CardContent>
                                     {activeSubscription ? (
                                         <div className="space-y-3">
-                                            <div className="p-3 rounded-lg bg-green-500/10 border border-green-200">
-                                                <p className="font-medium text-green-700">
+                                            <div className={`p-3 rounded-lg border ${STATUS_COLORS.SUCCESS}`}>
+                                                <p className="font-medium">
                                                     {activeSubscription.membership.name}
                                                 </p>
-                                                <p className="text-sm text-green-600">
+                                                <p className="text-sm opacity-90">
                                                     Hasta:{" "}
                                                     {activeSubscription.endDate
                                                         ? new Date(activeSubscription.endDate).toLocaleDateString(
@@ -308,8 +300,8 @@ export default async function AthleteDetailPage({ params }: Props) {
                                         </div>
                                     ) : (
                                         <div className="space-y-3">
-                                            <div className="p-3 rounded-lg bg-yellow-500/10 border border-yellow-200">
-                                                <p className="font-medium text-yellow-700">Sin suscripción activa</p>
+                                            <div className={`p-3 rounded-lg border ${STATUS_COLORS.WARNING}`}>
+                                                <p className="font-medium">Sin suscripción activa</p>
                                             </div>
                                             <Link href={`/pagos/nuevo?athleteId=${athlete.id}`}>
                                                 <Button className="w-full">Registrar Suscripción</Button>
@@ -372,14 +364,10 @@ export default async function AthleteDetailPage({ params }: Props) {
                                                             <Badge
                                                                 variant="outline"
                                                                 className={
-                                                                    comp.result === "WON"
-                                                                        ? "text-green-600 border-green-200"
-                                                                        : comp.result === "LOST"
-                                                                            ? "text-red-600 border-red-200"
-                                                                            : ""
+                                                                    getStatusColor(comp.result)
                                                                 }
                                                             >
-                                                                {comp.result}
+                                                                {comp.result === "WON" ? "Victoria" : comp.result === "LOST" ? "Derrota" : comp.result}
                                                             </Badge>
                                                             <span className="text-muted-foreground">
                                                                 {new Date(comp.date).toLocaleDateString("es-ES")}

@@ -5,7 +5,6 @@ import { cn } from "@/lib/utils";
 import { ClassDetailModal } from "./class-detail-modal";
 import { format, startOfWeek, addDays, isSameDay } from "date-fns";
 import { es } from "date-fns/locale";
-import { Users } from "lucide-react";
 import { Class, TYPE_COLORS } from "./types";
 
 type Props = {
@@ -32,7 +31,6 @@ export function MobileThreeDayView({ classes, currentDate }: Props) {
             const dayIndex = weekDays.findIndex(d => isSameDay(d, currentDate));
             if (dayIndex !== -1) {
                 // Approximate scroll to keep current day starting the view
-                const containerWidth = scrollContainerRef.current.clientWidth;
                 // Each column is roughly 1/3 of view, but let's just scroll to the day index * (1/3 view width)
                 // Actually safer to scroll to dayIndex * (containerWidth / 3) assuming we set min-w properly
                 // Since min-w is relative to viewport (33vw), we can calculate:
@@ -40,7 +38,7 @@ export function MobileThreeDayView({ classes, currentDate }: Props) {
                 scrollContainerRef.current.scrollTo({ left: dayIndex * widthPerDay, behavior: 'smooth' });
             }
         }
-    }, [currentDate]);
+    }, [currentDate, weekDays]);
 
     const handleClassClick = (id: string) => {
         setSelectedClassId(id);

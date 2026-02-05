@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { removeAttendance } from "@/app/(admin)/clases/actions";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { cn } from "@/lib/utils";
 
 type AttendenceItem = {
     id: string;

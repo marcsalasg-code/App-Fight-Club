@@ -1,11 +1,12 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, CalendarCheck, Trophy, AlertTriangle, Clock, AlertCircle, ChevronRight } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Users, CalendarCheck, Trophy, AlertTriangle, Clock, AlertCircle, ChevronRight, Activity } from "lucide-react";
 import Link from "next/link";
 import prisma from "@/lib/prisma";
-import { format } from "date-fns";
+import { format, subDays } from "date-fns";
 import { es } from "date-fns/locale";
 import { Suspense } from "react";
 import { DashboardSkeleton } from "@/components/ui/skeleton";
+import { WeeklyActivityChart } from "@/components/dashboard/weekly-activity-chart";
 
 export const dynamic = 'force-dynamic';
 
@@ -22,6 +23,7 @@ const DAYS_MAP: Record<number, string> = {
 async function getDashboardStats() {
   const now = new Date();
   const todayDayOfWeek = DAYS_MAP[now.getDay()];
+  const sevenDaysAgo = subDays(now, 6);
 
   const [
     totalAthletes,
@@ -31,6 +33,7 @@ async function getDashboardStats() {
     expiredSubscriptions,
     expiringSubscriptions,
     todayClasses,
+    weeklyAttendanceRaw
   ] = await Promise.all([
     prisma.athlete.count(),
     prisma.athlete.count({ where: { status: "ACTIVE" } }),
@@ -66,7 +69,34 @@ async function getDashboardStats() {
         _count: { select: { attendances: true } },
       },
     }),
+    prisma.attendance.findMany({
+      where: {
+        date: {
+          gte: sevenDaysAgo,
+        },
+      },
+      select: {
+        date: true,
+      },
+    }),
   ]);
+
+  // Process weekly attendance
+  const weeklyActivity = Array.from({ length: 7 }).map((_, i) => {
+    const d = subDays(now, 6 - i);
+    const dayName = format(d, "EEE", { locale: es }); // Lun, Mar, etc.
+    // Capitalize first letter
+    const dayLabel = dayName.charAt(0).toUpperCase() + dayName.slice(1);
+
+    const count = weeklyAttendanceRaw.filter(a =>
+      new Date(a.date).toDateString() === d.toDateString()
+    ).length;
+
+    return {
+      day: dayLabel,
+      attendance: count
+    };
+  });
 
   return {
     totalAthletes,
@@ -76,6 +106,7 @@ async function getDashboardStats() {
     expiredSubscriptions,
     expiringSubscriptions,
     todayClasses,
+    weeklyActivity,
   };
 }
 
@@ -129,21 +160,19 @@ async function DashboardContent() {
       <AlertBanner expired={stats.expiredSubscriptions} expiring={stats.expiringSubscriptions} />
 
       {/* Primary Stats - High Priority */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Link href="/atletas">
           <Card className="hover:shadow-lg transition-all cursor-pointer hover:border-primary/50 hover:scale-[1.02]">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Atletas Activos
               </CardTitle>
-              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <Users className="h-5 w-5 text-primary" aria-hidden="true" />
-              </div>
+              <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold">{stats.activeAthletes}</div>
-              <p className="text-sm text-muted-foreground mt-1">
-                de {stats.totalAthletes} registrados
+              <div className="text-2xl font-bold">{stats.activeAthletes}</div>
+              <p className="text-xs text-muted-foreground">
+                + {stats.totalAthletes} registrados
               </p>
             </CardContent>
           </Card>
@@ -155,120 +184,111 @@ async function DashboardContent() {
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Check-ins Hoy
               </CardTitle>
-              <div className="h-10 w-10 rounded-full bg-blue-500/10 flex items-center justify-center">
-                <CalendarCheck className="h-5 w-5 text-blue-500" aria-hidden="true" />
-              </div>
+              <CalendarCheck className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold">{stats.todayAttendance}</div>
-              <p className="text-sm text-muted-foreground mt-1">
+              <div className="text-2xl font-bold">{stats.todayAttendance}</div>
+              <p className="text-xs text-muted-foreground">
                 atletas entrenando
               </p>
             </CardContent>
           </Card>
         </Link>
 
-        <Card className="hover:shadow-lg transition-all hover:border-primary/50">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Clases Hoy
-            </CardTitle>
-            <div className="h-10 w-10 rounded-full bg-purple-500/10 flex items-center justify-center">
-              <Clock className="h-5 w-5 text-purple-500" aria-hidden="true" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-4xl font-bold">{stats.todayClasses.length}</div>
-            <p className="text-sm text-muted-foreground mt-1">
-              sesiones programadas
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Secondary Stats - Info */}
-      <div className="grid gap-4 grid-cols-2">
         <Link href="/competencias">
-          <Card className="hover:shadow-md transition-all cursor-pointer hover:border-primary/30">
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-3">
-                <Trophy className="h-5 w-5 text-amber-500" aria-hidden="true" />
-                <div>
-                  <p className="text-2xl font-bold">{stats.competitorAthletes}</p>
-                  <p className="text-xs text-muted-foreground">Competidores</p>
-                </div>
-              </div>
+          <Card className="hover:shadow-lg transition-all cursor-pointer hover:border-primary/50 hover:scale-[1.02]">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Competidores
+              </CardTitle>
+              <Trophy className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.competitorAthletes}</div>
+              <p className="text-xs text-muted-foreground">
+                en equipo oficial
+              </p>
             </CardContent>
           </Card>
         </Link>
 
         <Link href="/pagos">
-          <Card className={`hover:shadow-md transition-all cursor-pointer ${stats.expiredSubscriptions > 0 ? "border-red-200 bg-red-50/50 dark:bg-red-950/20" : ""}`}>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-3">
-                <AlertTriangle className={`h-5 w-5 ${stats.expiredSubscriptions > 0 ? "text-red-500" : "text-muted-foreground"}`} aria-hidden="true" />
-                <div>
-                  <p className="text-2xl font-bold">{stats.expiredSubscriptions}</p>
-                  <p className="text-xs text-muted-foreground">Vencidas</p>
-                </div>
-              </div>
+          <Card className="hover:shadow-lg transition-all cursor-pointer hover:border-primary/50 hover:scale-[1.02]">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Alertas Pago
+              </CardTitle>
+              <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.expiredSubscriptions}</div>
+              <p className="text-xs text-muted-foreground">
+                suscripciones vencidas
+              </p>
             </CardContent>
           </Card>
         </Link>
       </div>
 
-      {/* Today's Classes */}
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-lg">Clases de Hoy</CardTitle>
-            <Link
-              href="/calendario"
-              className="text-sm text-primary hover:underline flex items-center gap-1"
-            >
-              Ver calendario
-              <ChevronRight className="h-4 w-4" aria-hidden="true" />
-            </Link>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {stats.todayClasses.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" aria-hidden="true" />
-              <p>No hay clases programadas para hoy</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {stats.todayClasses.map((cls) => (
-                <Link
-                  key={cls.id}
-                  href={`/clases/${cls.id}/checkin`}
-                  className="flex items-center gap-4 p-3 rounded-lg border hover:bg-accent transition-colors"
-                >
-                  <div
-                    className="w-1 h-12 rounded-full"
-                    style={{ backgroundColor: cls.color || "#D4AF37" }}
-                    aria-hidden="true"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate">{cls.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {cls.startTime} - {cls.endTime}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium">
-                      {cls._count.attendances}/{cls.maxCapacity}
-                    </p>
-                    <p className="text-xs text-muted-foreground">asistentes</p>
-                  </div>
-                  <ChevronRight className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
-                </Link>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      {/* Main Content Grid */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+
+        {/* Chart Column */}
+        <WeeklyActivityChart data={stats.weeklyActivity} />
+
+        {/* Today's Classes Column */}
+        <Card className="col-span-3">
+          <CardHeader>
+            <CardTitle>Clases de Hoy</CardTitle>
+            <CardDescription>
+              {stats.todayClasses.length} sesiones programadas
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {stats.todayClasses.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" aria-hidden="true" />
+                <p>No hay clases para hoy</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {stats.todayClasses.map((cls) => (
+                  <Link
+                    key={cls.id}
+                    href={`/clases/${cls.id}/checkin`}
+                    className="flex items-center justify-between p-2 rounded-lg hover:bg-muted transition-colors border-b last:border-0"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="w-1 h-10 rounded-full"
+                        style={{ backgroundColor: cls.color || "#D4AF37" }}
+                      />
+                      <div>
+                        <p className="font-medium text-sm">{cls.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {cls.startTime} - {cls.endTime}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-xs bg-secondary px-2 py-1 rounded-md">
+                      {cls._count.attendances} / {cls.maxCapacity}
+                    </div>
+                  </Link>
+                ))}
+                <div className="pt-2">
+                  <Link
+                    href="/calendario"
+                    className="text-xs text-primary hover:underline flex items-center justify-center gap-1 w-full"
+                  >
+                    Ver calendario completo
+                    <ChevronRight className="h-3 w-3" />
+                  </Link>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

@@ -1,7 +1,7 @@
-import { Sidebar } from "@/components/sidebar";
-import { MobileBottomNav } from "@/components/mobile-bottom-nav";
-import { Breadcrumbs } from "@/components/breadcrumbs";
-import { CommandPalette } from "@/components/command-palette";
+import { AdminShell } from "@/components/layout/admin-shell";
+import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav";
+import { Breadcrumbs } from "@/components/layout/breadcrumbs";
+import { CommandPalette } from "@/components/layout/command-palette";
 
 import Link from "next/link"; // Not needed but harmless if auto-added
 import Image from "next/image";
@@ -38,14 +38,12 @@ export default function AdminLayout({
                 Saltar al contenido principal
             </a>
 
-            <Sidebar />
-
-            <main id="main-content" className="flex-1 md:ml-64 pb-20 md:pb-0 relative z-10">
+            <AdminShell>
                 <div className="p-4 md:p-8 pt-16 md:pt-8">
                     <Breadcrumbs />
                     {children}
                 </div>
-            </main>
+            </AdminShell>
 
             {/* Mobile Bottom Navigation */}
             <MobileBottomNav />

@@ -24,9 +24,7 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import { DataTablePagination } from "@/components/ui/data-table/data-table-pagination"
-import { DataTableToolbar } from "@/components/ui/data-table/data-table-toolbar"
 import { DataTableViewOptions } from "@/components/ui/data-table/data-table-view-options"
-import { DataTableFacetedFilter } from "@/components/ui/data-table/data-table-faceted-filter"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Cross2Icon } from "@radix-ui/react-icons"
@@ -41,52 +39,12 @@ interface AthletesTableProps {
 }
 
 export function AthletesTable({ data }: AthletesTableProps) {
-    const [rowSelection, setRowSelection] = React.useState({})
-    const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
-    const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
-    const [sorting, setSorting] = React.useState<SortingState>([])
-
-    // eslint-disable-next-line react-hooks/incompatible-library
-    const table = useReactTable({
-        data,
-        columns,
-        state: {
-            sorting,
-            columnVisibility,
-            rowSelection,
-            columnFilters,
-        },
-        enableRowSelection: true,
-        onRowSelectionChange: setRowSelection,
-        onSortingChange: setSorting,
-        onColumnFiltersChange: setColumnFilters,
-        onColumnVisibilityChange: setColumnVisibility,
-        getCoreRowModel: getCoreRowModel(),
-        getFilteredRowModel: getFilteredRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
-        getSortedRowModel: getSortedRowModel(),
-        getFacetedRowModel: getFacetedRowModel(),
-        getFacetedUniqueValues: getFacetedUniqueValues(),
-    })
-
-    // Extract selected IDs
-    const selectedIds = Object.keys(rowSelection).reduce((ids, key) => {
-        // Access the row data using the relative index if mapped correctly?
-        // rowSelection keys are row IDs (defaulting to index), unless we specify getRowId
-        // With default getRowId, keys are numeric strings "0", "1", etc.
-        // So we need to match them to data indices.
-        // Assuming data order has not changed significantly or getRowId handles it.
-        // Better practice: Provide getRowId that returns athlete.id.
-        return ids;
-    }, [] as string[])
-
-    // Custom row ID strategy to ensure safety
-    // Let's redefine table below to use getRowId: row => row.id
-
     return (
         <CustomDataTable data={data} columns={columns} />
     )
 }
+
+
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function CustomDataTable({ data, columns }: { data: AthleteColumn[], columns: any[] }) {

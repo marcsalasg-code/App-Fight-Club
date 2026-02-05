@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ChevronRight, Trophy } from "lucide-react";
+import { getStatusColor, STATUS_LABELS } from "@/lib/status-colors";
 
 type AthleteCardProps = {
     athlete: {
@@ -17,18 +18,6 @@ type AthleteCardProps = {
         _count?: { attendances: number };
         tags?: { id: string; name: string; color: string }[];
     };
-};
-
-const statusColors: Record<string, string> = {
-    ACTIVE: "bg-green-500/10 text-green-700 border-green-200",
-    INACTIVE: "bg-gray-500/10 text-gray-500 border-gray-200",
-    TRIAL: "bg-blue-500/10 text-blue-600 border-blue-200",
-};
-
-const statusLabels: Record<string, string> = {
-    ACTIVE: "Activo",
-    INACTIVE: "Inactivo",
-    TRIAL: "Prueba",
 };
 
 export function AthleteCard({ athlete }: AthleteCardProps) {
@@ -65,9 +54,9 @@ export function AthleteCard({ athlete }: AthleteCardProps) {
                         <div className="flex flex-col items-end gap-1">
                             <Badge
                                 variant="outline"
-                                className={statusColors[athlete.status] || ""}
+                                className={getStatusColor(athlete.status)}
                             >
-                                {statusLabels[athlete.status] || athlete.status}
+                                {STATUS_LABELS[athlete.status] || athlete.status}
                             </Badge>
                             {athlete._count && (
                                 <span className="text-xs text-muted-foreground">

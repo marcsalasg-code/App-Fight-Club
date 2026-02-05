@@ -2,7 +2,7 @@
 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
-import { eachDayOfInterval, endOfYear, format, getDay, isSameDay, startOfYear, subYears } from "date-fns"
+import { eachDayOfInterval, format, getDay, subYears } from "date-fns"
 import { es } from "date-fns/locale"
 
 interface AttendanceHeatmapProps {

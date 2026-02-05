@@ -14,6 +14,7 @@ import {
 import { Plus, CreditCard, Settings, TrendingUp } from "lucide-react";
 import { ExportButton } from "@/components/ui/export-button";
 import { PaymentsExportButton } from "@/components/payments-export-button";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export const dynamic = 'force-dynamic';
 
@@ -187,14 +188,13 @@ export default async function PaymentsPage() {
                 </CardHeader>
                 <CardContent>
                     {stats.recentPayments.length === 0 ? (
-                        <div className="text-center py-12">
-                            <p className="text-muted-foreground mb-4">
-                                No hay pagos registrados
-                            </p>
-                            <Link href="/pagos/nuevo">
-                                <Button>Registrar primer pago</Button>
-                            </Link>
-                        </div>
+                        <EmptyState
+                            icon={CreditCard}
+                            title="No hay pagos registrados"
+                            description="Comienza registrando el primer pago o venta de membresía."
+                            actionLabel="Registrar primer pago"
+                            actionHref="/pagos/nuevo"
+                        />
                     ) : (
                         <>
                             {/* Desktop Table */}

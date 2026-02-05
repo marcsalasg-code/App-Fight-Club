@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AnimatedCounter } from "@/components/animated-counter";
+import { AnimatedCounter } from "@/components/dashboard/animated-counter";
 import { LucideIcon } from "lucide-react";
 
 type Props = {

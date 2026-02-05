@@ -8,8 +8,10 @@ import { Plus, Trophy } from "lucide-react";
 import { ExportButton } from "@/components/ui/export-button";
 import { AthletesTable } from "./components/athletes-table";
 import { AthleteColumn } from "./components/columns";
-import { AthleteCard } from "@/components/athlete-card";
+import { AthleteCard } from "@/components/athletes/athlete-card";
 import { PageHeader } from "@/components/ui/page-header";
+import { EmptyState } from "@/components/ui/empty-state";
+import { User } from "lucide-react";
 
 export const dynamic = 'force-dynamic';
 
@@ -107,43 +109,55 @@ export default async function AthletesPage({ searchParams }: Props) {
             />
 
             {/* Desktop Table with Tabs */}
-            <Card className="hidden md:block border-none shadow-none bg-transparent">
-                <Tabs defaultValue="all" className="w-full space-y-4">
-                    <div className="flex items-center justify-between">
-                        <TabsList>
-                            <TabsTrigger value="all">Todos ({formattedAthletes.length})</TabsTrigger>
-                            <TabsTrigger value="team" className="gap-2">
-                                <span className="font-semibold text-primary">Fight Team</span>
-                                <Badge variant="secondary" className="px-1 py-0 h-5 min-w-5 justify-center">
-                                    {formattedAthletes.filter(a => a.isCompetitor).length}
-                                </Badge>
-                            </TabsTrigger>
-                        </TabsList>
-                    </div>
+            {athletes.length === 0 && !params.search ? (
+                <div className="hidden md:block">
+                    <EmptyState
+                        icon={User}
+                        title="No hay atletas registrados"
+                        description="Comienza añadiendo los miembros de tu gimnasio."
+                        actionLabel="Nuevo Atleta"
+                        actionHref="/atletas/nuevo"
+                    />
+                </div>
+            ) : (
+                <Card className="hidden md:block border-none shadow-none bg-transparent">
+                    <Tabs defaultValue="all" className="w-full space-y-4">
+                        <div className="flex items-center justify-between">
+                            <TabsList>
+                                <TabsTrigger value="all">Todos ({formattedAthletes.length})</TabsTrigger>
+                                <TabsTrigger value="team" className="gap-2">
+                                    <span className="font-semibold text-primary">Fight Team</span>
+                                    <Badge variant="secondary" className="px-1 py-0 h-5 min-w-5 justify-center">
+                                        {formattedAthletes.filter(a => a.isCompetitor).length}
+                                    </Badge>
+                                </TabsTrigger>
+                            </TabsList>
+                        </div>
 
-                    <TabsContent value="all" className="mt-0">
-                        <Card>
-                            <CardContent className="p-0 sm:p-6">
-                                <AthletesTable data={formattedAthletes} />
-                            </CardContent>
-                        </Card>
-                    </TabsContent>
+                        <TabsContent value="all" className="mt-0">
+                            <Card>
+                                <CardContent className="p-0 sm:p-6">
+                                    <AthletesTable data={formattedAthletes} />
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
 
-                    <TabsContent value="team" className="mt-0">
-                        <Card className="border-primary/20 bg-primary/5">
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2">
-                                    <Trophy className="h-5 w-5 text-yellow-500" />
-                                    Equipo de Competición
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="p-0 sm:p-6">
-                                <AthletesTable data={formattedAthletes.filter(a => a.isCompetitor)} />
-                            </CardContent>
-                        </Card>
-                    </TabsContent>
-                </Tabs>
-            </Card>
+                        <TabsContent value="team" className="mt-0">
+                            <Card className="border-primary/20 bg-primary/5">
+                                <CardHeader>
+                                    <CardTitle className="flex items-center gap-2">
+                                        <Trophy className="h-5 w-5 text-yellow-500" />
+                                        Equipo de Competición
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="p-0 sm:p-6">
+                                    <AthletesTable data={formattedAthletes.filter(a => a.isCompetitor)} />
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
+                    </Tabs>
+                </Card>
+            )}
 
             {/* Mobile Cards */}
             <div className="md:hidden space-y-3">
@@ -154,11 +168,13 @@ export default async function AthletesPage({ searchParams }: Props) {
                     <AthleteCard key={athlete.id} athlete={athlete} />
                 ))}
                 {athleteCards.length === 0 && (
-                    <Card>
-                        <CardContent className="py-8 text-center text-muted-foreground">
-                            No hay atletas registrados
-                        </CardContent>
-                    </Card>
+                    <EmptyState
+                        icon={User}
+                        title="No hay atletas registrados"
+                        description="Comienza añadiendo los miembros de tu gimnasio."
+                        actionLabel="Nuevo Atleta"
+                        actionHref="/atletas/nuevo"
+                    />
                 )}
             </div>
         </div>

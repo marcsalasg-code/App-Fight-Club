@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, Clock, User, Trash2, Plus, QrCode, CalendarDays, BarChart3, Edit, X, Users, Search } from "lucide-react";
+import { Loader2, Clock, User, Trash2, QrCode, CalendarDays, BarChart3, Edit, Users, Search } from "lucide-react";
 import { getClassDetails, cancelClass, addManualAttendance, getActiveAthletes, removeAttendance } from "@/app/actions/class-details";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
