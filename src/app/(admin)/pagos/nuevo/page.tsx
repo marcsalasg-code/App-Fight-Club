@@ -5,24 +5,36 @@ import { Loader2 } from "lucide-react";
 
 export const dynamic = 'force-dynamic';
 
-async function getData() {
-    const [athletes, memberships] = await Promise.all([
-        prisma.athlete.findMany({
-            where: { status: "ACTIVE" },
-            orderBy: { firstName: "asc" },
+async function getData(athleteId?: string) {
+    const membershipPromise = prisma.membership.findMany({
+        where: { active: true },
+        orderBy: { price: "asc" },
+    });
+
+    const athletePromise = athleteId
+        ? prisma.athlete.findUnique({
+            where: { id: athleteId },
             select: { id: true, firstName: true, lastName: true },
-        }),
-        prisma.membership.findMany({
-            where: { active: true },
-            orderBy: { price: "asc" },
-        }),
+        })
+        : Promise.resolve(null);
+
+    const [memberships, athlete] = await Promise.all([
+        membershipPromise,
+        athletePromise
     ]);
 
-    return { athletes, memberships };
+    return { memberships, athlete };
 }
 
-export default async function NewPaymentPage() {
-    const { athletes, memberships } = await getData();
+type Props = {
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}
+
+export default async function NewPaymentPage({ searchParams }: Props) {
+    const params = await searchParams;
+    const athleteId = typeof params.athleteId === 'string' ? params.athleteId : undefined;
+
+    const { memberships, athlete } = await getData(athleteId);
 
     return (
         <Suspense
@@ -32,7 +44,10 @@ export default async function NewPaymentPage() {
                 </div>
             }
         >
-            <PaymentForm athletes={athletes} memberships={memberships} />
+            <PaymentForm
+                memberships={memberships}
+                initialAthlete={athlete}
+            />
         </Suspense>
     );
 }

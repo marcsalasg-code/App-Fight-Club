@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import { ReceiptScanner } from "./receipt-scanner";
 import { ArrowLeft, Loader2, ScanLine } from "lucide-react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { AthleteSearchPopover } from "@/components/athletes/athlete-search";
 
 type Athlete = {
     id: string;
@@ -35,14 +36,16 @@ type Membership = {
 };
 
 type Props = {
-    athletes: Athlete[];
     memberships: Membership[];
+    initialAthlete?: Athlete | null;
 };
 
-export function PaymentForm({ athletes, memberships }: Props) {
+export function PaymentForm({ memberships, initialAthlete }: Props) {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const preSelectedAthleteId = searchParams.get("athleteId");
+
+    // State for the selected athlete (dynamic search)
+    const [selectedAthlete, setSelectedAthlete] = useState<Athlete | null>(initialAthlete || null);
 
     const [loading, setLoading] = useState(false);
     const [selectedMembership, setSelectedMembership] = useState<Membership | null>(
@@ -72,6 +75,11 @@ export function PaymentForm({ athletes, memberships }: Props) {
     };
 
     async function handleSubmit(formData: FormData) {
+        if (!selectedAthlete) {
+            toast.error("Debes seleccionar un atleta");
+            return;
+        }
+
         setLoading(true);
 
         const result = await registerPayment({
@@ -130,20 +138,35 @@ export function PaymentForm({ athletes, memberships }: Props) {
                             <CardTitle>Información del Pago</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
+                            {/* Athlete Selection (Dynamic) */}
                             <div className="space-y-2">
-                                <Label htmlFor="athleteId">Atleta *</Label>
-                                <Select name="athleteId" required defaultValue={preSelectedAthleteId || undefined}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Seleccionar atleta" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {athletes.map((athlete) => (
-                                            <SelectItem key={athlete.id} value={athlete.id}>
-                                                {athlete.firstName} {athlete.lastName}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                                <Label>Atleta *</Label>
+                                <input type="hidden" name="athleteId" value={selectedAthlete?.id || ""} />
+
+                                {selectedAthlete ? (
+                                    <div className="flex items-center justify-between p-3 border rounded-md bg-muted/50">
+                                        <div className="flex flex-col">
+                                            <span className="font-medium">{selectedAthlete.firstName} {selectedAthlete.lastName}</span>
+                                            <span className="text-xs text-muted-foreground">ID: ...{selectedAthlete.id.slice(-4)}</span>
+                                        </div>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => setSelectedAthlete(null)}
+                                            type="button"
+                                        >
+                                            Cambiar
+                                        </Button>
+                                    </div>
+                                ) : (
+                                    <AthleteSearchPopover
+                                        onSelect={(a) => setSelectedAthlete({
+                                            id: a.id,
+                                            firstName: a.fullName.split(' ')[0],
+                                            lastName: a.fullName.split(' ').slice(1).join(' ')
+                                        })}
+                                    />
+                                )}
                             </div>
 
                             <div className="space-y-2">
