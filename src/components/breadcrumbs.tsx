@@ -60,6 +60,32 @@ export function Breadcrumbs() {
                 <Home className="h-4 w-4" aria-hidden="true" />
             </Link>
 
+            <button
+                onClick={() => window.dispatchEvent(new CustomEvent("open-command-palette"))}
+                className="flex items-center gap-1 hover:text-foreground transition-colors ml-2 mr-1"
+                aria-label="Buscar (Cmd+K)"
+                title="Buscar (Cmd+K)"
+            >
+                <div className="bg-muted hover:bg-muted/80 p-1 rounded-md">
+                    {/* Search icon from Lucide, make sure it's imported if not already, or just import it now */}
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="h-3.5 w-3.5"
+                    >
+                        <circle cx="11" cy="11" r="8" />
+                        <path d="m21 21-4.3-4.3" />
+                    </svg>
+                </div>
+            </button>
+
             {breadcrumbs.map((crumb) => (
                 <div key={crumb.href} className="flex items-center gap-1">
                     <ChevronRight className="h-4 w-4" aria-hidden="true" />

@@ -166,3 +166,42 @@ export async function deleteAthletes(ids: string[]) {
         return { success: false, error: "Error al eliminar los atletas" };
     }
 }
+
+export async function searchAthletes(query: string) {
+    if (!query || query.length < 2) {
+        return [];
+    }
+
+    try {
+        const athletes = await prisma.athlete.findMany({
+            where: {
+                OR: [
+                    { firstName: { contains: query, mode: "insensitive" } },
+                    { lastName: { contains: query, mode: "insensitive" } },
+                    { email: { contains: query, mode: "insensitive" } },
+                    { phone: { contains: query, mode: "insensitive" } },
+                    { pin: { contains: query } },
+                ],
+                status: "ACTIVE",
+            },
+            take: 10,
+            select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                email: true,
+                status: true,
+                tags: { select: { label: true, color: true } },
+            },
+        });
+
+        return athletes.map(a => ({
+            ...a,
+            fullName: `${a.firstName} ${a.lastName}`,
+            initials: `${a.firstName[0]}${a.lastName[0]}`.toUpperCase()
+        }));
+    } catch (error) {
+        console.error("Error searching athletes:", error);
+        return [];
+    }
+}

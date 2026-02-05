@@ -4,6 +4,9 @@ import { QrGenerator } from "@/components/checkin/qr-generator";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { ManualCheckIn } from "@/components/checkin/manual-checkin";
+
+import { AttendanceList } from "@/components/checkin/attendance-list";
 
 export const dynamic = 'force-dynamic';
 
@@ -22,6 +25,28 @@ export default async function ClassCheckInPage({ params }: PageProps) {
         notFound();
     }
 
+    // Get today's attendance
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const nextDay = new Date(today);
+    nextDay.setDate(nextDay.getDate() + 1);
+
+    const attendances = await prisma.attendance.findMany({
+        where: {
+            classId: id,
+            date: {
+                gte: today,
+                lt: nextDay,
+            },
+        },
+        include: {
+            athlete: true,
+        },
+        orderBy: {
+            createdAt: 'desc',
+        },
+    });
+
     return (
         <div className="container py-8 space-y-8">
             <div className="flex items-center gap-4">
@@ -36,8 +61,20 @@ export default async function ClassCheckInPage({ params }: PageProps) {
                 </div>
             </div>
 
-            <div className="flex justify-center items-center min-h-[50vh]">
-                <QrGenerator classId={gymClass.id} className={gymClass.name} />
+            <div className="grid lg:grid-cols-2 gap-12 items-start">
+                {/* Left: Check-in Actions */}
+                <div className="flex flex-col items-center gap-8 min-h-[50vh]">
+                    <QrGenerator classId={gymClass.id} className={gymClass.name} />
+
+                    <div className="w-full max-w-sm border-t pt-8">
+                        <ManualCheckIn classId={gymClass.id} />
+                    </div>
+                </div>
+
+                {/* Right: Live List */}
+                <div className="bg-card border rounded-xl p-6 shadow-sm h-full max-h-[600px] overflow-hidden flex flex-col">
+                    <AttendanceList attendances={attendances} />
+                </div>
             </div>
         </div>
     );

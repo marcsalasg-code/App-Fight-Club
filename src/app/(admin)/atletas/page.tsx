@@ -9,6 +9,7 @@ import { ExportButton } from "@/components/ui/export-button";
 import { AthletesTable } from "./components/athletes-table";
 import { AthleteColumn } from "./components/columns";
 import { AthleteCard } from "@/components/athlete-card";
+import { PageHeader } from "@/components/ui/page-header";
 
 export const dynamic = 'force-dynamic';
 
@@ -76,35 +77,34 @@ export default async function AthletesPage({ searchParams }: Props) {
 
     return (
         <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold">Atletas</h1>
-                    <p className="text-muted-foreground">
-                        Gestiona los miembros del gimnasio
-                    </p>
-                </div>
-                <div className="flex gap-2">
-                    <ExportButton
-                        data={athletes}
-                        columns={[
-                            { header: "Nombre", key: "firstName" },
-                            { header: "Apellido", key: "lastName" },
-                            { header: "Email", key: "email" },
-                            { header: "Teléfono", key: "phone" },
-                            { header: "Estado", key: "status" },
-                            { header: "Es Competidor", key: "isCompetitor" },
-                        ]}
-                        fileName="reporte_atletas"
-                        title="Listado de Atletas"
-                    />
-                    <Link href="/atletas/nuevo">
-                        <Button className="gap-2">
-                            <Plus className="h-4 w-4" />
-                            <span className="hidden sm:inline">Nuevo Atleta</span>
-                        </Button>
-                    </Link>
-                </div>
-            </div>
+
+            <PageHeader
+                title="Atletas"
+                subtitle="Gestiona los miembros del gimnasio"
+                action={
+                    <div className="flex gap-2">
+                        <ExportButton
+                            data={athletes}
+                            columns={[
+                                { header: "Nombre", key: "firstName" },
+                                { header: "Apellido", key: "lastName" },
+                                { header: "Email", key: "email" },
+                                { header: "Teléfono", key: "phone" },
+                                { header: "Estado", key: "status" },
+                                { header: "Es Competidor", key: "isCompetitor" },
+                            ]}
+                            fileName="reporte_atletas"
+                            title="Listado de Atletas"
+                        />
+                        <Link href="/atletas/nuevo">
+                            <Button className="gap-2">
+                                <Plus className="h-4 w-4" />
+                                <span className="hidden sm:inline">Nuevo Atleta</span>
+                            </Button>
+                        </Link>
+                    </div>
+                }
+            />
 
             {/* Desktop Table with Tabs */}
             <Card className="hidden md:block border-none shadow-none bg-transparent">

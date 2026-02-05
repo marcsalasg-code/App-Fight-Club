@@ -1,39 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { format, addMonths, subMonths, addWeeks, subWeeks, addDays, subDays, addYears, subYears } from "date-fns";
-import { es } from "date-fns/locale";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { addMonths, subMonths, addWeeks, subWeeks, addDays, subDays, addYears, subYears } from "date-fns";
 import { WeekView } from "./week-view";
 import { MonthView } from "./month-view";
 import { DayView } from "./day-view";
 import { YearView } from "./year-view";
 import { NewClassModal } from "./new-class-modal";
-import { cn } from "@/lib/utils";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
-type ViewMode = 'year' | 'month' | 'week' | 'day';
-
-
-
-type Class = {
-    id: string;
-    name: string;
-    type: string;
-    dayOfWeek: string;
-    startTime: string;
-    endTime: string;
-    color: string;
-    _count: { attendances: number };
-};
-
-type CalendarEvent = {
-    id: string;
-    name: string;
-    date: Date;
-    status: string;
-};
+import { CalendarHeader } from "./calendar-header";
+import { Button } from "@/components/ui/button";
+import { Class, CalendarEvent, ViewMode } from "./types";
 
 type Props = {
     classes: Class[];
@@ -82,33 +58,15 @@ export function CalendarView({ classes, events }: Props) {
 
     return (
         <div className="space-y-4">
-            {/* Toolbar */}
-            <div className="flex items-center justify-between pb-4 border-b">
-                <div className="flex items-center gap-2">
-                    <Button variant="outline" size="icon" onClick={() => navigate('prev')}>
-                        <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    <Button variant="outline" onClick={handleToday}>Hoy</Button>
-                    <Button variant="outline" size="icon" onClick={() => navigate('next')}>
-                        <ChevronRight className="h-4 w-4" />
-                    </Button>
-                    <h2 className="text-xl font-semibold ml-2 capitalize">
-                        {format(date, view === 'year' ? 'yyyy' : view === 'day' ? 'PPPP' : 'MMMM yyyy', { locale: es })}
-                    </h2>
-                </div>
-
-                <div className="flex items-center gap-2">
-                    <Select value={view} onValueChange={(v) => handleViewChange(v as ViewMode)}>
-                        <SelectTrigger className="w-[140px]">
-                            <SelectValue placeholder="Vista" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="year">Año</SelectItem>
-                            <SelectItem value="month">Mes</SelectItem>
-                            <SelectItem value="week">Semana</SelectItem>
-                            <SelectItem value="day">Día</SelectItem>
-                        </SelectContent>
-                    </Select>
+            <div className="flex flex-col gap-4">
+                <CalendarHeader
+                    date={date}
+                    view={view}
+                    onViewChange={handleViewChange}
+                    onNavigate={navigate}
+                    onToday={handleToday}
+                />
+                <div className="flex justify-end">
                     <NewClassModal />
                 </div>
             </div>
@@ -117,7 +75,7 @@ export function CalendarView({ classes, events }: Props) {
             <div className="flex-1 min-h-[600px] bg-background rounded-lg border shadow-sm isolate">
                 {view === 'week' && <WeekView classes={classes} events={events} currentDate={date} />}
                 {view === 'month' && <MonthView classes={classes} events={events} currentDate={date} />}
-                {view === 'year' && <YearView currentDate={date} onMonthSelect={(d) => { setDate(d); setView('month'); }} />}
+                {view === 'year' && <YearView classes={classes} events={events} currentDate={date} onMonthSelect={(d) => { setDate(d); setView('month'); }} />}
                 {view === 'day' && <DayView classes={classes} events={events} currentDate={date} />}
             </div>
         </div>

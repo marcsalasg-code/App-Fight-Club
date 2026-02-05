@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Clock, Users, Calendar, QrCode } from "lucide-react";
+import { PageHeader } from "@/components/ui/page-header";
 
 export const dynamic = 'force-dynamic';
 
@@ -73,20 +74,19 @@ export default async function ClassesPage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold">Clases</h1>
-                    <p className="text-muted-foreground">
-                        Gestiona el horario de clases
-                    </p>
-                </div>
-                <Link href="/clases/nueva">
-                    <Button className="gap-2">
-                        <Plus className="h-4 w-4" />
-                        Nueva Clase
-                    </Button>
-                </Link>
-            </div>
+
+            <PageHeader
+                title="Clases"
+                subtitle="Gestiona el horario de clases"
+                action={
+                    <Link href="/clases/nueva">
+                        <Button className="gap-2">
+                            <Plus className="h-4 w-4" />
+                            <span className="hidden sm:inline">Nueva Clase</span>
+                        </Button>
+                    </Link>
+                }
+            />
 
             {classes.length === 0 ? (
                 <Card>

@@ -40,6 +40,13 @@ export function CommandPalette() {
     const [isPending, startTransition] = useTransition();
     const router = useRouter();
 
+    // Listen for custom open event
+    useEffect(() => {
+        const handleOpen = () => setOpen(true);
+        window.addEventListener("open-command-palette", handleOpen);
+        return () => window.removeEventListener("open-command-palette", handleOpen);
+    }, []);
+
     const staticCommands: CommandItem[] = [
         // Navigation
         { id: "nav-dashboard", name: "Ir al Dashboard", icon: LayoutDashboard, action: () => router.push("/"), category: "Navegación" },
