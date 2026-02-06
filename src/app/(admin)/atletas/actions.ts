@@ -167,24 +167,26 @@ export async function deleteAthletes(ids: string[]) {
     }
 }
 
-export async function searchAthletes(query: string) {
-    if (!query || query.length < 2) {
-        return [];
-    }
-
+export async function searchAthletes(query: string = "") {
     try {
-        const athletes = await prisma.athlete.findMany({
-            where: {
+        // Build where clause based on query length
+        const whereClause = query && query.length >= 2
+            ? {
                 OR: [
-                    { firstName: { contains: query, mode: "insensitive" } },
-                    { lastName: { contains: query, mode: "insensitive" } },
-                    { email: { contains: query, mode: "insensitive" } },
-                    { phone: { contains: query, mode: "insensitive" } },
+                    { firstName: { contains: query, mode: "insensitive" as const } },
+                    { lastName: { contains: query, mode: "insensitive" as const } },
+                    { email: { contains: query, mode: "insensitive" as const } },
+                    { phone: { contains: query, mode: "insensitive" as const } },
                     { pin: { contains: query } },
                 ],
                 status: "ACTIVE",
-            },
+            }
+            : { status: "ACTIVE" }; // No filter, return recent active athletes
+
+        const athletes = await prisma.athlete.findMany({
+            where: whereClause,
             take: 10,
+            orderBy: { createdAt: "desc" }, // Most recent first
             select: {
                 id: true,
                 firstName: true,

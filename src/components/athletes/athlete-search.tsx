@@ -1,22 +1,16 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
-import { Check, ChevronsUpDown, Loader2, Phone, Search, Shield, User } from "lucide-react";
+import { useEffect, useState, useCallback } from "react";
+import { Loader2, Phone, Search, Shield, X, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList,
-} from "@/components/ui/command";
+import { Input } from "@/components/ui/input";
 import {
     Popover,
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { searchAthletes } from "@/app/(admin)/atletas/actions";
@@ -34,130 +28,66 @@ type AthleteResult = {
     maskedPin?: string;
 };
 
-interface AthleteSearchProps {
+interface AthleteSearchPopoverProps {
     onSelect: (athlete: AthleteResult) => void;
-    className?: string;
     placeholder?: string;
+    className?: string;
 }
 
-export function AthleteSearch({ onSelect, className, placeholder = "Buscar atleta..." }: AthleteSearchProps) {
+export function AthleteSearchPopover({
+    onSelect,
+    placeholder = "Buscar atleta...",
+    className
+}: AthleteSearchPopoverProps) {
+    const [open, setOpen] = useState(false);
     const [query, setQuery] = useState("");
     const [loading, setLoading] = useState(false);
     const [athletes, setAthletes] = useState<AthleteResult[]>([]);
+    const [hasSearched, setHasSearched] = useState(false);
 
-    // Use the custom hook
     const debouncedQuery = useDebounce(query, 300);
 
-    useEffect(() => {
-        async function fetchAthletes() {
-            if (debouncedQuery.length < 2) {
-                setAthletes([]);
-                return;
-            }
-
-            setLoading(true);
-            try {
-                const results = await searchAthletes(debouncedQuery);
-                // Cast results to match AthleteResult if strictly typed, generally compatible
-                setAthletes(results as unknown as AthleteResult[]);
-            } catch (error) {
-                console.error(error);
-            } finally {
-                setLoading(false);
-            }
+    // Fetch athletes when popover opens or query changes
+    const fetchAthletes = useCallback(async (searchQuery: string) => {
+        setLoading(true);
+        try {
+            const results = await searchAthletes(searchQuery);
+            setAthletes(results as AthleteResult[]);
+            setHasSearched(true);
+        } catch (error) {
+            console.error("Error fetching athletes:", error);
+            setAthletes([]);
+        } finally {
+            setLoading(false);
         }
+    }, []);
 
-        fetchAthletes();
-    }, [debouncedQuery]);
+    // Fetch on open (recent athletes)
+    useEffect(() => {
+        if (open && !hasSearched) {
+            fetchAthletes("");
+        }
+    }, [open, hasSearched, fetchAthletes]);
 
-    return (
-        <div className={cn("relative w-full", className)}>
-            <Command shouldFilter={false} className="rounded-lg border shadow-md overflow-hidden">
-                <CommandInput
-                    placeholder={placeholder}
-                    value={query}
-                    onValueChange={setQuery}
-                />
-                <CommandList className="max-h-[300px]">
-                    {loading && (
-                        <div className="flex items-center justify-center p-4 text-sm text-muted-foreground">
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Buscando...
-                        </div>
-                    )}
+    // Fetch on query change
+    useEffect(() => {
+        if (open && debouncedQuery !== undefined) {
+            fetchAthletes(debouncedQuery);
+        }
+    }, [debouncedQuery, open, fetchAthletes]);
 
-                    {!loading && athletes.length === 0 && query.length >= 2 && (
-                        <CommandEmpty className="p-4 text-center text-sm text-muted-foreground">
-                            No se encontraron atletas.
-                        </CommandEmpty>
-                    )}
+    // Reset when closed
+    useEffect(() => {
+        if (!open) {
+            setQuery("");
+            setHasSearched(false);
+        }
+    }, [open]);
 
-                    {!loading && athletes.length > 0 && (
-                        <CommandGroup heading="Resultados">
-                            {athletes.map((athlete) => (
-                                <CommandItem
-                                    key={athlete.id}
-                                    value={athlete.id} // Use ID for uniqueness
-                                    onSelect={() => {
-                                        onSelect(athlete);
-                                        setQuery("");
-                                    }}
-                                    className="cursor-pointer aria-selected:bg-accent"
-                                    onMouseDown={(e) => e.preventDefault()} // Prevent blur focus issues
-                                >
-                                    <div className="flex items-center gap-3 w-full">
-                                        <Avatar className="h-9 w-9 border">
-                                            <AvatarFallback className={cn(
-                                                "font-semibold",
-                                                athlete.status === "ACTIVE" ? "text-primary bg-primary/10" : "text-muted-foreground"
-                                            )}>
-                                                {athlete.initials}
-                                            </AvatarFallback>
-                                        </Avatar>
-
-                                        <div className="flex flex-col flex-1 min-w-0">
-                                            <div className="flex items-center gap-2">
-                                                <span className="font-medium truncate">{athlete.fullName}</span>
-                                                {athlete.status === "INACTIVE" && (
-                                                    <Badge variant="secondary" className="h-5 px-1.5 text-[10px]">Inactivo</Badge>
-                                                )}
-                                                {athlete.status === "SUSPENDED" && (
-                                                    <Badge variant="destructive" className="h-5 px-1.5 text-[10px]">Susp</Badge>
-                                                )}
-                                            </div>
-
-                                            <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
-                                                {athlete.maskedPin && (
-                                                    <span className="flex items-center gap-1 bg-muted px-1.5 rounded-sm" title="PIN">
-                                                        <Shield className="h-3 w-3" />
-                                                        {athlete.maskedPin}
-                                                    </span>
-                                                )}
-                                                {athlete.phone && (
-                                                    <span className="flex items-center gap-1" title="Teléfono">
-                                                        <Phone className="h-3 w-3" />
-                                                        ...{athlete.phone.slice(-4)}
-                                                    </span>
-                                                )}
-                                                {!athlete.maskedPin && !athlete.phone && (
-                                                    <span>{athlete.email}</span>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </CommandItem>
-                            ))}
-                        </CommandGroup>
-                    )}
-                </CommandList>
-            </Command>
-        </div>
-    );
-}
-
-// Separate component for Popover integration
-export function AthleteSearchPopover({ onSelect }: { onSelect: (a: AthleteResult) => void }) {
-    const [open, setOpen] = useState(false);
+    const handleSelect = (athlete: AthleteResult) => {
+        onSelect(athlete);
+        setOpen(false);
+    };
 
     return (
         <Popover open={open} onOpenChange={setOpen}>
@@ -166,23 +96,124 @@ export function AthleteSearchPopover({ onSelect }: { onSelect: (a: AthleteResult
                     variant="outline"
                     role="combobox"
                     aria-expanded={open}
-                    className="w-full justify-between h-auto py-3" // Taller button for better touch area
+                    className={cn(
+                        "w-full justify-start h-auto py-3 px-4 font-normal",
+                        className
+                    )}
                 >
-                    <span className="flex items-center gap-2 text-muted-foreground">
-                        <Search className="h-4 w-4" />
-                        Buscar atleta...
-                    </span>
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    <Search className="mr-2 h-4 w-4 text-muted-foreground shrink-0" />
+                    <span className="text-muted-foreground">{placeholder}</span>
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[320px] p-0" align="start">
-                <AthleteSearch
-                    onSelect={(a) => {
-                        onSelect(a);
-                        setOpen(false);
-                    }}
-                />
+            <PopoverContent
+                className="w-[var(--radix-popover-trigger-width)] p-0"
+                align="start"
+                sideOffset={4}
+            >
+                {/* Search Input */}
+                <div className="flex items-center border-b px-3 py-2">
+                    <Search className="mr-2 h-4 w-4 shrink-0 text-muted-foreground" />
+                    <Input
+                        placeholder="Escribe para buscar..."
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        className="border-0 p-0 h-8 focus-visible:ring-0 focus-visible:ring-offset-0"
+                        autoFocus
+                    />
+                    {query && (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 shrink-0"
+                            onClick={() => setQuery("")}
+                        >
+                            <X className="h-3 w-3" />
+                        </Button>
+                    )}
+                </div>
+
+                {/* Results */}
+                <ScrollArea className="max-h-[280px]">
+                    {loading ? (
+                        <div className="flex items-center justify-center py-6 text-sm text-muted-foreground">
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Buscando...
+                        </div>
+                    ) : athletes.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-6 text-sm text-muted-foreground">
+                            <Users className="h-8 w-8 mb-2 opacity-50" />
+                            {query.length >= 2
+                                ? "No se encontraron atletas"
+                                : "No hay atletas registrados"}
+                        </div>
+                    ) : (
+                        <div className="p-1">
+                            {!query && athletes.length > 0 && (
+                                <p className="px-2 py-1.5 text-xs font-medium text-muted-foreground">
+                                    Recientes
+                                </p>
+                            )}
+                            {athletes.map((athlete) => (
+                                <button
+                                    key={athlete.id}
+                                    type="button"
+                                    onClick={() => handleSelect(athlete)}
+                                    className={cn(
+                                        "w-full flex items-center gap-3 px-2 py-2 rounded-md text-left",
+                                        "hover:bg-accent focus:bg-accent focus:outline-none",
+                                        "transition-colors cursor-pointer"
+                                    )}
+                                >
+                                    <Avatar className="h-9 w-9 border shrink-0">
+                                        <AvatarFallback className={cn(
+                                            "font-semibold text-sm",
+                                            athlete.status === "ACTIVE"
+                                                ? "text-primary bg-primary/10"
+                                                : "text-muted-foreground"
+                                        )}>
+                                            {athlete.initials}
+                                        </AvatarFallback>
+                                    </Avatar>
+
+                                    <div className="flex flex-col flex-1 min-w-0">
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-medium truncate">
+                                                {athlete.fullName}
+                                            </span>
+                                            {athlete.status === "INACTIVE" && (
+                                                <Badge variant="secondary" className="h-5 px-1.5 text-[10px] shrink-0">
+                                                    Inactivo
+                                                </Badge>
+                                            )}
+                                        </div>
+
+                                        <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
+                                            {athlete.maskedPin && (
+                                                <span className="flex items-center gap-1 bg-muted px-1.5 rounded-sm">
+                                                    <Shield className="h-3 w-3" />
+                                                    {athlete.maskedPin}
+                                                </span>
+                                            )}
+                                            {athlete.phone && (
+                                                <span className="flex items-center gap-1">
+                                                    <Phone className="h-3 w-3" />
+                                                    ...{athlete.phone.slice(-4)}
+                                                </span>
+                                            )}
+                                            {!athlete.maskedPin && !athlete.phone && athlete.email && (
+                                                <span className="truncate">{athlete.email}</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </ScrollArea>
             </PopoverContent>
         </Popover>
     );
 }
+
+// Keep the old AthleteSearch export for backwards compatibility if needed elsewhere
+export { AthleteSearchPopover as AthleteSearch };
