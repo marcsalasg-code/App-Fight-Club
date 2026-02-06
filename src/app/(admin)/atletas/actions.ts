@@ -191,6 +191,8 @@ export async function searchAthletes(query: string) {
                 lastName: true,
                 email: true,
                 status: true,
+                phone: true,
+                pin: true,
                 tags: { select: { label: true, color: true } },
             },
         });
@@ -198,7 +200,8 @@ export async function searchAthletes(query: string) {
         return athletes.map(a => ({
             ...a,
             fullName: `${a.firstName} ${a.lastName}`,
-            initials: `${a.firstName[0]}${a.lastName[0]}`.toUpperCase()
+            initials: `${a.firstName[0]}${a.lastName[0]}`.toUpperCase(),
+            maskedPin: a.pin ? `***${a.pin.slice(-3)}` : undefined
         }));
     } catch (error) {
         console.error("Error searching athletes:", error);

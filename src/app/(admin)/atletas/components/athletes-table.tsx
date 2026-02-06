@@ -25,9 +25,8 @@ import {
 } from "@/components/ui/table"
 import { DataTablePagination } from "@/components/ui/data-table/data-table-pagination"
 import { DataTableViewOptions } from "@/components/ui/data-table/data-table-view-options"
-import { Input } from "@/components/ui/input"
+import { SearchInput } from "@/components/ui/search-input"
 import { Button } from "@/components/ui/button"
-import { Cross2Icon } from "@radix-ui/react-icons"
 import { Trash2 } from "lucide-react"
 
 import { AthleteColumn, columns } from "./columns"
@@ -98,25 +97,10 @@ function CustomDataTable({ data, columns }: { data: AthleteColumn[], columns: an
         <div className="space-y-4">
             <div className="flex items-center justify-between">
                 <div className="flex flex-1 items-center space-x-2">
-                    <Input
-                        placeholder="Filtrar por nombre..."
-                        value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
-                        onChange={(event) =>
-                            table.getColumn("name")?.setFilterValue(event.target.value)
-                        }
-                        className="h-8 w-[150px] lg:w-[250px]"
+                    <SearchInput
+                        placeholder="Buscar por nombre, email o teléfono..."
+                        className="h-8 w-[250px] lg:w-[350px]"
                     />
-                    {table.getState().columnFilters.length > 0 && (
-                        <Button
-                            variant="ghost"
-                            onClick={() => table.resetColumnFilters()}
-                            className="h-8 px-2 lg:px-3"
-                        >
-                            Resetear
-                            <Cross2Icon className="ml-2 h-4 w-4" />
-                        </Button>
-                    )}
-
                     {/* Bulk Actions */}
                     {selectedIds.length > 0 && (
                         <Button

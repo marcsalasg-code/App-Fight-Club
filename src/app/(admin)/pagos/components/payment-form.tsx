@@ -162,8 +162,8 @@ export function PaymentForm({ memberships, initialAthlete }: Props) {
                                     <AthleteSearchPopover
                                         onSelect={(a) => setSelectedAthlete({
                                             id: a.id,
-                                            firstName: a.fullName.split(' ')[0],
-                                            lastName: a.fullName.split(' ').slice(1).join(' ')
+                                            firstName: a.firstName,
+                                            lastName: a.lastName
                                         })}
                                     />
                                 )}
