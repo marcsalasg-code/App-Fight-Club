@@ -187,11 +187,14 @@ model Payment {
   subscriptionId String?
   amount         Float
   paymentMethod  String // CASH, CARD, TRANSFER
+  status         String    @default("PAID") // PAID, VOID
   paymentDate    DateTime  @default(now())
   periodStart    DateTime?
   periodEnd      DateTime?
   receiptNumber  String?
   notes          String?
+  voidReason     String?   // Reason for voiding
+  voidedAt       DateTime? // When it was voided
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
@@ -200,6 +203,7 @@ model Payment {
 
   @@index([paymentDate])
   @@index([athleteId, paymentDate])
+  @@index([status])
 }
 
 // ==========================================================

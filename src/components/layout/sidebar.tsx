@@ -10,11 +10,9 @@ import {
     Trophy,
     LayoutDashboard,
     Menu,
-    X,
     Settings as SettingsIcon,
     FileText,
 } from "lucide-react";
-import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
@@ -38,59 +36,16 @@ interface SidebarProps {
 
 export function Sidebar({ isCollapsed = false, toggleCollapse }: SidebarProps) {
     const pathname = usePathname();
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-    // Lock body scroll when mobile menu is open
-    useEffect(() => {
-        if (mobileMenuOpen) {
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = '';
-        }
-        return () => {
-            document.body.style.overflow = '';
-        };
-    }, [mobileMenuOpen]);
-
-    const renderNavItem = (item: typeof mainNavigation[0]) => {
-        const isActive = pathname === item.href ||
-            (item.href !== "/" && pathname.startsWith(item.href));
-        const Icon = item.icon;
-
-        return (
-            <Link
-                key={item.name}
-                href={item.href}
-                onClick={() => setMobileMenuOpen(false)}
-                className={cn(
-                    "group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
-                    isActive
-                        ? "bg-primary text-primary-foreground shadow-md"
-                        : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                )}
-                aria-label={item.description}
-                aria-current={isActive ? "page" : undefined}
-            >
-                {/* Active indicator pill */}
-                {isActive && (
-                    <span
-                        className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary-foreground rounded-r-full"
-                        aria-hidden="true"
-                    />
-                )}
-
-                <Icon className="h-5 w-5 shrink-0" aria-hidden="true" />
-                <span>{item.name}</span>
-
-                {/* Hover tooltip for collapsed state (future) */}
-            </Link>
-        );
-    };
-
-    const navContent = (
-        <>
-            {/* Logo/Brand */}
-            <div className="flex items-center gap-3 px-3 py-4 border-b border-sidebar-border">
+    return (
+        <aside
+            className={cn(
+                "hidden md:flex md:flex-col md:fixed md:top-0 md:left-0 md:h-screen md:bg-sidebar md:border-r md:border-sidebar-border transition-all duration-300 ease-in-out",
+                isCollapsed ? "md:w-20" : "md:w-64"
+            )}
+            aria-label="Menú lateral"
+        >
+            <div className="flex items-center gap-3 px-3 py-4 border-b border-sidebar-border h-16">
                 <div className="relative w-10 h-10 flex-shrink-0">
                     <Image
                         src="/logo.png"
@@ -100,211 +55,99 @@ export function Sidebar({ isCollapsed = false, toggleCollapse }: SidebarProps) {
                         priority
                     />
                 </div>
-                <div className="flex flex-col">
-                    <span className="font-bold text-sidebar-foreground">RC Fight Club</span>
-                    <span className="text-xs text-sidebar-foreground/60">Gym Manager</span>
-                </div>
+                {!isCollapsed && (
+                    <div className="flex flex-col whitespace-nowrap overflow-hidden transition-all duration-300">
+                        <span className="font-bold text-sidebar-foreground">RC Fight Club</span>
+                        <span className="text-xs text-sidebar-foreground/60">Gym Manager</span>
+                    </div>
+                )}
             </div>
 
             {/* Main Navigation */}
-            <nav className="flex-1 px-3 py-4 space-y-1" role="navigation" aria-label="Navegación principal">
+            <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto" role="navigation">
                 <div className="space-y-1">
-                    {mainNavigation.map(renderNavItem)}
+                    {mainNavigation.map((item) => {
+                        const isActive = pathname === item.href ||
+                            (item.href !== "/" && pathname.startsWith(item.href));
+                        const Icon = item.icon;
+
+                        return (
+                            <Link
+                                key={item.name}
+                                href={item.href}
+                                title={isCollapsed ? item.name : undefined}
+                                className={cn(
+                                    "group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                                    isActive
+                                        ? "bg-primary text-primary-foreground shadow-md"
+                                        : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                                    isCollapsed && "justify-center px-2"
+                                )}
+                            >
+                                <Icon className={cn("h-5 w-5 shrink-0", isCollapsed ? "h-6 w-6" : "")} />
+                                {!isCollapsed && <span>{item.name}</span>}
+                            </Link>
+                        )
+                    })}
                 </div>
 
-                {/* Separator */}
-                <div className="my-4 border-t border-sidebar-border" role="separator" />
+                <div className="my-4 border-t border-sidebar-border" />
 
-                {/* Secondary Navigation */}
                 <div className="space-y-1">
-                    <p className="px-3 text-xs font-semibold text-sidebar-foreground/50 uppercase tracking-wider mb-2">
-                        Otros
-                    </p>
-                    {secondaryNavigation.map(renderNavItem)}
+                    {!isCollapsed && (
+                        <p className="px-3 text-xs font-semibold text-sidebar-foreground/50 uppercase tracking-wider mb-2">
+                            Otros
+                        </p>
+                    )}
+                    {secondaryNavigation.map((item) => {
+                        const isActive = pathname === item.href || pathname.startsWith(item.href);
+                        const Icon = item.icon;
+                        return (
+                            <Link
+                                key={item.name}
+                                href={item.href}
+                                title={isCollapsed ? item.name : undefined}
+                                className={cn(
+                                    "group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                                    isActive
+                                        ? "bg-primary text-primary-foreground shadow-md"
+                                        : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                                    isCollapsed && "justify-center px-2"
+                                )}
+                            >
+                                <Icon className={cn("h-5 w-5 shrink-0", isCollapsed ? "h-6 w-6" : "")} />
+                                {!isCollapsed && <span>{item.name}</span>}
+                            </Link>
+                        )
+                    })}
                 </div>
             </nav>
 
-            {/* Footer */}
-            <div className="px-3 py-4 border-t border-sidebar-border">
-                <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-sidebar-accent/50">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
-                        <span className="text-white font-semibold text-sm">A</span>
-                    </div>
-                    <div className="flex flex-col">
-                        <span className="text-sm font-medium text-sidebar-foreground">Admin</span>
-                        <span className="text-xs text-sidebar-foreground/60">Administrador</span>
-                    </div>
-                </div>
-            </div>
-        </>
-    );
-
-    return (
-        <>
-            {/* Mobile Header */}
-            <header className="fixed top-0 left-0 right-0 z-40 flex items-center justify-between h-14 px-4 bg-background/95 backdrop-blur-lg border-b md:hidden">
-                <div className="flex items-center gap-2">
-                    <div className="relative w-8 h-8 flex-shrink-0">
-                        <Image
-                            src="/logo.png"
-                            alt="RC Fight Club"
-                            fill
-                            className="object-contain"
-                        />
-                    </div>
-                    <span className="font-semibold">RC Fight Club</span>
-                </div>
+            {/* Footer / Toggle */}
+            <div className="flex flex-col gap-2 p-3 border-t border-sidebar-border">
+                {/* Toggle Button */}
                 <Button
                     variant="ghost"
-                    size="icon"
-                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                    aria-label={mobileMenuOpen ? "Cerrar menú" : "Abrir menú"}
-                    aria-expanded={mobileMenuOpen}
-                    aria-controls="mobile-sidebar"
+                    size="sm"
+                    onClick={toggleCollapse}
+                    className={cn("w-full mb-2", isCollapsed ? "px-0" : "")}
+                    title={isCollapsed ? "Expandir" : "Colapsar"}
                 >
-                    {mobileMenuOpen ? (
-                        <X className="h-5 w-5" aria-hidden="true" />
-                    ) : (
-                        <Menu className="h-5 w-5" aria-hidden="true" />
-                    )}
+                    {isCollapsed ? <Menu className="h-4 w-4" /> : <div className="flex items-center gap-2 text-xs text-muted-foreground"><Menu className="h-3 w-3 rotate-90" /> Colapsar menú</div>}
                 </Button>
-            </header>
 
-            {/* Mobile Overlay */}
-            {mobileMenuOpen && (
-                <div
-                    className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden"
-                    onClick={() => setMobileMenuOpen(false)}
-                    aria-hidden="true"
-                />
-            )}
-
-            {/* Mobile Sidebar */}
-            <aside
-                id="mobile-sidebar"
-                className={cn(
-                    "fixed top-0 left-0 z-50 h-full w-72 bg-sidebar transform transition-transform duration-300 ease-in-out md:hidden",
-                    mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-                )}
-                aria-label="Menú lateral"
-            >
-                <div className="flex flex-col h-full">
-                    {navContent}
-                </div>
-            </aside>
-
-            {/* Desktop Sidebar */}
-            <aside
-                className={cn(
-                    "hidden md:flex md:flex-col md:fixed md:top-0 md:left-0 md:h-screen md:bg-sidebar md:border-r md:border-sidebar-border transition-all duration-300 ease-in-out",
-                    isCollapsed ? "md:w-20" : "md:w-64"
-                )}
-                aria-label="Menú lateral"
-            >
-                <div className="flex items-center gap-3 px-3 py-4 border-b border-sidebar-border h-16">
-                    <div className="relative w-10 h-10 flex-shrink-0">
-                        <Image
-                            src="/logo.png"
-                            alt="RC Fight Club"
-                            fill
-                            className="object-contain"
-                            priority
-                        />
-                    </div>
-                    {!isCollapsed && (
-                        <div className="flex flex-col whitespace-nowrap overflow-hidden transition-all duration-300">
-                            <span className="font-bold text-sidebar-foreground">RC Fight Club</span>
-                            <span className="text-xs text-sidebar-foreground/60">Gym Manager</span>
+                {!isCollapsed && (
+                    <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-sidebar-accent/50">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shrink-0">
+                            <span className="text-white font-semibold text-sm">A</span>
                         </div>
-                    )}
-                </div>
-
-                {/* Main Navigation */}
-                <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto" role="navigation">
-                    <div className="space-y-1">
-                        {mainNavigation.map((item) => {
-                            const isActive = pathname === item.href ||
-                                (item.href !== "/" && pathname.startsWith(item.href));
-                            const Icon = item.icon;
-
-                            return (
-                                <Link
-                                    key={item.name}
-                                    href={item.href}
-                                    title={isCollapsed ? item.name : undefined}
-                                    className={cn(
-                                        "group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
-                                        isActive
-                                            ? "bg-primary text-primary-foreground shadow-md"
-                                            : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                                        isCollapsed && "justify-center px-2"
-                                    )}
-                                >
-                                    <Icon className={cn("h-5 w-5 shrink-0", isCollapsed ? "h-6 w-6" : "")} />
-                                    {!isCollapsed && <span>{item.name}</span>}
-                                </Link>
-                            )
-                        })}
-                    </div>
-
-                    <div className="my-4 border-t border-sidebar-border" />
-
-                    <div className="space-y-1">
-                        {!isCollapsed && (
-                            <p className="px-3 text-xs font-semibold text-sidebar-foreground/50 uppercase tracking-wider mb-2">
-                                Otros
-                            </p>
-                        )}
-                        {secondaryNavigation.map((item) => {
-                            const isActive = pathname === item.href || pathname.startsWith(item.href);
-                            const Icon = item.icon;
-                            return (
-                                <Link
-                                    key={item.name}
-                                    href={item.href}
-                                    title={isCollapsed ? item.name : undefined}
-                                    className={cn(
-                                        "group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
-                                        isActive
-                                            ? "bg-primary text-primary-foreground shadow-md"
-                                            : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                                        isCollapsed && "justify-center px-2"
-                                    )}
-                                >
-                                    <Icon className={cn("h-5 w-5 shrink-0", isCollapsed ? "h-6 w-6" : "")} />
-                                    {!isCollapsed && <span>{item.name}</span>}
-                                </Link>
-                            )
-                        })}
-                    </div>
-                </nav>
-
-                {/* Footer / Toggle */}
-                <div className="flex flex-col gap-2 p-3 border-t border-sidebar-border">
-                    {/* Toggle Button */}
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={toggleCollapse}
-                        className={cn("w-full mb-2", isCollapsed ? "px-0" : "")}
-                        title={isCollapsed ? "Expandir" : "Colapsar"}
-                    >
-                        {isCollapsed ? <Menu className="h-4 w-4" /> : <div className="flex items-center gap-2 text-xs text-muted-foreground"><Menu className="h-3 w-3 rotate-90" /> Colapsar menú</div>}
-                    </Button>
-
-                    {!isCollapsed && (
-                        <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-sidebar-accent/50">
-                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shrink-0">
-                                <span className="text-white font-semibold text-sm">A</span>
-                            </div>
-                            <div className="flex flex-col overflow-hidden">
-                                <span className="text-sm font-medium text-sidebar-foreground truncate">Admin</span>
-                                <span className="text-xs text-sidebar-foreground/60 truncate">Administrador</span>
-                            </div>
+                        <div className="flex flex-col overflow-hidden">
+                            <span className="text-sm font-medium text-sidebar-foreground truncate">Admin</span>
+                            <span className="text-xs text-sidebar-foreground/60 truncate">Administrador</span>
                         </div>
-                    )}
-                </div>
-            </aside>
-        </>
+                    </div>
+                )}
+            </div>
+        </aside>
     );
 }

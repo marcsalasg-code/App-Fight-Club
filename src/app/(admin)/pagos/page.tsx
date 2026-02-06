@@ -15,6 +15,7 @@ import { Plus, CreditCard, Settings, TrendingUp } from "lucide-react";
 import { ExportButton } from "@/components/ui/export-button";
 import { PaymentsExportButton } from "@/components/payments-export-button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { VoidPaymentButton } from "@/components/payments/void-payment-button";
 
 export const dynamic = 'force-dynamic';
 
@@ -28,12 +29,16 @@ async function getPaymentsStats() {
         await Promise.all([
             prisma.payment.aggregate({
                 _sum: { amount: true },
-                where: { paymentDate: { gte: startOfMonth } },
+                where: {
+                    paymentDate: { gte: startOfMonth },
+                    status: "PAID" // Exclude voided
+                },
             }),
             prisma.payment.aggregate({
                 _sum: { amount: true },
                 where: {
                     paymentDate: { gte: startOfLastMonth, lte: endOfLastMonth },
+                    status: "PAID" // Exclude voided
                 },
             }),
             prisma.payment.findMany({
@@ -208,6 +213,7 @@ export default async function PaymentsPage() {
                                             <TableHead>Método</TableHead>
                                             <TableHead>Fecha</TableHead>
                                             <TableHead>Recibo</TableHead>
+                                            <TableHead className="w-[50px]"></TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
@@ -224,8 +230,11 @@ export default async function PaymentsPage() {
                                                 <TableCell>
                                                     {payment.subscription?.membership.name || "-"}
                                                 </TableCell>
-                                                <TableCell className="font-medium">
+                                                <TableCell className={payment.status === "VOID" ? "font-medium line-through text-muted-foreground" : "font-medium"}>
                                                     €{payment.amount.toFixed(2)}
+                                                    {payment.status === "VOID" && (
+                                                        <Badge variant="destructive" className="ml-2 text-xs">Anulado</Badge>
+                                                    )}
                                                 </TableCell>
                                                 <TableCell>
                                                     <Badge variant="outline">
@@ -238,6 +247,15 @@ export default async function PaymentsPage() {
                                                 </TableCell>
                                                 <TableCell className="text-muted-foreground text-sm">
                                                     {payment.receiptNumber}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {payment.status !== "VOID" && (
+                                                        <VoidPaymentButton
+                                                            paymentId={payment.id}
+                                                            amount={payment.amount}
+                                                            athleteName={`${payment.athlete.firstName} ${payment.athlete.lastName}`}
+                                                        />
+                                                    )}
                                                 </TableCell>
                                             </TableRow>
                                         ))}
@@ -271,8 +289,13 @@ export default async function PaymentsPage() {
                                                     </div>
                                                 </div>
                                                 <div className="text-right shrink-0">
-                                                    <p className="text-lg font-bold">€{payment.amount.toFixed(2)}</p>
-                                                    {payment.receiptNumber && (
+                                                    <p className={payment.status === "VOID" ? "text-lg font-bold line-through text-muted-foreground" : "text-lg font-bold"}>
+                                                        €{payment.amount.toFixed(2)}
+                                                    </p>
+                                                    {payment.status === "VOID" && (
+                                                        <Badge variant="destructive" className="text-xs">Anulado</Badge>
+                                                    )}
+                                                    {payment.receiptNumber && payment.status !== "VOID" && (
                                                         <p className="text-xs text-muted-foreground">#{payment.receiptNumber}</p>
                                                     )}
                                                 </div>

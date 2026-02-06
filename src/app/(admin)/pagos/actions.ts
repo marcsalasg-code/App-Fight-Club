@@ -190,3 +190,53 @@ export async function registerPayment(data: PaymentFormData) {
         return { success: false, error: "Error al registrar el pago" };
     }
 }
+
+export async function voidPayment(paymentId: string, reason?: string) {
+    if (!paymentId) {
+        return { success: false, error: "ID de pago requerido" };
+    }
+
+    try {
+        // Find the payment
+        const payment = await prisma.payment.findUnique({
+            where: { id: paymentId },
+            include: { subscription: true }
+        });
+
+        if (!payment) {
+            return { success: false, error: "Pago no encontrado" };
+        }
+
+        if (payment.status === "VOID") {
+            return { success: false, error: "Este pago ya está anulado" };
+        }
+
+        // Void the payment
+        await prisma.payment.update({
+            where: { id: paymentId },
+            data: {
+                status: "VOID",
+                voidReason: reason || "Anulado por el administrador",
+                voidedAt: new Date(),
+            }
+        });
+
+        // If there's a linked subscription, deactivate it
+        if (payment.subscriptionId) {
+            await prisma.subscription.update({
+                where: { id: payment.subscriptionId },
+                data: { status: "CANCELLED" }
+            });
+        }
+
+        revalidatePath("/pagos");
+        revalidatePath("/atletas");
+        revalidatePath(`/atletas/${payment.athleteId}`);
+
+        return { success: true };
+    } catch (error) {
+        console.error("Error voiding payment:", error);
+        return { success: false, error: "Error al anular el pago" };
+    }
+}
+
