@@ -118,59 +118,101 @@ export async function registerAttendance(classId: string, athleteIds: string[]) 
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
-        // Create attendance records
-        const attendances = await Promise.all(
-            athleteIds.map(async (athleteId) => {
-                // Check if already checked in
-                const existing = await prisma.attendance.findFirst({
-                    where: {
-                        athleteId,
-                        classId,
-                        date: today,
-                    },
-                });
+        // Calculate current week boundaries (Monday to Sunday)
+        const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, ...
+        const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+        const weekStart = new Date(today);
+        weekStart.setDate(today.getDate() + mondayOffset);
+        weekStart.setHours(0, 0, 0, 0);
 
-                if (existing) return existing;
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekStart.getDate() + 6);
+        weekEnd.setHours(23, 59, 59, 999);
 
-                return prisma.attendance.create({
-                    data: {
-                        athleteId,
-                        classId,
-                        date: today,
-                        method: "MANUAL",
-                    },
-                });
-            })
-        );
+        const results: { athleteId: string; success: boolean; error?: string }[] = [];
 
-        // Update class count for class-based subscriptions
         for (const athleteId of athleteIds) {
+            // Check if already checked in today
+            const existing = await prisma.attendance.findFirst({
+                where: { athleteId, classId, date: today },
+            });
+
+            if (existing) {
+                results.push({ athleteId, success: true }); // Already checked in
+                continue;
+            }
+
+            // Get active subscription with membership details
             const subscription = await prisma.subscription.findFirst({
-                where: {
-                    athleteId,
-                    status: "ACTIVE",
-                    membership: { classCount: { not: null } },
-                },
+                where: { athleteId, status: "ACTIVE" },
                 include: { membership: true },
             });
 
-            if (subscription && subscription.membership.classCount) {
+            if (!subscription) {
+                results.push({ athleteId, success: false, error: "Sin suscripción activa" });
+                continue;
+            }
+
+            // Check weekly limit if applicable
+            if (subscription.membership.weeklyLimit) {
+                const weeklyAttendances = await prisma.attendance.count({
+                    where: {
+                        athleteId,
+                        date: { gte: weekStart, lte: weekEnd },
+                    },
+                });
+
+                if (weeklyAttendances >= subscription.membership.weeklyLimit) {
+                    results.push({
+                        athleteId,
+                        success: false,
+                        error: `Límite semanal alcanzado (${weeklyAttendances}/${subscription.membership.weeklyLimit})`,
+                    });
+                    continue;
+                }
+            }
+
+            // Check total class count limit if applicable
+            if (subscription.membership.classCount) {
+                if (subscription.classesUsed >= subscription.membership.classCount) {
+                    results.push({
+                        athleteId,
+                        success: false,
+                        error: `Clases agotadas (${subscription.classesUsed}/${subscription.membership.classCount})`,
+                    });
+                    continue;
+                }
+            }
+
+            // Create attendance
+            await prisma.attendance.create({
+                data: { athleteId, classId, date: today, method: "MANUAL" },
+            });
+
+            // Update class count for class-based subscriptions
+            if (subscription.membership.classCount) {
                 const newClassesUsed = subscription.classesUsed + 1;
                 await prisma.subscription.update({
                     where: { id: subscription.id },
                     data: {
                         classesUsed: newClassesUsed,
-                        status:
-                            newClassesUsed >= subscription.membership.classCount
-                                ? "EXPIRED"
-                                : "ACTIVE",
+                        status: newClassesUsed >= subscription.membership.classCount ? "EXPIRED" : "ACTIVE",
                     },
                 });
             }
+
+            results.push({ athleteId, success: true });
+        }
+
+        // Check if any failed
+        const failed = results.filter(r => !r.success);
+        if (failed.length > 0 && failed.length === athleteIds.length) {
+            // All failed
+            return { success: false, error: failed[0].error };
         }
 
         revalidatePath("/calendario");
-        return { success: true, data: attendances };
+        return { success: true, data: results };
     } catch (error) {
         console.error("Error registering attendance:", error);
         return { success: false, error: "Error al registrar la asistencia" };

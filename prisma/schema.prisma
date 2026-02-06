@@ -150,6 +150,7 @@ model Membership {
   price        Float
   durationDays Int? // null for class-based passes
   classCount   Int? // null for time-based memberships
+  weeklyLimit  Int? // Max classes per week (null = unlimited)
   description  String?
   active       Boolean  @default(true)
   createdAt    DateTime @default(now())

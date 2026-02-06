@@ -59,6 +59,29 @@ async function main() {
         });
     }
 
+    // Seed Memberships (Upsert to avoid duplicates)
+    const memberships = [
+        { name: "Mensual Ilimitado", price: 65, durationDays: 30, weeklyLimit: null, description: "Acceso ilimitado durante 30 días" },
+        { name: "Pack 2 días/semana", price: 45, durationDays: 30, weeklyLimit: 2, description: "2 clases por semana durante 30 días" },
+        { name: "Pack 3 días/semana", price: 55, durationDays: 30, weeklyLimit: 3, description: "3 clases por semana durante 30 días" },
+        { name: "Bono 10 clases", price: 80, durationDays: null, classCount: 10, weeklyLimit: null, description: "10 clases sin fecha de caducidad" },
+        { name: "Clase suelta", price: 12, durationDays: null, classCount: 1, weeklyLimit: null, description: "Clase individual" },
+    ];
+
+    for (const m of memberships) {
+        const existing = await prisma.membership.findFirst({ where: { name: m.name } });
+        if (existing) {
+            await prisma.membership.update({
+                where: { id: existing.id },
+                data: { price: m.price, durationDays: m.durationDays, classCount: m.classCount ?? null, weeklyLimit: m.weeklyLimit, description: m.description },
+            });
+        } else {
+            await prisma.membership.create({
+                data: { name: m.name, price: m.price, durationDays: m.durationDays, classCount: m.classCount ?? null, weeklyLimit: m.weeklyLimit, description: m.description },
+            });
+        }
+    }
+
     console.log("Seeding finished.");
 }
 

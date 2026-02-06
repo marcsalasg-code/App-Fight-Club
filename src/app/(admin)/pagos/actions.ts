@@ -17,9 +17,9 @@ export type PaymentFormData = {
     membershipId: string;
     amount: number;
     paymentMethod: string;
+    startDate?: string; // New field (ISO string)
     notes?: string;
 };
-
 export async function createMembership(data: MembershipFormData) {
     // Validate input
     const validation = validateData(membershipSchema, data);
@@ -113,50 +113,44 @@ export async function registerPayment(data: PaymentFormData) {
             return { success: false, error: "Membresía no encontrada" };
         }
 
-        // Check for existing active subscription
-        const activeSubscription = await prisma.subscription.findFirst({
-            where: {
-                athleteId: data.athleteId,
-                status: "ACTIVE",
-            },
-            orderBy: { endDate: "desc" },
-        });
-
         const now = new Date();
-        let startDate = now;
-        let endDate: Date | null = null;
+        let startDate: Date;
 
-        // Advance Payment Logic
-        if (activeSubscription && activeSubscription.endDate && activeSubscription.endDate > now) {
-            // If active subscription exists and extends into future, start next day
-            startDate = new Date(activeSubscription.endDate);
-            startDate.setDate(startDate.getDate() + 1);
+        // Custom Start Date Logic
+        if (data.startDate) {
+            startDate = new Date(data.startDate);
         } else {
-            // If no active subscription (or it's expired), align to 1st of CURRENT month
-            // This assumes "paying for the month" regardless of current day.
-            startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+            // Default Fallback Logic
+            // Check for existing active subscription to extend? 
+            // For simplicity in this new model, if no date provided, we default to TODAY (Rolling)
+            // unless active subscription exists, then we extend.
+
+            const activeSubscription = await prisma.subscription.findFirst({
+                where: {
+                    athleteId: data.athleteId,
+                    status: "ACTIVE",
+                },
+                orderBy: { endDate: "desc" },
+            });
+
+            if (activeSubscription && activeSubscription.endDate && activeSubscription.endDate > now) {
+                startDate = new Date(activeSubscription.endDate);
+                startDate.setDate(startDate.getDate() + 1);
+            } else {
+                startDate = now;
+            }
         }
 
         // Ensure time is start of day
         startDate.setHours(0, 0, 0, 0);
 
+        let endDate: Date | null = null;
+
         if (membership.durationDays) {
-            // Calendar Month Alignment
-            // We set endDate to the last day of the month of the startDate.
-            // Even if startDate is Mar 1, endDate is Mar 31.
-            // If durationDays would imply multi-month (e.g. 90 days), we should handle that.
-            // But for now, assuming standard monthly (durationDays ~ 30).
-
-            // Calculate End of Month based on startDate
-            // new Date(year, month + 1, 0) gives last day of 'month'.
-            // month is 0-indexed. 
-            // If Start is Feb 1 (Month 1). We want End of Feb.
-            // new Date(Year, 2, 0) -> Day 0 of Month 2 (March) -> Last Day of Feb. Correct.
-
-            const desiredMonths = Math.round(membership.durationDays / 30);
-            const monthsToAdd = desiredMonths > 0 ? desiredMonths : 1;
-
-            endDate = new Date(startDate.getFullYear(), startDate.getMonth() + monthsToAdd, 0);
+            // Calculate endDate based on durationDays exactly
+            const durationMs = membership.durationDays * 24 * 60 * 60 * 1000;
+            // Subtract 1 second to land on 23:59:59 of the last day
+            endDate = new Date(startDate.getTime() + durationMs - 1000);
             endDate.setHours(23, 59, 59, 999);
         }
 
@@ -168,6 +162,7 @@ export async function registerPayment(data: PaymentFormData) {
                 startDate,
                 endDate,
                 status: "ACTIVE",
+                classesUsed: 0 // Reset usage for new sub
             },
         });
 

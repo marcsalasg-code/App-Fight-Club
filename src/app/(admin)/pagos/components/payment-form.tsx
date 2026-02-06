@@ -42,16 +42,11 @@ type Props = {
 
 export function PaymentForm({ memberships, initialAthlete }: Props) {
     const router = useRouter();
-    const searchParams = useSearchParams();
-
-    // State for the selected athlete (dynamic search)
     const [selectedAthlete, setSelectedAthlete] = useState<Athlete | null>(initialAthlete || null);
-
     const [loading, setLoading] = useState(false);
-    const [selectedMembership, setSelectedMembership] = useState<Membership | null>(
-        null
-    );
-    const [currentDate] = useState(new Date());
+    const [selectedMembership, setSelectedMembership] = useState<Membership | null>(null);
+    const [startDate, setStartDate] = useState<string>(new Date().toISOString().split('T')[0]); // Default to today YYYY-MM-DD
+
     // OCR State
     const [scannedAmount, setScannedAmount] = useState<number | undefined>(undefined);
     const [scanDialogOpen, setScanDialogOpen] = useState(false);
@@ -87,6 +82,7 @@ export function PaymentForm({ memberships, initialAthlete }: Props) {
             membershipId: formData.get("membershipId") as string,
             amount: parseFloat(formData.get("amount") as string),
             paymentMethod: formData.get("paymentMethod") as string,
+            startDate: formData.get("startDate") as string, // Include start date
             notes: formData.get("notes") as string,
         });
 
@@ -99,6 +95,14 @@ export function PaymentForm({ memberships, initialAthlete }: Props) {
             toast.error(result.error);
         }
     }
+
+    // Helper to calculate end date for display
+    const calculateEndDate = () => {
+        if (!selectedMembership || !selectedMembership.durationDays || !startDate) return null;
+        const start = new Date(startDate);
+        const durationMs = selectedMembership.durationDays * 24 * 60 * 60 * 1000;
+        return new Date(start.getTime() + durationMs);
+    };
 
     return (
         <div className="space-y-6">
@@ -194,6 +198,22 @@ export function PaymentForm({ memberships, initialAthlete }: Props) {
                                 </Select>
                             </div>
 
+                            {/* NEW: Start Date Selector */}
+                            <div className="space-y-2">
+                                <Label htmlFor="startDate">Fecha de Inicio *</Label>
+                                <Input
+                                    id="startDate"
+                                    name="startDate"
+                                    type="date"
+                                    required
+                                    value={startDate}
+                                    onChange={(e) => setStartDate(e.target.value)}
+                                />
+                                <p className="text-xs text-muted-foreground">
+                                    La suscripción comenzará en esta fecha.
+                                </p>
+                            </div>
+
                             <div className="space-y-2">
                                 <Label htmlFor="amount">Monto (€) *</Label>
                                 <Input
@@ -207,11 +227,6 @@ export function PaymentForm({ memberships, initialAthlete }: Props) {
                                     readOnly={!!selectedMembership}
                                     className={selectedMembership ? "bg-muted" : ""}
                                 />
-                                {selectedMembership && (
-                                    <p className="text-xs text-muted-foreground">
-                                        Precio de la membresía aplicado automáticamente
-                                    </p>
-                                )}
                             </div>
 
                             <div className="space-y-2">
@@ -265,16 +280,15 @@ export function PaymentForm({ memberships, initialAthlete }: Props) {
                                         </div>
                                         <div className="flex justify-between">
                                             <span className="text-muted-foreground">Fecha inicio:</span>
-                                            <span>{new Date().toLocaleDateString("es-ES")}</span>
+                                            <span className="font-medium">
+                                                {startDate ? new Date(startDate).toLocaleDateString("es-ES") : "-"}
+                                            </span>
                                         </div>
-                                        {selectedMembership.durationDays && (
+                                        {selectedMembership.durationDays && startDate && (
                                             <div className="flex justify-between">
-                                                <span className="text-muted-foreground">Fecha fin:</span>
-                                                <span>
-                                                    {new Date(
-                                                        currentDate.getTime() +
-                                                        selectedMembership.durationDays * 24 * 60 * 60 * 1000
-                                                    ).toLocaleDateString("es-ES")}
+                                                <span className="text-muted-foreground">Fecha fin (estimada):</span>
+                                                <span className="font-medium">
+                                                    {calculateEndDate()?.toLocaleDateString("es-ES")}
                                                 </span>
                                             </div>
                                         )}

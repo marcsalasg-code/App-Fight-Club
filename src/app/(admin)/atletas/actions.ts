@@ -208,3 +208,54 @@ export async function searchAthletes(query: string) {
         return [];
     }
 }
+
+/**
+ * Get subscription status with weekly usage for an athlete
+ */
+export async function getAthleteSubscriptionStatus(athleteId: string) {
+    try {
+        const subscription = await prisma.subscription.findFirst({
+            where: { athleteId, status: "ACTIVE" },
+            include: { membership: true },
+        });
+
+        if (!subscription) {
+            return { hasSubscription: false };
+        }
+
+        // Calculate current week boundaries
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const dayOfWeek = today.getDay();
+        const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+        const weekStart = new Date(today);
+        weekStart.setDate(today.getDate() + mondayOffset);
+        weekStart.setHours(0, 0, 0, 0);
+
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekStart.getDate() + 6);
+        weekEnd.setHours(23, 59, 59, 999);
+
+        // Count weekly attendances
+        const weeklyAttendances = await prisma.attendance.count({
+            where: {
+                athleteId,
+                date: { gte: weekStart, lte: weekEnd },
+            },
+        });
+
+        return {
+            hasSubscription: true,
+            membershipName: subscription.membership.name,
+            weeklyLimit: subscription.membership.weeklyLimit,
+            weeklyUsed: weeklyAttendances,
+            classLimit: subscription.membership.classCount,
+            classesUsed: subscription.classesUsed,
+            endDate: subscription.endDate,
+            status: subscription.status,
+        };
+    } catch (error) {
+        console.error("Error getting subscription status:", error);
+        return { hasSubscription: false };
+    }
+}

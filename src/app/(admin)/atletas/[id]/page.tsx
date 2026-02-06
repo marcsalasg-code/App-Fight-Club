@@ -21,6 +21,8 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AttendanceTab } from "./components/attendance-tab";
 import { WeighInHistory } from "../components/weigh-in-history";
+import { SubscriptionStatusCard } from "@/components/athletes/subscription-status-card";
+import { getAthleteSubscriptionStatus } from "../actions";
 
 export const dynamic = 'force-dynamic';
 
@@ -73,7 +75,10 @@ type Props = {
 
 export default async function AthleteDetailPage({ params }: Props) {
     const { id } = await params;
-    const athlete = await getAthlete(id);
+    const [athlete, subscriptionStatus] = await Promise.all([
+        getAthlete(id),
+        getAthleteSubscriptionStatus(id)
+    ]);
 
     if (!athlete) {
         notFound();
@@ -271,45 +276,24 @@ export default async function AthleteDetailPage({ params }: Props) {
 
                         {/* Sidebar Column */}
                         <div className="space-y-6">
-                            {/* Subscription */}
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Suscripción</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    {activeSubscription ? (
-                                        <div className="space-y-3">
-                                            <div className={`p-3 rounded-lg border ${STATUS_COLORS.SUCCESS}`}>
-                                                <p className="font-medium">
-                                                    {activeSubscription.membership.name}
-                                                </p>
-                                                <p className="text-sm opacity-90">
-                                                    Hasta:{" "}
-                                                    {activeSubscription.endDate
-                                                        ? new Date(activeSubscription.endDate).toLocaleDateString(
-                                                            "es-ES"
-                                                        )
-                                                        : "Sin fecha de fin"}
-                                                </p>
-                                            </div>
-                                            <Link href={`/pagos/nuevo?athleteId=${athlete.id}`}>
-                                                <Button variant="outline" className="w-full">
-                                                    Renovar Suscripción
-                                                </Button>
-                                            </Link>
-                                        </div>
-                                    ) : (
-                                        <div className="space-y-3">
-                                            <div className={`p-3 rounded-lg border ${STATUS_COLORS.WARNING}`}>
-                                                <p className="font-medium">Sin suscripción activa</p>
-                                            </div>
-                                            <Link href={`/pagos/nuevo?athleteId=${athlete.id}`}>
-                                                <Button className="w-full">Registrar Suscripción</Button>
-                                            </Link>
-                                        </div>
-                                    )}
-                                </CardContent>
-                            </Card>
+                            {/* Subscription Status with Weekly Usage */}
+                            <SubscriptionStatusCard
+                                hasSubscription={subscriptionStatus.hasSubscription}
+                                membershipName={subscriptionStatus.membershipName}
+                                weeklyLimit={subscriptionStatus.weeklyLimit}
+                                weeklyUsed={subscriptionStatus.weeklyUsed}
+                                classLimit={subscriptionStatus.classLimit}
+                                classesUsed={subscriptionStatus.classesUsed}
+                                endDate={subscriptionStatus.endDate}
+                                status={subscriptionStatus.status}
+                            />
+
+                            {/* Payment Action Button */}
+                            <Link href={`/pagos/nuevo?athleteId=${athlete.id}`}>
+                                <Button variant="outline" className="w-full">
+                                    {activeSubscription ? "Renovar Suscripción" : "Registrar Pago"}
+                                </Button>
+                            </Link>
 
                             {/* Recent Payments Small */}
                             <Card>
