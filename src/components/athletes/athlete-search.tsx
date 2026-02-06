@@ -26,7 +26,27 @@ type AthleteResult = {
     initials: string;
     status: string;
     maskedPin?: string;
+    // Membership indicators
+    membershipColor?: "green" | "yellow" | "red";
+    membershipLabel?: string;
+    membershipName?: string | null;
+    // Session indicators
+    sessionsUsed?: number;
+    sessionsLimit?: number | null;
+    sessionsBadge?: string | null;
 };
+
+// Color indicator dot component
+function StatusDot({ color }: { color: "green" | "yellow" | "red" }) {
+    return (
+        <span className={cn(
+            "h-2.5 w-2.5 rounded-full shrink-0",
+            color === "green" && "bg-green-500",
+            color === "yellow" && "bg-yellow-500",
+            color === "red" && "bg-red-500"
+        )} />
+    );
+}
 
 interface AthleteSearchPopoverProps {
     onSelect: (athlete: AthleteResult) => void;
@@ -133,7 +153,7 @@ export function AthleteSearchPopover({
                 </div>
 
                 {/* Results */}
-                <ScrollArea className="max-h-[280px]">
+                <ScrollArea className="max-h-[320px]">
                     {loading ? (
                         <div className="flex items-center justify-center py-6 text-sm text-muted-foreground">
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -159,49 +179,81 @@ export function AthleteSearchPopover({
                                     type="button"
                                     onClick={() => handleSelect(athlete)}
                                     className={cn(
-                                        "w-full flex items-center gap-3 px-2 py-2 rounded-md text-left",
+                                        "w-full flex items-center gap-3 px-2 py-2.5 rounded-md text-left",
                                         "hover:bg-accent focus:bg-accent focus:outline-none",
                                         "transition-colors cursor-pointer"
                                     )}
                                 >
+                                    {/* Color indicator */}
+                                    <StatusDot color={athlete.membershipColor || "red"} />
+
+                                    {/* Avatar with initials */}
                                     <Avatar className="h-9 w-9 border shrink-0">
                                         <AvatarFallback className={cn(
                                             "font-semibold text-sm",
-                                            athlete.status === "ACTIVE"
-                                                ? "text-primary bg-primary/10"
-                                                : "text-muted-foreground"
+                                            athlete.membershipColor === "green" && "text-green-700 bg-green-50",
+                                            athlete.membershipColor === "yellow" && "text-yellow-700 bg-yellow-50",
+                                            athlete.membershipColor === "red" && "text-muted-foreground bg-muted"
                                         )}>
                                             {athlete.initials}
                                         </AvatarFallback>
                                     </Avatar>
 
+                                    {/* Info */}
                                     <div className="flex flex-col flex-1 min-w-0">
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex items-center justify-between gap-2">
                                             <span className="font-medium truncate">
                                                 {athlete.fullName}
                                             </span>
-                                            {athlete.status === "INACTIVE" && (
-                                                <Badge variant="secondary" className="h-5 px-1.5 text-[10px] shrink-0">
-                                                    Inactivo
+                                            {/* Sessions badge */}
+                                            {athlete.sessionsBadge && (
+                                                <Badge
+                                                    variant="outline"
+                                                    className={cn(
+                                                        "h-5 px-1.5 text-[10px] font-mono shrink-0",
+                                                        athlete.sessionsUsed !== undefined &&
+                                                        athlete.sessionsLimit != null &&
+                                                        athlete.sessionsUsed >= athlete.sessionsLimit &&
+                                                        "border-amber-500 text-amber-600"
+                                                    )}
+                                                >
+                                                    {athlete.sessionsBadge}
                                                 </Badge>
                                             )}
                                         </div>
 
-                                        <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
+                                        <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                                            {/* Membership info */}
+                                            <span className="truncate">
+                                                {athlete.membershipName || athlete.membershipLabel || "Sin membresía"}
+                                            </span>
+                                            {athlete.membershipLabel && athlete.membershipLabel !== "Activo" && (
+                                                <Badge
+                                                    variant="secondary"
+                                                    className={cn(
+                                                        "h-4 px-1 text-[9px] shrink-0",
+                                                        athlete.membershipColor === "yellow" && "bg-yellow-100 text-yellow-700",
+                                                        athlete.membershipColor === "red" && "bg-red-100 text-red-700"
+                                                    )}
+                                                >
+                                                    {athlete.membershipLabel}
+                                                </Badge>
+                                            )}
+                                        </div>
+
+                                        {/* Secondary info */}
+                                        <div className="flex items-center gap-2 text-xs text-muted-foreground/70 mt-0.5">
                                             {athlete.maskedPin && (
-                                                <span className="flex items-center gap-1 bg-muted px-1.5 rounded-sm">
-                                                    <Shield className="h-3 w-3" />
+                                                <span className="flex items-center gap-0.5">
+                                                    <Shield className="h-2.5 w-2.5" />
                                                     {athlete.maskedPin}
                                                 </span>
                                             )}
                                             {athlete.phone && (
-                                                <span className="flex items-center gap-1">
-                                                    <Phone className="h-3 w-3" />
+                                                <span className="flex items-center gap-0.5">
+                                                    <Phone className="h-2.5 w-2.5" />
                                                     ...{athlete.phone.slice(-4)}
                                                 </span>
-                                            )}
-                                            {!athlete.maskedPin && !athlete.phone && athlete.email && (
-                                                <span className="truncate">{athlete.email}</span>
                                             )}
                                         </div>
                                     </div>
@@ -215,5 +267,5 @@ export function AthleteSearchPopover({
     );
 }
 
-// Keep the old AthleteSearch export for backwards compatibility if needed elsewhere
+// Keep the old AthleteSearch export for backwards compatibility
 export { AthleteSearchPopover as AthleteSearch };

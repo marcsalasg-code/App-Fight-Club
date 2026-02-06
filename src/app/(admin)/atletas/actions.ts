@@ -169,7 +169,7 @@ export async function deleteAthletes(ids: string[]) {
 
 export async function searchAthletes(query: string = "") {
     try {
-        // Build where clause based on query length
+        // Build where clause - show ALL athletes (no status filter)
         const whereClause = query && query.length >= 2
             ? {
                 OR: [
@@ -179,14 +179,24 @@ export async function searchAthletes(query: string = "") {
                     { phone: { contains: query, mode: "insensitive" as const } },
                     { pin: { contains: query } },
                 ],
-                status: "ACTIVE",
             }
-            : { status: "ACTIVE" }; // No filter, return recent active athletes
+            : {}; // No filter, return recent athletes
+
+        // Calculate current week boundaries (Monday-Sunday)
+        const now = new Date();
+        const dayOfWeek = now.getDay();
+        const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+        const weekStart = new Date(now);
+        weekStart.setDate(now.getDate() + mondayOffset);
+        weekStart.setHours(0, 0, 0, 0);
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekStart.getDate() + 6);
+        weekEnd.setHours(23, 59, 59, 999);
 
         const athletes = await prisma.athlete.findMany({
             where: whereClause,
-            take: 10,
-            orderBy: { createdAt: "desc" }, // Most recent first
+            take: 80,
+            orderBy: { createdAt: "desc" },
             select: {
                 id: true,
                 firstName: true,
@@ -196,15 +206,77 @@ export async function searchAthletes(query: string = "") {
                 phone: true,
                 pin: true,
                 tags: { select: { label: true, color: true } },
+                subscriptions: {
+                    where: { status: "ACTIVE" },
+                    take: 1,
+                    orderBy: { createdAt: "desc" },
+                    include: { membership: true }
+                },
+                attendances: {
+                    where: {
+                        date: { gte: weekStart, lte: weekEnd }
+                    }
+                }
             },
         });
 
-        return athletes.map(a => ({
-            ...a,
-            fullName: `${a.firstName} ${a.lastName}`,
-            initials: `${a.firstName[0]}${a.lastName[0]}`.toUpperCase(),
-            maskedPin: a.pin ? `***${a.pin.slice(-3)}` : undefined
-        }));
+        return athletes.map(a => {
+            const subscription = a.subscriptions[0];
+            const sessionsUsed = a.attendances.length;
+            const sessionsLimit = subscription?.membership.weeklyLimit || null;
+
+            // Calculate membership color based on endDate
+            let membershipColor: "green" | "yellow" | "red" = "red";
+            let membershipLabel = "Sin membresía";
+            let membershipName: string | null = null;
+
+            if (subscription) {
+                membershipName = subscription.membership.name;
+                const endDate = subscription.endDate ? new Date(subscription.endDate) : null;
+
+                if (endDate) {
+                    const daysSinceExpiry = Math.floor((now.getTime() - endDate.getTime()) / (1000 * 60 * 60 * 24));
+
+                    if (daysSinceExpiry < 0) {
+                        // Not expired yet
+                        membershipColor = "green";
+                        membershipLabel = "Activo";
+                    } else if (daysSinceExpiry <= 5) {
+                        // Grace period (0-5 days expired)
+                        membershipColor = "yellow";
+                        membershipLabel = "Prórroga";
+                    } else {
+                        // Expired > 5 days
+                        membershipColor = "red";
+                        membershipLabel = "Vencido";
+                    }
+                } else {
+                    // No end date means unlimited/active
+                    membershipColor = "green";
+                    membershipLabel = "Activo";
+                }
+            }
+
+            return {
+                id: a.id,
+                firstName: a.firstName,
+                lastName: a.lastName,
+                email: a.email,
+                status: a.status,
+                phone: a.phone,
+                fullName: `${a.firstName} ${a.lastName}`,
+                initials: `${a.firstName[0]}${a.lastName[0]}`.toUpperCase(),
+                maskedPin: a.pin ? `***${a.pin.slice(-3)}` : undefined,
+                // Membership indicators
+                membershipColor,
+                membershipLabel,
+                membershipName,
+                // Session indicators
+                sessionsUsed,
+                sessionsLimit,
+                sessionsBadge: sessionsLimit ? `${sessionsUsed}/${sessionsLimit}` : null
+            };
+        });
     } catch (error) {
         console.error("Error searching athletes:", error);
         return [];

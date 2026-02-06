@@ -109,10 +109,16 @@ export async function toggleClassActive(id: string, active: boolean) {
     }
 }
 
-export async function registerAttendance(classId: string, athleteIds: string[]) {
+export async function registerAttendance(
+    classId: string,
+    athleteIds: string[],
+    options?: { skipLimits?: boolean }
+) {
     if (!classId || !Array.isArray(athleteIds) || athleteIds.length === 0) {
         return { success: false, error: "Parámetros inválidos" };
     }
+
+    const skipLimits = options?.skipLimits ?? false;
 
     try {
         const today = new Date();
@@ -129,7 +135,7 @@ export async function registerAttendance(classId: string, athleteIds: string[]) 
         weekEnd.setDate(weekStart.getDate() + 6);
         weekEnd.setHours(23, 59, 59, 999);
 
-        const results: { athleteId: string; success: boolean; error?: string }[] = [];
+        const results: { athleteId: string; success: boolean; error?: string; warning?: string }[] = [];
 
         for (const athleteId of athleteIds) {
             // Check if already checked in today
@@ -142,12 +148,45 @@ export async function registerAttendance(classId: string, athleteIds: string[]) 
                 continue;
             }
 
-            // Get active subscription with membership details
+            // Get subscription with membership details
             const subscription = await prisma.subscription.findFirst({
                 where: { athleteId, status: "ACTIVE" },
                 include: { membership: true },
             });
 
+            // If skipLimits is true, always allow registration
+            if (skipLimits) {
+                // Create attendance without validation
+                await prisma.attendance.create({
+                    data: { athleteId, classId, date: today, method: "MANUAL" },
+                });
+
+                // Still update class count for tracking (don't expire)
+                if (subscription?.membership.classCount) {
+                    await prisma.subscription.update({
+                        where: { id: subscription.id },
+                        data: { classesUsed: subscription.classesUsed + 1 },
+                    });
+                }
+
+                // Return with warning if limits were bypassed
+                let warning: string | undefined;
+                if (!subscription) {
+                    warning = "Registrado sin membresía activa";
+                } else if (subscription.membership.weeklyLimit) {
+                    const weeklyAttendances = await prisma.attendance.count({
+                        where: { athleteId, date: { gte: weekStart, lte: weekEnd } },
+                    });
+                    if (weeklyAttendances > subscription.membership.weeklyLimit) {
+                        warning = `Excede límite semanal (${weeklyAttendances}/${subscription.membership.weeklyLimit})`;
+                    }
+                }
+
+                results.push({ athleteId, success: true, warning });
+                continue;
+            }
+
+            // Normal validation flow (QR check-in, etc.)
             if (!subscription) {
                 results.push({ athleteId, success: false, error: "Sin suscripción activa" });
                 continue;

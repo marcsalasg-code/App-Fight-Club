@@ -21,7 +21,7 @@ export function ManualCheckIn({ classId }: ManualCheckInProps) {
         setIsLoading(true);
 
         try {
-            const result = await registerAttendance(classId, [athlete.id]);
+            const result = await registerAttendance(classId, [athlete.id], { skipLimits: true });
 
             if (result.success) {
                 toast.success(`Check-in exitoso: ${athlete.fullName}`, {
