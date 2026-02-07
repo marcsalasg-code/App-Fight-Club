@@ -9,6 +9,7 @@ export type MembershipFormData = {
     price: number;
     durationDays?: number;
     classCount?: number;
+    weeklyLimit?: number;
     description?: string;
 };
 
@@ -34,6 +35,7 @@ export async function createMembership(data: MembershipFormData) {
                 price: data.price,
                 durationDays: data.durationDays || null,
                 classCount: data.classCount || null,
+                weeklyLimit: data.weeklyLimit || null,
                 description: data.description || null,
             },
         });
@@ -62,6 +64,7 @@ export async function updateMembership(id: string, data: MembershipFormData) {
                 price: data.price,
                 durationDays: data.durationDays || null,
                 classCount: data.classCount || null,
+                weeklyLimit: data.weeklyLimit || null,
                 description: data.description || null,
             },
         });

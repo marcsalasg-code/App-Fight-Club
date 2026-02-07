@@ -32,6 +32,7 @@ type Membership = {
     price: number;
     durationDays: number | null;
     classCount: number | null;
+    weeklyLimit: number | null;
     description: string | null;
     active: boolean;
 };
@@ -90,15 +91,31 @@ export function MembershipCard({ membership }: { membership: Membership }) {
                             <p className="text-3xl font-bold text-primary">
                                 €{membership.price.toFixed(2)}
                             </p>
-                            <div className="text-sm text-muted-foreground">
-                                {membership.durationDays && <p>Duración: {membership.durationDays} días</p>}
-                                {membership.classCount && <p>Clases: {membership.classCount}</p>}
-                                {!membership.durationDays && !membership.classCount && (
-                                    <p>Sin límite de tiempo ni clases</p>
+                            <div className="space-y-1">
+                                {membership.weeklyLimit ? (
+                                    <div className="flex items-center gap-2 text-sm font-medium">
+                                        <Badge variant="secondary">
+                                            {membership.weeklyLimit} clases / semana
+                                        </Badge>
+                                    </div>
+                                ) : (
+                                    <div className="flex items-center gap-2 text-sm font-medium">
+                                        <Badge variant="outline" className="border-dashed">
+                                            Acceso ilimitado semanal
+                                        </Badge>
+                                    </div>
                                 )}
+
+                                <div className="text-xs text-muted-foreground pt-1 space-y-0.5">
+                                    {membership.durationDays && <p>• Validez: {membership.durationDays} días</p>}
+                                    {membership.classCount && <p>• Bono: {membership.classCount} clases totales</p>}
+                                </div>
                             </div>
+
                             {membership.description && (
-                                <p className="text-sm">{membership.description}</p>
+                                <p className="text-xs text-muted-foreground italic pt-2 border-t mt-2">
+                                    "{membership.description}"
+                                </p>
                             )}
                         </div>
                     </CardContent>
