@@ -183,6 +183,10 @@ export function AthleteSearchPopover({
                                         "hover:bg-accent focus:bg-accent focus:outline-none",
                                         "transition-colors cursor-pointer"
                                     )}
+                                    onMouseDown={(e) => {
+                                        // Prevent input blur to allow onClick to fire on mouse click
+                                        e.preventDefault();
+                                    }}
                                 >
                                     {/* Color indicator */}
                                     <StatusDot color={athlete.membershipColor || "red"} />

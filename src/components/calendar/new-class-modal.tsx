@@ -101,6 +101,7 @@ export function NewClassModal() {
                         name="name"
                         required
                         placeholder="Ej: Muay Thai Principiantes"
+                        autoFocus
                     />
                 </div>
 
