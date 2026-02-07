@@ -36,6 +36,12 @@ export type AthleteColumn = {
 
     hasActiveSubscription: boolean
     tags?: { label: string; color: string }[]
+
+    // Rich indicators
+    membershipColor: "green" | "yellow" | "red"
+    membershipLabel: string
+    sessionsBadge: string | null
+    isOverLimit: boolean
 }
 
 export const columns: ColumnDef<AthleteColumn>[] = [
@@ -64,14 +70,18 @@ export const columns: ColumnDef<AthleteColumn>[] = [
         enableHiding: false,
     },
     {
-        accessorKey: "name", // Virtual column for sorting/filtering ease? Or just combine in cell. 
-        // Creating separate accessor functions for sorting
+        accessorKey: "name",
         id: "name",
         header: ({ column }) => <DataTableColumnHeader column={column} title="Nombre" />,
         accessorFn: row => `${row.firstName} ${row.lastName}`,
         cell: ({ row }) => {
             return (
                 <div className="flex items-center gap-2">
+                    {/* Status Dot */}
+                    <span className={`h-2.5 w-2.5 rounded-full shrink-0 ${row.original.membershipColor === "green" ? "bg-green-500" :
+                            row.original.membershipColor === "yellow" ? "bg-yellow-500" : "bg-red-500"
+                        }`} />
+
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-medium text-xs">
                         {row.original.firstName[0]}
                         {row.original.lastName[0]}
@@ -116,56 +126,43 @@ export const columns: ColumnDef<AthleteColumn>[] = [
         }
     },
     {
-        accessorKey: "email",
-        header: ({ column }) => <DataTableColumnHeader column={column} title="Email" />,
-        cell: ({ row }) => <div className="lowercase text-muted-foreground">{row.getValue("email") || "-"}</div>,
-    },
-    {
         accessorKey: "status",
         header: ({ column }) => <DataTableColumnHeader column={column} title="Estado" />,
         cell: ({ row }) => {
-            const status = row.getValue("status") as string
+            const color = row.original.membershipColor;
+            const label = row.original.membershipLabel;
+
             const styles = {
-                ACTIVE: "bg-green-500/10 text-green-700 border-green-200",
-                INACTIVE: "bg-gray-500/10 text-gray-700 border-gray-200",
-                SUSPENDED: "bg-red-500/10 text-red-700 border-red-200",
-            }[status] || "bg-gray-100"
+                green: "bg-green-500/10 text-green-700 border-green-200",
+                yellow: "bg-yellow-500/10 text-yellow-700 border-yellow-200",
+                red: "bg-red-500/10 text-red-700 border-red-200",
+            }[color];
 
-            const labels = {
-                ACTIVE: "Activo",
-                INACTIVE: "Inactivo",
-                SUSPENDED: "Suspendido",
-            }[status] || status
-
-            return <Badge className={styles}>{labels}</Badge>
-        },
-        filterFn: (row, id, value) => {
-            // Basic includes filter
-            return value.includes(row.getValue(id))
-        },
-    },
-    {
-        accessorKey: "level",
-        header: ({ column }) => <DataTableColumnHeader column={column} title="Nivel" />,
-        cell: ({ row }) => {
-            const labels: Record<string, string> = {
-                BEGINNER: "Principiante",
-                INTERMEDIATE: "Intermedio",
-                ADVANCED: "Avanzado",
-            };
-            return <Badge variant="outline">{labels[row.getValue("level") as string] || row.getValue("level")}</Badge>
+            return <Badge className={styles} variant="outline">{label}</Badge>
         }
     },
     {
-        id: "subscription",
-        header: "Suscripción",
+        id: "sessions",
+        header: "Sesiones",
         cell: ({ row }) => {
-            return row.original.hasActiveSubscription ? (
-                <Badge variant="secondary" className="bg-green-500/10 text-green-700">Activa</Badge>
-            ) : (
-                <Badge variant="secondary" className="bg-yellow-500/10 text-yellow-700">Inactiva</Badge>
+            const badge = row.original.sessionsBadge;
+            if (!badge) return <span className="text-muted-foreground text-xs">-</span>;
+
+            return (
+                <Badge
+                    variant="outline"
+                    className={`font-mono text-xs ${row.original.isOverLimit ? "border-amber-500 text-amber-600" : ""
+                        }`}
+                >
+                    {badge}
+                </Badge>
             )
         }
+    },
+    {
+        accessorKey: "email",
+        header: ({ column }) => <DataTableColumnHeader column={column} title="Email" />,
+        cell: ({ row }) => <div className="lowercase text-muted-foreground">{row.getValue("email") || "-"}</div>,
     },
     {
         id: "actions",

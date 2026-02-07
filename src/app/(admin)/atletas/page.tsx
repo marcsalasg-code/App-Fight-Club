@@ -27,7 +27,21 @@ async function getAthletes(search?: string) {
         }
         : {};
 
-    return prisma.athlete.findMany({
+    // Calculate week boundaries for attendance counting
+    const now = new Date();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const dayOfWeek = now.getDay();
+    const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+    const weekStart = new Date(now);
+    weekStart.setDate(now.getDate() + mondayOffset);
+    weekStart.setHours(0, 0, 0, 0);
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6);
+    weekEnd.setHours(23, 59, 59, 999);
+
+    const athletesData = await prisma.athlete.findMany({
         where,
         orderBy: { createdAt: "desc" },
         include: {
@@ -35,12 +49,20 @@ async function getAthletes(search?: string) {
                 where: { status: "ACTIVE" },
                 take: 1,
                 orderBy: { endDate: "desc" },
-
+                include: { membership: true }
             },
             tags: true,
+            attendances: {
+                where: {
+                    date: { gte: weekStart, lte: weekEnd }
+                },
+                select: { id: true } // Only need count
+            },
             _count: { select: { attendances: true } },
         },
     });
+
+    return athletesData;
 }
 
 type Props = {
@@ -51,27 +73,75 @@ export default async function AthletesPage({ searchParams }: Props) {
     const params = await searchParams;
     const athletes = await getAthletes(params.search);
 
-    const formattedAthletes: AthleteColumn[] = athletes.map(a => ({
-        id: a.id,
-        firstName: a.firstName,
-        lastName: a.lastName,
-        email: a.email,
-        phone: a.phone,
-        status: a.status,
-        level: a.level,
-        isCompetitor: a.isCompetitor,
+    const formattedAthletes: AthleteColumn[] = athletes.map(a => {
+        // Calculate Status Color
+        let statusColor: "green" | "yellow" | "red" = "red";
+        let statusLabel = "Sin membresía";
+        const subscription = a.subscriptions[0];
 
-        hasActiveSubscription: a.subscriptions.length > 0,
-        tags: a.tags.map(t => ({ label: t.label, color: t.color }))
-    }));
+        if (subscription) {
+            if (subscription.endDate) {
+                const endDate = new Date(subscription.endDate);
+                const daysSinceExpiry = Math.floor((new Date().getTime() - endDate.getTime()) / (1000 * 60 * 60 * 24));
+
+                if (daysSinceExpiry < 0) {
+                    statusColor = "green";
+                    statusLabel = "Activo";
+                } else if (daysSinceExpiry <= 5) {
+                    statusColor = "yellow";
+                    statusLabel = "Prórroga";
+                } else {
+                    statusColor = "red";
+                    statusLabel = "Vencido";
+                }
+            } else {
+                statusColor = "green";
+                statusLabel = "Activo";
+            }
+        }
+
+        // Calculate Session Badge
+        let sessionsBadge: string | null = null;
+        let isOverLimit = false;
+
+        if (subscription?.membership?.weeklyLimit) {
+            const used = a.attendances.length;
+            const limit = subscription.membership.weeklyLimit;
+            sessionsBadge = `${used}/${limit}`;
+            isOverLimit = used >= limit;
+        }
+
+        return {
+            id: a.id,
+            firstName: a.firstName,
+            lastName: a.lastName,
+            email: a.email,
+            phone: a.phone,
+            status: a.status,
+            level: a.level,
+            isCompetitor: a.isCompetitor,
+
+            hasActiveSubscription: a.subscriptions.length > 0,
+            tags: a.tags.map(t => ({ label: t.label, color: t.color })),
+
+            // Rich indicators
+            membershipColor: statusColor,
+            membershipLabel: statusLabel,
+            sessionsBadge,
+            isOverLimit
+        };
+    });
 
     // Transform for mobile cards
-    const athleteCards = athletes.map(a => ({
+    const athleteCards = athletes.map((a, i) => ({
         id: a.id,
         name: `${a.firstName} ${a.lastName}`,
         email: a.email,
         phone: a.phone,
-        status: a.status,
+        status: formattedAthletes[i].membershipLabel, // Use calculated label
+        statusColor: formattedAthletes[i].membershipColor, // Use calculated color
+        sessionsBadge: formattedAthletes[i].sessionsBadge,
+        isOverLimit: formattedAthletes[i].isOverLimit,
         isCompetitor: a.isCompetitor,
         _count: a._count,
         tags: a.tags.map(t => ({ id: t.id, name: t.label, color: t.color })),
