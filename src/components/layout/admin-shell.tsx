@@ -55,7 +55,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                     // We remove "pb-20" here if we want the scroll to be clean, or keep it inside the scroll area.
                 )}
             >
-                <div className="min-h-full p-4 md:p-6 pb-32 md:pb-10">
+                <div className="min-h-full p-4 md:p-6 pb-32 md:pb-10 max-w-[1600px] xl:mx-auto w-full">
                     {children}
                 </div>
             </main>

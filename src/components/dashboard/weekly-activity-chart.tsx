@@ -14,7 +14,7 @@ interface WeeklyActivityChartProps {
 
 export function WeeklyActivityChart({ data }: WeeklyActivityChartProps) {
     return (
-        <Card className="col-span-4">
+        <Card className="h-full">
             <CardHeader>
                 <CardTitle>Actividad Semanal</CardTitle>
                 <CardDescription>

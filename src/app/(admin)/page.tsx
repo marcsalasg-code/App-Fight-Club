@@ -157,70 +157,8 @@ async function DashboardContent() {
         <p className="text-muted-foreground capitalize">{today}</p>
       </div>
 
-      {/* Alert Banner */}
-      <AlertBanner expired={stats.expiredSubscriptions} expiring={stats.expiringSubscriptions} />
-
-      {/* Today's Classes - High Priority (Moved to Top) */}
-      <Card className="w-full border-primary/20 bg-primary/5 shadow-sm">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle className="flex items-center gap-2">
-              <Clock className="h-5 w-5 text-primary" />
-              Clases de Hoy
-            </CardTitle>
-            <CardDescription className="mt-1.5">
-              {stats.todayClasses.length} sesiones programadas para hoy
-            </CardDescription>
-          </div>
-          <Link href="/calendario">
-            <Button variant="outline" size="sm" className="gap-2 bg-background">
-              Ver Calendario
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </Link>
-        </CardHeader>
-        <CardContent>
-          {stats.todayClasses.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <p>No hay clases para hoy</p>
-            </div>
-          ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {stats.todayClasses.map((cls) => (
-                <Link
-                  key={cls.id}
-                  href={`/clases/${cls.id}/checkin`}
-                  className="group flex flex-col justify-between p-4 rounded-xl bg-card border hover:border-primary/50 transition-all hover:shadow-md"
-                >
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div
-                        className="px-2 py-1 rounded-md text-xs font-medium bg-secondary"
-                      >
-                        {cls.startTime} - {cls.endTime}
-                      </div>
-                      <div className="h-2 w-2 rounded-full" style={{ backgroundColor: cls.color || "#D4AF37" }} />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold group-hover:text-primary transition-colors">{cls.name}</h4>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {cls._count.attendances} / {cls.maxCapacity} asistentes
-                      </p>
-                    </div>
-                  </div>
-                  <div className="mt-4 pt-3 border-t flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground">Ir al check-in</span>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Primary Stats */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {/* Primary Stats - Top Priority for "at a glance" info */}
+      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         <Link href="/atletas">
           <Card className="hover:shadow-lg transition-all cursor-pointer hover:border-primary/50 hover:scale-[1.02]">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -230,7 +168,7 @@ async function DashboardContent() {
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.activeAthletes}</div>
+              <div className="text-2xl font-bold stat-number">{stats.activeAthletes}</div>
               <p className="text-xs text-muted-foreground">
                 + {stats.totalAthletes} registrados
               </p>
@@ -247,7 +185,7 @@ async function DashboardContent() {
               <CalendarCheck className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.todayAttendance}</div>
+              <div className="text-2xl font-bold stat-number">{stats.todayAttendance}</div>
               <p className="text-xs text-muted-foreground">
                 atletas entrenando
               </p>
@@ -264,7 +202,7 @@ async function DashboardContent() {
               <Trophy className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.competitorAthletes}</div>
+              <div className="text-2xl font-bold stat-number">{stats.competitorAthletes}</div>
               <p className="text-xs text-muted-foreground">
                 en equipo oficial
               </p>
@@ -281,7 +219,7 @@ async function DashboardContent() {
               <AlertTriangle className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.expiredSubscriptions}</div>
+              <div className="text-2xl font-bold stat-number">{stats.expiredSubscriptions}</div>
               <p className="text-xs text-muted-foreground">
                 suscripciones vencidas
               </p>
@@ -290,10 +228,77 @@ async function DashboardContent() {
         </Link>
       </div>
 
-      {/* Main Content Grid */}
-      <div className="grid gap-4">
-        {/* Chart Column */}
-        <WeeklyActivityChart data={stats.weeklyActivity} />
+      {/* Alert Banner */}
+      <AlertBanner expired={stats.expiredSubscriptions} expiring={stats.expiringSubscriptions} />
+
+      {/* Main Content Grid: Classes (Left/Top) & Charts (Right/Bottom) */}
+      <div className="grid gap-6 md:grid-cols-7">
+
+        {/* Today's Classes - Spans 4 columns on desktop */}
+        <div className="md:col-span-4 space-y-6">
+          <Card className="w-full border-primary/20 bg-primary/5 shadow-sm h-full">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Clock className="h-5 w-5 text-primary" />
+                  Clases de Hoy
+                </CardTitle>
+                <CardDescription className="mt-1.5">
+                  {stats.todayClasses.length} sesiones programadas para hoy
+                </CardDescription>
+              </div>
+              <Link href="/calendario">
+                <Button variant="outline" size="sm" className="gap-2 bg-background">
+                  Ver Calendario
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </Link>
+            </CardHeader>
+            <CardContent>
+              {stats.todayClasses.length === 0 ? (
+                <div className="text-center py-12 text-muted-foreground">
+                  <p>No hay clases programadas para hoy</p>
+                </div>
+              ) : (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {stats.todayClasses.map((cls) => (
+                    <Link
+                      key={cls.id}
+                      href={`/clases/${cls.id}/checkin`}
+                      className="group flex flex-col justify-between p-4 rounded-xl bg-card border hover:border-primary/50 transition-all hover:shadow-md"
+                    >
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div
+                            className="px-2 py-1 rounded-md text-xs font-medium bg-secondary text-secondary-foreground"
+                          >
+                            {cls.startTime} - {cls.endTime}
+                          </div>
+                          <div className="h-2.5 w-2.5 rounded-full ring-2 ring-background" style={{ backgroundColor: cls.color || "#D4AF37" }} />
+                        </div>
+                        <div>
+                          <h4 className="font-semibold group-hover:text-primary transition-colors line-clamp-1">{cls.name}</h4>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {cls._count.attendances} / {cls.maxCapacity} asistentes
+                          </p>
+                        </div>
+                      </div>
+                      <div className="mt-4 pt-3 border-t flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground font-medium">REALIZAR CHECK-IN</span>
+                        <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-transform group-hover:translate-x-0.5" />
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Activity Chart - Spans 3 columns on desktop */}
+        <div className="md:col-span-3">
+          <WeeklyActivityChart data={stats.weeklyActivity} />
+        </div>
       </div>
     </div>
   );

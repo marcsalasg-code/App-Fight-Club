@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ChevronRight, Trophy } from "lucide-react";
 import { getStatusColor, STATUS_LABELS } from "@/lib/status-colors";
+import { cn } from "@/lib/utils";
 
 type AthleteCardProps = {
     athlete: {
