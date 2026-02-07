@@ -67,7 +67,7 @@ export function ResponsiveDialog({
                     <DrawerTitle>{title}</DrawerTitle>
                     {description && <DrawerDescription>{description}</DrawerDescription>}
                 </DrawerHeader>
-                <div className="px-4 pb-4">
+                <div className="px-4 pb-4 overflow-y-auto flex-1">
                     {children}
                 </div>
                 <DrawerFooter className="pt-2">
