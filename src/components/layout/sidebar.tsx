@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
 const mainNavigation = [
-    { name: "Dashboard", href: "/", icon: LayoutDashboard, description: "Panel principal" },
+    { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, description: "Panel principal" },
     { name: "Calendario", href: "/calendario", icon: Calendar, description: "Ver clases y horarios" },
     { name: "Atletas", href: "/atletas", icon: Users, description: "Gestionar miembros" },
     { name: "Pagos", href: "/pagos", icon: CreditCard, description: "Facturación y suscripciones" },
