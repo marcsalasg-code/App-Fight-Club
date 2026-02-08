@@ -41,6 +41,14 @@ export default function LoginPage() {
                     <CardContent>
                         <form action={(formData) => {
                             formData.append("email", "marc@gymmanager.com"); // Hardcoded admin email
+
+                            // Extract callbackUrl from window.location or searchParams if available
+                            const params = new URLSearchParams(window.location.search);
+                            const callbackUrl = params.get("callbackUrl");
+                            if (callbackUrl) {
+                                formData.append("callbackUrl", callbackUrl);
+                            }
+
                             formAction(formData);
                         }} className="space-y-6">
                             <div className="space-y-2">

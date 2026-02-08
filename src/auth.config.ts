@@ -7,25 +7,30 @@ export const authConfig = {
     callbacks: {
         authorized({ auth, request: { nextUrl } }) {
             const isLoggedIn = !!auth?.user;
-            const isOnDashboard =
-                nextUrl.pathname === "/" ||
-                nextUrl.pathname.startsWith("/dashboard") ||
-                nextUrl.pathname.startsWith("/configuracion") ||
-                nextUrl.pathname.startsWith("/atletas"); // Protect admin routes
 
-            // Allow access to login page
-            if (nextUrl.pathname.startsWith("/login")) {
+            const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
+            const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
+            const isAuthRoute = authRoutes.includes(nextUrl.pathname);
+
+            if (isApiAuthRoute) {
+                return true;
+            }
+
+            if (isAuthRoute) {
                 if (isLoggedIn) {
-                    return Response.redirect(new URL("/", nextUrl)); // Redirect to dashboard if already logged in
+                    return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
                 }
                 return true;
             }
 
-            // Protect Admin Routes
-            // This is a simple check; we'll refine it with role checks in Middleware or server-side
-            if (isOnDashboard) {
-                if (isLoggedIn) return true;
-                return false; // Redirect to login
+            if (!isLoggedIn && !isPublicRoute) {
+                let callbackUrl = nextUrl.pathname;
+                if (nextUrl.search) {
+                    callbackUrl += nextUrl.search;
+                }
+
+                const encodedCallbackUrl = encodeURIComponent(callbackUrl);
+                return Response.redirect(new URL(`/login?callbackUrl=${encodedCallbackUrl}`, nextUrl));
             }
 
             return true;

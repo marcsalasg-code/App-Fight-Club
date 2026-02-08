@@ -1,5 +1,6 @@
 "use server";
 
+import { DEFAULT_LOGIN_REDIRECT } from "@/lib/routes";
 import { signIn, signOut } from "@/auth";
 import { AuthError } from "next-auth";
 
@@ -8,7 +9,7 @@ export async function authenticate(
     formData: FormData,
 ) {
     try {
-        await signIn("credentials", { ...Object.fromEntries(formData), redirectTo: "/" });
+        await signIn("credentials", { ...Object.fromEntries(formData), redirectTo: DEFAULT_LOGIN_REDIRECT });
     } catch (error) {
         if (error instanceof AuthError) {
             switch (error.type) {
