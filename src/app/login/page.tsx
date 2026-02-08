@@ -41,21 +41,21 @@ export default function LoginPage() {
                     <CardContent>
                         <form action={formAction} className="space-y-4">
                             <div className="space-y-2">
-                                <Label htmlFor="email" className="text-zinc-300">Email</Label>
+                                <Label htmlFor="email" className="text-zinc-300">Usuario o Email</Label>
                                 <div className="relative">
                                     <User className="absolute left-3 top-3 h-4 w-4 text-zinc-500" />
                                     <Input
                                         id="email"
-                                        type="email"
+                                        type="text"
                                         name="email"
-                                        placeholder="entrenador@ejemplo.com"
+                                        placeholder="Marc Salas"
                                         required
                                         className="pl-9 bg-zinc-900/50 border-zinc-800 text-white placeholder:text-zinc-600 focus:ring-purple-500/50 focus:border-purple-500/50"
                                     />
                                 </div>
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="password" className="text-zinc-300">Contraseña</Label>
+                                <Label htmlFor="password" className="text-zinc-300">PIN / Contraseña</Label>
                                 <div className="relative">
                                     <Lock className="absolute left-3 top-3 h-4 w-4 text-zinc-500" />
                                     <Input

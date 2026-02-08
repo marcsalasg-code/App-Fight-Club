@@ -22,21 +22,25 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
         Credentials({
             async authorize(credentials) {
                 const parsedCredentials = z
-                    .object({ email: z.string().email(), password: z.string().min(6) })
+                    .object({ email: z.string(), password: z.string().min(1) })
                     .safeParse(credentials);
 
                 if (parsedCredentials.success) {
                     const { email, password } = parsedCredentials.data;
-                    const user = await getUser(email);
+
+                    // Search by email OR name
+                    const user = await prisma.user.findFirst({
+                        where: {
+                            OR: [
+                                { email: email },
+                                { name: email } // We treat the 'email' field as universal identifier
+                            ]
+                        }
+                    });
 
                     if (!user) return null;
 
-                    // In a real app with existing plain text passwords, you might need a migration strategy.
-                    // For now, checks if passwords match (Assuming bcrypt hash).
-                    // If your seeding script uses plain text "temp123", we might need to update that.
-
                     // Fallback for plain text passwords (ONLY FOR MIGRATION/DEV)
-                    // Remove this block in strict production if all passwords are pre-hashed.
                     if (!user.password.startsWith("$2")) {
                         if (user.password === password) return user;
                         return null;

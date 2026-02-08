@@ -7,7 +7,11 @@ export const authConfig = {
     callbacks: {
         authorized({ auth, request: { nextUrl } }) {
             const isLoggedIn = !!auth?.user;
-            const isOnDashboard = nextUrl.pathname.startsWith("/dashboard") || nextUrl.pathname.startsWith("/configuracion") || nextUrl.pathname.startsWith("/atletas"); // Protect admin routes
+            const isOnDashboard =
+                nextUrl.pathname === "/" ||
+                nextUrl.pathname.startsWith("/dashboard") ||
+                nextUrl.pathname.startsWith("/configuracion") ||
+                nextUrl.pathname.startsWith("/atletas"); // Protect admin routes
 
             // Allow access to login page
             if (nextUrl.pathname.startsWith("/login")) {
