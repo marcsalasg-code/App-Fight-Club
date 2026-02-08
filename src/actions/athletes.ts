@@ -110,14 +110,26 @@ export async function updateAthlete(id: string, data: AthleteFormData) {
 }
 
 export async function deleteAthlete(id: string) {
-    await requireRole(["ADMIN"]); // Only Admin can delete? Or Coach too? Let's say Admin for safety.
+    const session = await requireRole(["ADMIN", "COACH"]); // Coaches can now delete athletes
 
     if (!id || typeof id !== "string") {
         return { success: false, error: "ID inválido" };
     }
 
     try {
-        await prisma.athlete.delete({ where: { id } });
+        await prisma.$transaction(async (tx) => {
+            await tx.athlete.delete({ where: { id } });
+            await tx.auditLog.create({
+                data: {
+                    action: "DELETE",
+                    entity: "Athlete",
+                    entityId: id,
+                    performedBy: session.user.id,
+                    details: { timestamp: new Date() }
+                }
+            });
+        });
+
         revalidatePath("/atletas");
         return { success: true };
     } catch (error) {
@@ -148,15 +160,27 @@ export async function toggleAthleteStatus(id: string, status: string) {
 }
 
 export async function deleteAthletes(ids: string[]) {
-    await requireRole(["ADMIN"]);
+    const session = await requireRole(["ADMIN", "COACH"]);
 
     try {
-        await prisma.athlete.deleteMany({
-            where: {
-                id: {
-                    in: ids,
+        await prisma.$transaction(async (tx) => {
+            await tx.athlete.deleteMany({
+                where: {
+                    id: {
+                        in: ids,
+                    },
                 },
-            },
+            });
+
+            await tx.auditLog.createMany({
+                data: ids.map(id => ({
+                    action: "DELETE",
+                    entity: "Athlete",
+                    entityId: id,
+                    performedBy: session.user.id,
+                    details: { timestamp: new Date() }
+                }))
+            });
         });
 
         revalidatePath("/atletas");

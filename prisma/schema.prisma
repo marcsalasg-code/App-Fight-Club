@@ -239,6 +239,7 @@ model Payment {
   @@index([paymentDate])
   @@index([athleteId, paymentDate])
   @@index([status])
+  @@index([paymentDate, status]) // Optimized for revenue reporting
 }
 
 // ==========================================================

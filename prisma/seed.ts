@@ -83,12 +83,57 @@ async function main() {
     }
 
     console.log("Seeding finished.");
+    console.log("Seeding finished.");
+
+    // Create/Upsert Users (Admin & Coach)
+    // Hash passwords: "1234" (Marc) and "0000" (Javi)
+    // Using bcryptjs directly here since we can't import from src easily in seed
+    const bcrypt = require("bcryptjs");
+    const adminPassword = await bcrypt.hash("1234", 10);
+    const coachPassword = await bcrypt.hash("0000", 10);
+
+    // Marc (Admin)
+    await prisma.user.upsert({
+        where: { email: "marc@gymmanager.com" },
+        update: {
+            password: adminPassword,
+            role: "ADMIN",
+            name: "Marc",
+            active: true
+        },
+        create: {
+            email: "marc@gymmanager.com",
+            password: adminPassword,
+            name: "Marc",
+            role: "ADMIN",
+            active: true
+        }
+    });
+
+    // Javi (Coach)
+    await prisma.user.upsert({
+        where: { email: "coach@gymmanager.com" },
+        update: {
+            password: coachPassword,
+            role: "COACH",
+            name: "Javi",
+            active: true
+        },
+        create: {
+            email: "coach@gymmanager.com",
+            password: coachPassword,
+            name: "Javi",
+            role: "COACH",
+            active: true
+        }
+    });
+
+    console.log("Users seeded successfully.");
+
+    process.exit(0);
 }
 
 main()
-    .then(async () => {
-        await prisma.$disconnect();
-    })
     .catch(async (e) => {
         console.error(e);
         await prisma.$disconnect();

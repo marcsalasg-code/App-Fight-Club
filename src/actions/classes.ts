@@ -279,7 +279,7 @@ export async function removeAttendance(attendanceId: string) {
 }
 
 export async function deleteClass(id: string) {
-    await requireRole(["ADMIN"]); // Only Admin delete classes
+    const session = await requireRole(["ADMIN", "COACH"]); // Coaches can now delete classes
 
     if (!id) return { success: false, error: "ID requerido" };
 
@@ -290,7 +290,19 @@ export async function deleteClass(id: string) {
             return { success: false, error: `No se puede eliminar: tiene ${attendanceCount} registros de asistencia` };
         }
 
-        await prisma.class.delete({ where: { id } });
+        await prisma.$transaction(async (tx) => {
+            await tx.class.delete({ where: { id } });
+            await tx.auditLog.create({
+                data: {
+                    action: "DELETE",
+                    entity: "Class",
+                    entityId: id,
+                    performedBy: session.user.id,
+                    details: { timestamp: new Date() }
+                }
+            });
+        });
+
         revalidatePath("/clases");
         revalidatePath("/calendario");
         return { success: true };
