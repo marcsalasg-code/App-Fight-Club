@@ -7,7 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getGymSettings, updateGymSettings, GymSettingsData } from "@/app/actions/settings";
 import { toast } from "sonner";
-import { Loader2, Save, Settings as SettingsIcon, Tag as TagIcon, Users, CalendarClock } from "lucide-react";
+import { Loader2, Save, Settings as SettingsIcon, Tag as TagIcon, Users, CalendarClock, Trophy } from "lucide-react";
+import Link from "next/link";
 
 export default function SettingsPage() {
     const [loading, setLoading] = useState(true);
@@ -174,7 +175,7 @@ export default function SettingsPage() {
                         </div>
                     </a>
 
-                    <a
+                    <Link
                         href="/configuracion/horarios"
                         className="flex items-center justify-between p-4 rounded-lg border hover:bg-accent transition-colors"
                     >
@@ -187,7 +188,37 @@ export default function SettingsPage() {
                                 <p className="text-xs text-muted-foreground">Patrones de clases</p>
                             </div>
                         </div>
-                    </a>
+                    </Link>
+
+                    <Link
+                        href="/configuracion/clases"
+                        className="flex items-center justify-between p-4 rounded-lg border hover:bg-accent transition-colors"
+                    >
+                        <div className="flex items-center gap-3">
+                            <div className="bg-primary/10 p-2 rounded-full">
+                                <SettingsIcon className="h-4 w-4 text-primary" />
+                            </div>
+                            <div>
+                                <p className="font-medium">Tipos de Clase</p>
+                                <p className="text-xs text-muted-foreground">Personalizar disciplinas</p>
+                            </div>
+                        </div>
+                    </Link>
+
+                    <Link
+                        href="/configuracion/competencias"
+                        className="flex items-center justify-between p-4 rounded-lg border hover:bg-accent transition-colors"
+                    >
+                        <div className="flex items-center gap-3">
+                            <div className="bg-primary/10 p-2 rounded-full">
+                                <Trophy className="h-4 w-4 text-primary" />
+                            </div>
+                            <div>
+                                <p className="font-medium">Competencias</p>
+                                <p className="text-xs text-muted-foreground">Categorías y eventos</p>
+                            </div>
+                        </div>
+                    </Link>
                 </CardContent>
             </Card>
         </div>

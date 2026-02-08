@@ -9,6 +9,7 @@ import { Users, Trophy, CheckCircle2, Clock } from "lucide-react";
 import { Class, CalendarEvent, TYPE_COLORS } from "./types";
 import { MobileThreeDayView } from "./mobile-three-day-view";
 import { getClassStatus } from "./utils";
+import { useClassTypes } from "@/hooks/use-class-types";
 
 type Props = {
     classes: Class[];
@@ -16,13 +17,10 @@ type Props = {
     currentDate: Date;
 };
 
-const DAYS = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"];
-const START_HOUR = 6;
-const END_HOUR = 22;
-const HOUR_HEIGHT = 64;
-const TOTAL_HOURS = END_HOUR - START_HOUR + 1;
+import { CALENDAR_CONSTANTS, TOTAL_HOURS, TOTAL_HEIGHT, calculateBlockDimensions, calculateEventDimensions, resolveClassColors } from "./calendar-engine";
 
 export function WeekView({ classes, events, currentDate }: Props) {
+    const { types: classTypes } = useClassTypes();
     const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
     const [detailsOpen, setDetailsOpen] = useState(false);
 
@@ -34,23 +32,9 @@ export function WeekView({ classes, events, currentDate }: Props) {
         setDetailsOpen(true);
     };
 
-    const blockHeight = (durationMinutes: number) => (durationMinutes / 60) * HOUR_HEIGHT;
-    const blockTop = (startMinutes: number) => (startMinutes / 60) * HOUR_HEIGHT;
+    const getTypeColors = (type: string) => resolveClassColors(type, classTypes);
 
-    const getClassStyle = (cls: Class) => {
-        const [startH, startM] = cls.startTime.split(":").map(Number);
-        const [endH, endM] = cls.endTime.split(":").map(Number);
-        const startMinutes = (startH - START_HOUR) * 60 + startM;
-        const endMinutes = (endH - START_HOUR) * 60 + endM;
-        const durationMinutes = endMinutes - startMinutes;
-
-        return {
-            top: `${blockTop(startMinutes)}px`,
-            height: `${Math.max(blockHeight(durationMinutes), 32)}px`
-        };
-    };
-
-    const getTypeColors = (type: string) => TYPE_COLORS[type] || TYPE_COLORS.default;
+    const DAYS = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"];
 
     const classesByDay = DAYS.reduce((acc, day) => {
         acc[day] = classes.filter(c => c.dayOfWeek === day);
@@ -99,9 +83,9 @@ export function WeekView({ classes, events, currentDate }: Props) {
                             <div
                                 key={i}
                                 className="border-b border-border/30 text-xs text-right pr-2 text-muted-foreground font-mono flex items-start justify-end pt-1"
-                                style={{ height: `${HOUR_HEIGHT}px` }}
+                                style={{ height: `${CALENDAR_CONSTANTS.HOUR_HEIGHT}px` }}
                             >
-                                <span className="tabular-nums opacity-50">{String(START_HOUR + i).padStart(2, '0')}:00</span>
+                                <span className="tabular-nums opacity-50">{String(CALENDAR_CONSTANTS.START_HOUR + i).padStart(2, '0')}:00</span>
                             </div>
                         ))}
                     </div>
@@ -114,35 +98,28 @@ export function WeekView({ classes, events, currentDate }: Props) {
                                 "flex-1 border-r border-border/50 relative min-w-[140px]",
                                 isSameDay(weekDays[dayIndex], new Date()) && "bg-primary/5"
                             )}
-                            style={{ height: `${TOTAL_HOURS * HOUR_HEIGHT}px` }}
+                            style={{ height: `${CALENDAR_CONSTANTS.TOTAL_HEIGHT}px` }}
                         >
                             {/* Hour grid lines - Subtler */}
                             {Array.from({ length: TOTAL_HOURS }, (_, i) => (
                                 <div
                                     key={i}
                                     className="absolute w-full border-b border-dashed border-border/30 pointer-events-none"
-                                    style={{ top: `${i * HOUR_HEIGHT}px`, height: `${HOUR_HEIGHT}px` }}
+                                    style={{ top: `${i * CALENDAR_CONSTANTS.HOUR_HEIGHT}px`, height: `${CALENDAR_CONSTANTS.HOUR_HEIGHT}px` }}
                                 />
                             ))}
 
                             {/* Events */}
                             {events.filter(e => isSameDay(e.date, weekDays[dayIndex])).map(event => {
-                                const eventDate = new Date(event.date);
-                                const hours = eventDate.getHours();
-                                const minutes = eventDate.getMinutes();
-
-                                let topPos = 0;
-                                if (hours >= START_HOUR && hours <= END_HOUR) {
-                                    topPos = ((hours - START_HOUR) * 60 + minutes) / 60 * HOUR_HEIGHT;
-                                }
+                                const eventStyle = calculateEventDimensions(event.date);
 
                                 return (
                                     <div
                                         key={event.id}
                                         className="absolute left-1 right-1 px-2 py-1 z-20 rounded-md border shadow-sm flex flex-col justify-center group hover:scale-[1.02] transition-transform"
                                         style={{
-                                            top: `${topPos}px`,
-                                            height: `${HOUR_HEIGHT}px`,
+                                            top: eventStyle.top,
+                                            height: eventStyle.height,
                                             backgroundColor: "rgba(147, 51, 234, 0.9)",
                                             borderColor: "#7e22ce",
                                             color: "white"
@@ -162,7 +139,7 @@ export function WeekView({ classes, events, currentDate }: Props) {
 
                             {/* Classes */}
                             {classesByDay[day]?.map((cls) => {
-                                const style = getClassStyle(cls);
+                                const style = calculateBlockDimensions(cls.startTime, cls.endTime);
                                 const colors = getTypeColors(cls.type);
                                 const status = getClassStatus(cls, weekDays[dayIndex]);
 

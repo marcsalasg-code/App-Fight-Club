@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useClassTypes } from "@/hooks/use-class-types"; // Added import
 import {
     Dialog,
     DialogContent,
@@ -55,7 +56,23 @@ export function EditClassModal({ classData, onSuccess, children }: Props) {
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [coaches, setCoaches] = useState<{ id: string; name: string }[]>([]);
+
+    // Dynamic Types
+    const { types: classTypes, loading: typesLoading } = useClassTypes();
+    const [selectedType, setSelectedType] = useState(classData.type);
+    const [selectedColor, setSelectedColor] = useState(classData.color || "#D4AF37");
+
     const router = useRouter();
+
+    const handleTypeChange = (value: string) => {
+        setSelectedType(value);
+        // Sync color logic (optional for edit: maybe user wants to keep override?)
+        // Let's bias towards syncing if user changes type explicitly
+        const typeData = classTypes.find(t => t.code === value);
+        if (typeData) {
+            setSelectedColor(typeData.color);
+        }
+    };
 
     // Fetch coaches when dialog opens
     const handleOpenChange = async (newOpen: boolean) => {
@@ -88,7 +105,7 @@ export function EditClassModal({ classData, onSuccess, children }: Props) {
             endTime: formData.get("endTime") as string,
             levelRequired: formData.get("levelRequired") as string || undefined,
             maxCapacity: parseInt(formData.get("maxCapacity") as string) || 20,
-            color: formData.get("color") as string,
+            color: selectedColor,
             coachIds: coachIds.length > 0 ? coachIds : undefined,
         };
 
@@ -104,18 +121,6 @@ export function EditClassModal({ classData, onSuccess, children }: Props) {
             toast.error(result.error || "Error al actualizar");
         }
     }
-
-    // Process existing coaches for default values (if classData had them, but classData type needs update?)
-    // Warning: classData currently defined in this file might not have coach info passed from parent.
-    // Parent is `ClassCard` or similar. Let's assume parent will pass `coachIds` or similar if we update type.
-    // For now, let's update local type definition, but we need to ensure parent passes it.
-    // However, `classData` prop in `EditClassModal` comes from `clases/page.tsx` mapping?
-    // Let's check `ClassData` type definition above. 
-    // It is `type ClassData = { ... }`. I need to update it.
-
-    // Default values for selects:
-    // This is tricky if data isn't passed.
-    // If simple fix: I'll assume `classData` contains `coaches` array.
 
     const defaultCoach1 = classData.coaches?.[0]?.id || "";
     const defaultCoach2 = classData.coaches?.[1]?.id || "";
@@ -152,16 +157,28 @@ export function EditClassModal({ classData, onSuccess, children }: Props) {
                     <div className="grid gap-4 sm:grid-cols-2">
                         <div className="space-y-2">
                             <Label>Tipo *</Label>
-                            <Select name="type" required defaultValue={classData.type}>
+                            <Select
+                                name="type"
+                                required
+                                value={selectedType}
+                                onValueChange={handleTypeChange}
+                            >
                                 <SelectTrigger>
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="MUAY_THAI">Muay Thai</SelectItem>
-                                    <SelectItem value="KICKBOXING">Kickboxing</SelectItem>
-                                    <SelectItem value="SPARRING">Sparring</SelectItem>
-                                    <SelectItem value="CONDITIONING">Acondicionamiento</SelectItem>
-                                    <SelectItem value="COMPETITION">Competición</SelectItem>
+                                    {typesLoading ? (
+                                        <div className="flex justify-center p-2"><Loader2 className="h-4 w-4 animate-spin" /></div>
+                                    ) : (
+                                        classTypes.map(type => (
+                                            <SelectItem key={type.code} value={type.code}>
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: type.color }} />
+                                                    {type.label}
+                                                </div>
+                                            </SelectItem>
+                                        ))
+                                    )}
                                 </SelectContent>
                             </Select>
                         </div>
@@ -275,7 +292,8 @@ export function EditClassModal({ classData, onSuccess, children }: Props) {
                                         type="radio"
                                         name="color"
                                         value={c.value}
-                                        defaultChecked={classData.color === c.value || (!classData.color && c.value === "#D4AF37")}
+                                        checked={selectedColor === c.value}
+                                        onChange={() => setSelectedColor(c.value)}
                                         className="sr-only peer"
                                     />
                                     <div

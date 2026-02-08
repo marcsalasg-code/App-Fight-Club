@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
+import { useClassTypes } from "@/hooks/use-class-types"; // Added import
 
 // ... keep other imports but remove Dialog ones ...
 import {
@@ -31,7 +32,22 @@ export function NewClassModal() {
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [coaches, setCoaches] = useState<{ id: string; name: string }[]>([]);
+
+    // Dynamic Class Types
+    const { types: classTypes, loading: typesLoading } = useClassTypes();
+    const [selectedType, setSelectedType] = useState("MUAY_THAI");
+    const [selectedColor, setSelectedColor] = useState("#D4AF37");
+
     const router = useRouter();
+
+    const handleTypeChange = (value: string) => {
+        setSelectedType(value);
+        // Find type and sync color
+        const typeData = classTypes.find(t => t.code === value);
+        if (typeData) {
+            setSelectedColor(typeData.color);
+        }
+    };
 
     // Fetch coaches when dialog opens
     const handleOpenChange = async (newOpen: boolean) => {
@@ -64,7 +80,7 @@ export function NewClassModal() {
             endTime: formData.get("endTime") as string,
             levelRequired: formData.get("levelRequired") as string || undefined,
             maxCapacity: parseInt(formData.get("maxCapacity") as string) || 20,
-            color: formData.get("color") as string,
+            color: selectedColor, // Use controlled color
             coachIds: coachIds.length > 0 ? coachIds : undefined,
         };
 
@@ -107,16 +123,28 @@ export function NewClassModal() {
                 <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
                         <Label>Tipo *</Label>
-                        <Select name="type" required defaultValue="MUAY_THAI">
+                        <Select
+                            name="type"
+                            required
+                            value={selectedType}
+                            onValueChange={handleTypeChange}
+                        >
                             <SelectTrigger>
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="MUAY_THAI">Muay Thai</SelectItem>
-                                <SelectItem value="KICKBOXING">Kickboxing</SelectItem>
-                                <SelectItem value="SPARRING">Sparring</SelectItem>
-                                <SelectItem value="CONDITIONING">Acondicionamiento</SelectItem>
-                                <SelectItem value="COMPETITION">Competición</SelectItem>
+                                {typesLoading ? (
+                                    <div className="flex justify-center p-2"><Loader2 className="h-4 w-4 animate-spin" /></div>
+                                ) : (
+                                    classTypes.map(type => (
+                                        <SelectItem key={type.code} value={type.code}>
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: type.color }} />
+                                                {type.label}
+                                            </div>
+                                        </SelectItem>
+                                    ))
+                                )}
                             </SelectContent>
                         </Select>
                     </div>
@@ -230,7 +258,8 @@ export function NewClassModal() {
                                     type="radio"
                                     name="color"
                                     value={c.value}
-                                    defaultChecked={i === 0}
+                                    checked={selectedColor === c.value}
+                                    onChange={() => setSelectedColor(c.value)}
                                     className="sr-only peer"
                                 />
                                 <div

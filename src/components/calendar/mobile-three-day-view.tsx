@@ -8,6 +8,7 @@ import { es } from "date-fns/locale";
 import { Trophy, CheckCircle2, Clock } from "lucide-react";
 import { Class, CalendarEvent, TYPE_COLORS } from "./types";
 import { getClassStatus } from "./utils";
+import { useClassTypes } from "@/hooks/use-class-types"; // Added import
 
 type Props = {
     classes: Class[];
@@ -15,12 +16,10 @@ type Props = {
     currentDate: Date;
 };
 
-const START_HOUR = 6;
-const END_HOUR = 22;
-const HOUR_HEIGHT = 64;
-const TOTAL_HOURS = END_HOUR - START_HOUR + 1;
+import { CALENDAR_CONSTANTS, TOTAL_HOURS, TOTAL_HEIGHT, calculateBlockDimensions, calculateEventDimensions, resolveClassColors } from "./calendar-engine";
 
 export function MobileThreeDayView({ classes, events, currentDate }: Props) {
+    const { types: classTypes } = useClassTypes(); // Hook usage
     const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
     const [detailsOpen, setDetailsOpen] = useState(false);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -48,18 +47,7 @@ export function MobileThreeDayView({ classes, events, currentDate }: Props) {
         setDetailsOpen(true);
     };
 
-    const getClassStyle = (cls: Class) => {
-        const [startH, startM] = cls.startTime.split(":").map(Number);
-        const [endH, endM] = cls.endTime.split(":").map(Number);
-        const startMinutes = (startH - START_HOUR) * 60 + startM;
-        const endMinutes = (endH - START_HOUR) * 60 + endM;
-        const durationMinutes = endMinutes - startMinutes;
-        const top = (startMinutes / 60) * HOUR_HEIGHT;
-        const height = (durationMinutes / 60) * HOUR_HEIGHT;
-        return { top: `${top}px`, height: `${Math.max(height, 32)}px` };
-    };
-
-    const getTypeColors = (type: string) => TYPE_COLORS[type] || TYPE_COLORS.default;
+    const getTypeColors = (type: string) => resolveClassColors(type, classTypes);
 
     const classesByDay = weekDays.reduce((acc, day) => {
         const dayName = format(day, 'EEEE').toUpperCase();
@@ -85,9 +73,9 @@ export function MobileThreeDayView({ classes, events, currentDate }: Props) {
                             <div
                                 key={i}
                                 className="border-b border-border/50 text-[10px] text-right pr-1 text-muted-foreground font-mono flex items-start justify-end pt-1 bg-background"
-                                style={{ height: `${HOUR_HEIGHT}px` }}
+                                style={{ height: `${CALENDAR_CONSTANTS.HOUR_HEIGHT}px` }}
                             >
-                                <span>{String(START_HOUR + i).padStart(2, '0')}:00</span>
+                                <span>{String(CALENDAR_CONSTANTS.START_HOUR + i).padStart(2, '0')}:00</span>
                             </div>
                         ))}
                     </div>
@@ -115,13 +103,13 @@ export function MobileThreeDayView({ classes, events, currentDate }: Props) {
                             </div>
 
                             {/* Body */}
-                            <div className="relative" style={{ height: `${TOTAL_HOURS * HOUR_HEIGHT}px` }}>
+                            <div className="relative" style={{ height: `${TOTAL_HEIGHT}px` }}>
                                 {/* Horizontal Grid Lines */}
                                 {Array.from({ length: TOTAL_HOURS }, (_, h) => (
                                     <div
                                         key={h}
                                         className="absolute w-full border-b border-border/40 pointer-events-none"
-                                        style={{ top: `${h * HOUR_HEIGHT}px`, height: `${HOUR_HEIGHT}px` }}
+                                        style={{ top: `${h * CALENDAR_CONSTANTS.HOUR_HEIGHT}px`, height: `${CALENDAR_CONSTANTS.HOUR_HEIGHT}px` }}
                                     >
                                         <div className="absolute w-full border-b border-border/10 top-1/2" />
                                     </div>
@@ -129,96 +117,15 @@ export function MobileThreeDayView({ classes, events, currentDate }: Props) {
 
                                 {/* Events */}
                                 {events?.filter(e => isSameDay(e.date, day)).map(event => {
-                                    const eventDate = new Date(event.date);
-                                    const hours = eventDate.getHours();
-                                    const minutes = eventDate.getMinutes();
-
-                                    let topPos = 0;
-                                    if (hours >= START_HOUR && hours <= END_HOUR) {
-                                        topPos = ((hours - START_HOUR) * 60 + minutes) / 60 * HOUR_HEIGHT;
-                                    } else {
-                                        topPos = 0;
-                                    }
+                                    const eventStyle = calculateEventDimensions(event.date);
 
                                     return (
                                         <div
                                             key={event.id}
                                             className="absolute left-0.5 right-0.5 px-1 py-1 z-20 rounded-sm border shadow-sm flex flex-col justify-center"
                                             style={{
-                                                top: `${topPos}px`,
-                                                height: `${HOUR_HEIGHT}px`,
-                                                backgroundColor: "rgba(147, 51, 234, 0.9)",
-                                                borderColor: "#7e22ce",
-                                                color: "white"
-                                            }}
-                                        >
-                                            <div className="flex items-center gap-1 font-bold text-[10px] truncate leading-tight">
-                                                <Trophy className="h-3 w-3 text-yellow-300 shrink-0" />
-                                                <span className="truncate">{event.name}</span>
-                                            </div>
-                                            <div className="text-[9px] opacity-90 truncate -mt-0.5">
-                                                Competencia
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-
-                                {/* Events */}
-                                {events?.filter(e => isSameDay(e.date, day)).map(event => {
-                                    const eventDate = new Date(event.date);
-                                    const hours = eventDate.getHours();
-                                    const minutes = eventDate.getMinutes();
-
-                                    let topPos = 0;
-                                    if (hours >= START_HOUR && hours <= END_HOUR) {
-                                        topPos = ((hours - START_HOUR) * 60 + minutes) / 60 * HOUR_HEIGHT;
-                                    } else {
-                                        topPos = 0;
-                                    }
-
-                                    return (
-                                        <div
-                                            key={event.id}
-                                            className="absolute left-0.5 right-0.5 px-1 py-1 z-20 rounded-sm border shadow-sm flex flex-col justify-center"
-                                            style={{
-                                                top: `${topPos}px`,
-                                                height: `${HOUR_HEIGHT}px`,
-                                                backgroundColor: "rgba(147, 51, 234, 0.9)",
-                                                borderColor: "#7e22ce",
-                                                color: "white"
-                                            }}
-                                        >
-                                            <div className="flex items-center gap-1 font-bold text-[10px] truncate leading-tight">
-                                                <Trophy className="h-3 w-3 text-yellow-300 shrink-0" />
-                                                <span className="truncate">{event.name}</span>
-                                            </div>
-                                            <div className="text-[9px] opacity-90 truncate -mt-0.5">
-                                                Competencia
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-
-                                {/* Events */}
-                                {events?.filter(e => isSameDay(e.date, day)).map(event => {
-                                    const eventDate = new Date(event.date);
-                                    const hours = eventDate.getHours();
-                                    const minutes = eventDate.getMinutes();
-
-                                    let topPos = 0;
-                                    if (hours >= START_HOUR && hours <= END_HOUR) {
-                                        topPos = ((hours - START_HOUR) * 60 + minutes) / 60 * HOUR_HEIGHT;
-                                    } else {
-                                        topPos = 0;
-                                    }
-
-                                    return (
-                                        <div
-                                            key={event.id}
-                                            className="absolute left-0.5 right-0.5 px-1 py-1 z-20 rounded-sm border shadow-sm flex flex-col justify-center"
-                                            style={{
-                                                top: `${topPos}px`,
-                                                height: `${HOUR_HEIGHT}px`,
+                                                top: eventStyle.top,
+                                                height: eventStyle.height,
                                                 backgroundColor: "rgba(147, 51, 234, 0.9)",
                                                 borderColor: "#7e22ce",
                                                 color: "white"
@@ -237,7 +144,7 @@ export function MobileThreeDayView({ classes, events, currentDate }: Props) {
 
                                 {/* Classes */}
                                 {classesByDay[format(day, 'EEEE').toUpperCase()]?.map((cls) => {
-                                    const style = getClassStyle(cls);
+                                    const style = calculateBlockDimensions(cls.startTime, cls.endTime); // Use engine
                                     const colors = getTypeColors(cls.type);
                                     const status = getClassStatus(cls, day);
 

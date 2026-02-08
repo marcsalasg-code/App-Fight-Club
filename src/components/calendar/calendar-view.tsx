@@ -7,6 +7,7 @@ import { MonthView } from "./month-view";
 import { DayView } from "./day-view";
 import { YearView } from "./year-view";
 import { NewClassModal } from "./new-class-modal";
+import { NewCompetitionModal } from "./new-competition-modal";
 import { CalendarHeader } from "./calendar-header";
 import { Button } from "@/components/ui/button";
 import { Class, CalendarEvent, ViewMode } from "./types";
@@ -66,7 +67,8 @@ export function CalendarView({ classes, events }: Props) {
                     onNavigate={navigate}
                     onToday={handleToday}
                 />
-                <div className="flex justify-end">
+                <div className="flex justify-end gap-2">
+                    <NewCompetitionModal />
                     <NewClassModal />
                 </div>
             </div>

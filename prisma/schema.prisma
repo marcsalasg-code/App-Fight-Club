@@ -140,6 +140,41 @@ model GymSettings {
   updatedAt           DateTime @updatedAt
 }
 
+// ==========================================================
+// DYNAMIC CONFIGURATION (Customizable Dropdowns)
+// ==========================================================
+
+model ClassType {
+  id          String   @id @default(cuid())
+  code        String   @unique // The internal ID link (e.g. "MUAY_THAI")
+  label       String   // Display Name
+  color       String   // Background Color
+  borderColor String   // Border Color
+  icon        String?  // Lucid Icon Name
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model CompetitionCategory {
+  id        String   @id @default(cuid())
+  name      String   // e.g. "Adulto -70kg"
+  gender    String?  // MALE, FEMALE, MIXED
+  minWeight Float?
+  maxWeight Float?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model EventType {
+  id        String   @id @default(cuid())
+  label     String   // e.g. "Torneo", "Interclub"
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 
 // ==========================================================
 // MEMBERSHIPS (Subscription Types)
