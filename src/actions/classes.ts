@@ -300,4 +300,28 @@ export async function deleteClass(id: string) {
     }
 }
 
+
+export async function getCoachesList() {
+    await requireRole(["ADMIN", "COACH"]);
+
+    try {
+        const coaches = await prisma.user.findMany({
+            where: {
+                role: "COACH",
+                active: true,
+            },
+            select: {
+                id: true,
+                name: true,
+            },
+            orderBy: {
+                name: "asc",
+            }
+        });
+        return coaches;
+    } catch (error) {
+        console.error("Error fetching coaches:", error);
+        return [];
+    }
+}
 // End of file

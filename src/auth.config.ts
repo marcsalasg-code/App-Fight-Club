@@ -34,7 +34,7 @@ export const authConfig = {
             if (user) {
                 // Add role to the token
                 token.role = user.role;
-                token.id = user.id;
+                if (user.id) token.id = user.id;
             }
             return token;
         },

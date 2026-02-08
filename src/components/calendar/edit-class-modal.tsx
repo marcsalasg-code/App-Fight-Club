@@ -20,7 +20,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { updateClass, ClassFormData, getCoachesList } from "@/app/(admin)/clases/actions";
+import { updateClass, ClassFormData, getCoachesList } from "@/actions/classes";
 import { toast } from "sonner";
 import { Edit, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";

@@ -15,7 +15,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { createClass, ClassFormData, getCoachesList } from "@/app/(admin)/clases/actions";
+import { createClass, ClassFormData, getCoachesList } from "@/actions/classes";
 import { toast } from "sonner";
 import { Plus, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";

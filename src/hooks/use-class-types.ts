@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getClassTypes, ClassTypeData } from "@/app/(admin)/configuracion/clases/actions";
-import { CLASS_TYPES, CLASS_TYPE_LABELS } from "@/lib/constants";
+import { getClassTypes } from "@/actions/class-types";
+import { CLASS_TYPES } from "@/lib/constants";
 import { TYPE_COLORS } from "@/components/calendar/types";
 
 export type ClassType = {
@@ -11,7 +11,7 @@ export type ClassType = {
     label: string;
     color: string;
     borderColor: string;
-    icon?: string;
+    icon?: string | null;
     active: boolean;
 };
 

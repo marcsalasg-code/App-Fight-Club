@@ -98,7 +98,7 @@ export function WeekView({ classes, events, currentDate }: Props) {
                                 "flex-1 border-r border-border/50 relative min-w-[140px]",
                                 isSameDay(weekDays[dayIndex], new Date()) && "bg-primary/5"
                             )}
-                            style={{ height: `${CALENDAR_CONSTANTS.TOTAL_HEIGHT}px` }}
+                            style={{ height: `${TOTAL_HEIGHT}px` }}
                         >
                             {/* Hour grid lines - Subtler */}
                             {Array.from({ length: TOTAL_HOURS }, (_, i) => (
