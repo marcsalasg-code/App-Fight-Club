@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { ClassDetailModal } from "./class-detail-modal";
 import { format, startOfWeek, addDays, isSameDay } from "date-fns";
 import { es } from "date-fns/locale";
-import { Users } from "lucide-react";
+import { Users, Trophy } from "lucide-react";
 import { Class, CalendarEvent, TYPE_COLORS } from "./types";
 import { MobileThreeDayView } from "./mobile-three-day-view";
 
@@ -21,7 +21,7 @@ const END_HOUR = 22;
 const HOUR_HEIGHT = 64;
 const TOTAL_HOURS = END_HOUR - START_HOUR + 1;
 
-export function WeekView({ classes, currentDate }: Props) {
+export function WeekView({ classes, events, currentDate }: Props) {
     const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
     const [detailsOpen, setDetailsOpen] = useState(false);
 
@@ -127,6 +127,47 @@ export function WeekView({ classes, currentDate }: Props) {
                                     style={{ top: `${i * HOUR_HEIGHT + HOUR_HEIGHT / 2}px` }}
                                 />
                             ))}
+
+                            {/* Events */}
+                            {events.filter(e => isSameDay(e.date, weekDays[dayIndex])).map(event => {
+                                // Default to 8:00 AM if time is before start hour or defined as 00:00
+                                const eventDate = new Date(event.date);
+                                const hours = eventDate.getHours();
+                                const minutes = eventDate.getMinutes();
+
+                                let topPos = 0;
+                                // If time is within view range (6am - 10pm), position accordingly
+                                if (hours >= START_HOUR && hours <= END_HOUR) {
+                                    topPos = ((hours - START_HOUR) * 60 + minutes) / 60 * HOUR_HEIGHT;
+                                } else {
+                                    // Default to "All Day" or fixed slot (e.g. 8 AM visualization) if out of bounds
+                                    // For now, let's pin it to the top (6 AM) + offset to not hide it completely
+                                    topPos = 0;
+                                }
+
+                                return (
+                                    <div
+                                        key={event.id}
+                                        className="absolute left-1 right-1 px-2 py-1 z-20 rounded-md border shadow-sm flex flex-col justify-center"
+                                        style={{
+                                            top: `${topPos}px`,
+                                            height: `${HOUR_HEIGHT}px`, // Fixed height for events
+                                            backgroundColor: "rgba(147, 51, 234, 0.9)", // Purple
+                                            borderColor: "#7e22ce",
+                                            color: "white"
+                                        }}
+                                        title={event.name}
+                                    >
+                                        <div className="flex items-center gap-1.5 font-bold text-xs truncate">
+                                            <Trophy className="h-3 w-3 text-yellow-300 shrink-0" />
+                                            <span className="truncate">{event.name}</span>
+                                        </div>
+                                        <div className="text-[10px] opacity-90 truncate">
+                                            Competencia
+                                        </div>
+                                    </div>
+                                );
+                            })}
 
                             {/* Classes */}
                             {classesByDay[day]?.map((cls) => {

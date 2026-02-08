@@ -5,10 +5,12 @@ import { cn } from "@/lib/utils";
 import { ClassDetailModal } from "./class-detail-modal";
 import { format, startOfWeek, addDays, isSameDay } from "date-fns";
 import { es } from "date-fns/locale";
-import { Class, TYPE_COLORS } from "./types";
+import { Trophy } from "lucide-react";
+import { Class, CalendarEvent, TYPE_COLORS } from "./types";
 
 type Props = {
     classes: Class[];
+    events?: CalendarEvent[];
     currentDate: Date;
 };
 
@@ -17,7 +19,7 @@ const END_HOUR = 22;
 const HOUR_HEIGHT = 64;
 const TOTAL_HOURS = END_HOUR - START_HOUR + 1;
 
-export function MobileThreeDayView({ classes, currentDate }: Props) {
+export function MobileThreeDayView({ classes, events, currentDate }: Props) {
     const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
     const [detailsOpen, setDetailsOpen] = useState(false);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -123,6 +125,114 @@ export function MobileThreeDayView({ classes, currentDate }: Props) {
                                         <div className="absolute w-full border-b border-border/10 top-1/2" />
                                     </div>
                                 ))}
+
+                                {/* Events */}
+                                {events?.filter(e => isSameDay(e.date, day)).map(event => {
+                                    const eventDate = new Date(event.date);
+                                    const hours = eventDate.getHours();
+                                    const minutes = eventDate.getMinutes();
+
+                                    let topPos = 0;
+                                    if (hours >= START_HOUR && hours <= END_HOUR) {
+                                        topPos = ((hours - START_HOUR) * 60 + minutes) / 60 * HOUR_HEIGHT;
+                                    } else {
+                                        topPos = 0;
+                                    }
+
+                                    return (
+                                        <div
+                                            key={event.id}
+                                            className="absolute left-0.5 right-0.5 px-1 py-1 z-20 rounded-sm border shadow-sm flex flex-col justify-center"
+                                            style={{
+                                                top: `${topPos}px`,
+                                                height: `${HOUR_HEIGHT}px`,
+                                                backgroundColor: "rgba(147, 51, 234, 0.9)",
+                                                borderColor: "#7e22ce",
+                                                color: "white"
+                                            }}
+                                        >
+                                            <div className="flex items-center gap-1 font-bold text-[10px] truncate leading-tight">
+                                                <Trophy className="h-3 w-3 text-yellow-300 shrink-0" />
+                                                <span className="truncate">{event.name}</span>
+                                            </div>
+                                            <div className="text-[9px] opacity-90 truncate -mt-0.5">
+                                                Competencia
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+
+                                {/* Events */}
+                                {events?.filter(e => isSameDay(e.date, day)).map(event => {
+                                    const eventDate = new Date(event.date);
+                                    const hours = eventDate.getHours();
+                                    const minutes = eventDate.getMinutes();
+
+                                    let topPos = 0;
+                                    if (hours >= START_HOUR && hours <= END_HOUR) {
+                                        topPos = ((hours - START_HOUR) * 60 + minutes) / 60 * HOUR_HEIGHT;
+                                    } else {
+                                        topPos = 0;
+                                    }
+
+                                    return (
+                                        <div
+                                            key={event.id}
+                                            className="absolute left-0.5 right-0.5 px-1 py-1 z-20 rounded-sm border shadow-sm flex flex-col justify-center"
+                                            style={{
+                                                top: `${topPos}px`,
+                                                height: `${HOUR_HEIGHT}px`,
+                                                backgroundColor: "rgba(147, 51, 234, 0.9)",
+                                                borderColor: "#7e22ce",
+                                                color: "white"
+                                            }}
+                                        >
+                                            <div className="flex items-center gap-1 font-bold text-[10px] truncate leading-tight">
+                                                <Trophy className="h-3 w-3 text-yellow-300 shrink-0" />
+                                                <span className="truncate">{event.name}</span>
+                                            </div>
+                                            <div className="text-[9px] opacity-90 truncate -mt-0.5">
+                                                Competencia
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+
+                                {/* Events */}
+                                {events?.filter(e => isSameDay(e.date, day)).map(event => {
+                                    const eventDate = new Date(event.date);
+                                    const hours = eventDate.getHours();
+                                    const minutes = eventDate.getMinutes();
+
+                                    let topPos = 0;
+                                    if (hours >= START_HOUR && hours <= END_HOUR) {
+                                        topPos = ((hours - START_HOUR) * 60 + minutes) / 60 * HOUR_HEIGHT;
+                                    } else {
+                                        topPos = 0;
+                                    }
+
+                                    return (
+                                        <div
+                                            key={event.id}
+                                            className="absolute left-0.5 right-0.5 px-1 py-1 z-20 rounded-sm border shadow-sm flex flex-col justify-center"
+                                            style={{
+                                                top: `${topPos}px`,
+                                                height: `${HOUR_HEIGHT}px`,
+                                                backgroundColor: "rgba(147, 51, 234, 0.9)",
+                                                borderColor: "#7e22ce",
+                                                color: "white"
+                                            }}
+                                        >
+                                            <div className="flex items-center gap-1 font-bold text-[10px] truncate leading-tight">
+                                                <Trophy className="h-3 w-3 text-yellow-300 shrink-0" />
+                                                <span className="truncate">{event.name}</span>
+                                            </div>
+                                            <div className="text-[9px] opacity-90 truncate -mt-0.5">
+                                                Competencia
+                                            </div>
+                                        </div>
+                                    );
+                                })}
 
                                 {/* Classes */}
                                 {classesByDay[format(day, 'EEEE').toUpperCase()]?.map((cls) => {

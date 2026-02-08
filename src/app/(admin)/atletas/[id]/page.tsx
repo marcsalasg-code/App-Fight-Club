@@ -23,6 +23,9 @@ import { AttendanceTab } from "./components/attendance-tab";
 import { WeighInHistory } from "../components/weigh-in-history";
 import { SubscriptionStatusCard } from "@/components/athletes/subscription-status-card";
 import { getAthleteSubscriptionStatus } from "../actions";
+import { AthleteProfileCard } from "@/components/athletes/athlete-profile-card";
+import { cn } from "@/lib/utils";
+import { ChevronRight } from "lucide-react";
 
 export const dynamic = 'force-dynamic';
 
@@ -139,108 +142,9 @@ export default async function AthleteDetailPage({ params }: Props) {
                     <div className="grid gap-6 lg:grid-cols-3">
                         {/* Main Info Columns */}
                         <div className="lg:col-span-2 space-y-6">
-                            {/* Contact Info */}
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="flex items-center gap-2">
-                                        <User className="h-5 w-5" />
-                                        Información Personal
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent className="grid gap-4 sm:grid-cols-2">
-                                    {athlete.email && (
-                                        <div className="flex items-center gap-3">
-                                            <Mail className="h-4 w-4 text-muted-foreground" />
-                                            <div>
-                                                <p className="text-sm text-muted-foreground">Email</p>
-                                                <p className="font-medium">{athlete.email}</p>
-                                            </div>
-                                        </div>
-                                    )}
-                                    {athlete.phone && (
-                                        <div className="flex items-center gap-3">
-                                            <Phone className="h-4 w-4 text-muted-foreground" />
-                                            <div>
-                                                <p className="text-sm text-muted-foreground">Teléfono</p>
-                                                <p className="font-medium">{athlete.phone}</p>
-                                            </div>
-                                        </div>
-                                    )}
-                                    {athlete.dateOfBirth && (
-                                        <div className="flex items-center gap-3">
-                                            <Calendar className="h-4 w-4 text-muted-foreground" />
-                                            <div>
-                                                <p className="text-sm text-muted-foreground">
-                                                    Fecha de Nacimiento
-                                                </p>
-                                                <p className="font-medium">
-                                                    {new Date(athlete.dateOfBirth).toLocaleDateString("es-ES")}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    )}
-                                    {athlete.emergencyContact && (
-                                        <div className="flex items-center gap-3">
-                                            <AlertCircle className="h-4 w-4 text-muted-foreground" />
-                                            <div>
-                                                <p className="text-sm text-muted-foreground">
-                                                    Contacto Emergencia
-                                                </p>
-                                                <p className="font-medium">{athlete.emergencyContact}</p>
-                                            </div>
-                                        </div>
-                                    )}
-                                </CardContent>
-                            </Card>
 
-                            {/* Training Info */}
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="flex items-center gap-2">
-                                        <Activity className="h-5 w-5" />
-                                        Información de Entrenamiento
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="grid gap-4 sm:grid-cols-3">
-                                        <div>
-                                            <p className="text-sm text-muted-foreground">Objetivo</p>
-                                            <p className="font-medium">{goalLabels[athlete.goal]}</p>
-                                        </div>
-                                        {athlete.height && (
-                                            <div>
-                                                <p className="text-sm text-muted-foreground">Altura</p>
-                                                <p className="font-medium">{athlete.height} cm</p>
-                                            </div>
-                                        )}
-                                        {athlete.weight && (
-                                            <div>
-                                                <p className="text-sm text-muted-foreground">Peso</p>
-                                                <p className="font-medium">{athlete.weight} kg</p>
-                                            </div>
-                                        )}
-                                        {athlete.isCompetitor && athlete.competitionCategory && (
-                                            <div>
-                                                <p className="text-sm text-muted-foreground">
-                                                    Categoría Competencia
-                                                </p>
-                                                <p className="font-medium">{athlete.competitionCategory}</p>
-                                            </div>
-                                        )}
-                                    </div>
-                                    {athlete.medicalConditions && (
-                                        <>
-                                            <Separator className="my-4" />
-                                            <div>
-                                                <p className="text-sm text-muted-foreground">
-                                                    Condiciones Médicas
-                                                </p>
-                                                <p className="font-medium">{athlete.medicalConditions}</p>
-                                            </div>
-                                        </>
-                                    )}
-                                </CardContent>
-                            </Card>
+                            {/* Unified Profile Card */}
+                            <AthleteProfileCard athlete={athlete} />
 
                             {/* Recent Activity Mini-List (Just top 5) */}
                             <Card>
@@ -324,45 +228,49 @@ export default async function AthleteDetailPage({ params }: Props) {
                                 </CardContent>
                             </Card>
 
-                            {/* Competitions */}
+                            {/* Competitions - Now at the bottom as requested */}
                             {athlete.isCompetitor && (
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle className="flex items-center gap-2 text-base">
-                                            <Trophy className="h-4 w-4 text-yellow-500" />
-                                            Competencias
-                                        </CardTitle>
-                                    </CardHeader>
-                                    <CardContent>
-                                        {athlete.competitions.length === 0 ? (
-                                            <p className="text-muted-foreground text-sm">Sin registros</p>
-                                        ) : (
-                                            <div className="space-y-2">
-                                                {athlete.competitions.map((comp) => (
-                                                    <div
-                                                        key={comp.id}
-                                                        className="p-2 rounded-lg bg-muted/50 text-sm"
-                                                    >
-                                                        <p className="font-medium">{comp.eventName}</p>
-                                                        <div className="flex justify-between text-xs mt-1">
+                                <Link href="/competencias" className="block group">
+                                    <Card className="hover:border-primary/50 transition-colors cursor-pointer border-dashed border-2 bg-muted/5">
+                                        <CardHeader>
+                                            <CardTitle className="flex items-center gap-2 text-base group-hover:text-primary transition-colors">
+                                                <Trophy className="h-4 w-4 text-yellow-500" />
+                                                Competencias
+                                                <ChevronRight className="h-4 w-4 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
+                                            </CardTitle>
+                                        </CardHeader>
+                                        <CardContent>
+                                            {athlete.competitions.length === 0 ? (
+                                                <p className="text-muted-foreground text-sm">Sin registros</p>
+                                            ) : (
+                                                <div className="space-y-2">
+                                                    {athlete.competitions.slice(0, 3).map((comp) => (
+                                                        <div
+                                                            key={comp.id}
+                                                            className="p-2 rounded-lg bg-background border text-sm flex justify-between items-center"
+                                                        >
+                                                            <div className="min-w-0">
+                                                                <p className="font-medium truncate">{comp.eventName}</p>
+                                                                <p className="text-xs text-muted-foreground">{new Date(comp.date).toLocaleDateString("es-ES")}</p>
+                                                            </div>
                                                             <Badge
                                                                 variant="outline"
-                                                                className={
-                                                                    getStatusColor(comp.result)
-                                                                }
+                                                                className={cn("shrink-0 ml-2", getStatusColor(comp.result))}
                                                             >
-                                                                {comp.result === "WON" ? "Victoria" : comp.result === "LOST" ? "Derrota" : comp.result}
+                                                                {comp.result === "WON" ? "VICTORIA" : comp.result === "LOST" ? "DERROTA" : comp.result}
                                                             </Badge>
-                                                            <span className="text-muted-foreground">
-                                                                {new Date(comp.date).toLocaleDateString("es-ES")}
-                                                            </span>
                                                         </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </CardContent>
-                                </Card>
+                                                    ))}
+                                                    {athlete.competitions.length > 3 && (
+                                                        <p className="text-xs text-center text-muted-foreground pt-1">
+                                                            + {athlete.competitions.length - 3} más
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </CardContent>
+                                    </Card>
+                                </Link>
                             )}
                         </div>
                     </div>

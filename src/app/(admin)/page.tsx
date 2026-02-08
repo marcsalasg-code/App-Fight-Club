@@ -82,6 +82,39 @@ async function getDashboardStats() {
     }),
   ]);
 
+  // If no classes today, find the next active day
+  let displayClasses = todayClasses;
+  let displayDate = "Hoy";
+
+  if (todayClasses.length === 0) {
+    for (let i = 1; i <= 7; i++) {
+      const nextDate = new Date();
+      nextDate.setDate(now.getDate() + i);
+      const dayOfWeek = DAYS_MAP[nextDate.getDay()];
+
+      const nextClasses = await prisma.class.findMany({
+        where: { dayOfWeek, active: true },
+        orderBy: { startTime: "asc" },
+        select: {
+          id: true,
+          name: true,
+          startTime: true,
+          endTime: true,
+          color: true,
+          maxCapacity: true,
+          _count: { select: { attendances: true } },
+        },
+      });
+
+      if (nextClasses.length > 0) {
+        displayClasses = nextClasses;
+        const dayName = format(nextDate, "EEEE", { locale: es });
+        displayDate = `Próximas: ${dayName.charAt(0).toUpperCase() + dayName.slice(1)}`;
+        break;
+      }
+    }
+  }
+
   // Process weekly attendance
   const weeklyActivity = Array.from({ length: 7 }).map((_, i) => {
     const d = subDays(now, 6 - i);
@@ -106,7 +139,8 @@ async function getDashboardStats() {
     todayAttendance,
     expiredSubscriptions,
     expiringSubscriptions,
-    todayClasses,
+    displayClasses,
+    displayDate,
     weeklyActivity,
   };
 }
@@ -241,10 +275,10 @@ async function DashboardContent() {
               <div>
                 <CardTitle className="flex items-center gap-2">
                   <Clock className="h-5 w-5 text-primary" />
-                  Clases de Hoy
+                  {stats.displayDate === "Hoy" ? "Clases de Hoy" : stats.displayDate}
                 </CardTitle>
                 <CardDescription className="mt-1.5">
-                  {stats.todayClasses.length} sesiones programadas para hoy
+                  {stats.displayClasses.length} sesiones programadas
                 </CardDescription>
               </div>
               <Link href="/calendario">
@@ -255,13 +289,13 @@ async function DashboardContent() {
               </Link>
             </CardHeader>
             <CardContent>
-              {stats.todayClasses.length === 0 ? (
+              {stats.displayClasses.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
-                  <p>No hay clases programadas para hoy</p>
+                  <p>No hay clases programadas próximamente</p>
                 </div>
               ) : (
                 <div className="grid gap-4 sm:grid-cols-2">
-                  {stats.todayClasses.map((cls) => (
+                  {stats.displayClasses.map((cls) => (
                     <Link
                       key={cls.id}
                       href={`/clases/${cls.id}/checkin`}
