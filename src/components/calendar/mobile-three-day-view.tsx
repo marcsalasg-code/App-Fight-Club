@@ -5,8 +5,9 @@ import { cn } from "@/lib/utils";
 import { ClassDetailModal } from "./class-detail-modal";
 import { format, startOfWeek, addDays, isSameDay } from "date-fns";
 import { es } from "date-fns/locale";
-import { Trophy } from "lucide-react";
+import { Trophy, CheckCircle2, Clock } from "lucide-react";
 import { Class, CalendarEvent, TYPE_COLORS } from "./types";
+import { getClassStatus } from "./utils";
 
 type Props = {
     classes: Class[];
@@ -238,22 +239,40 @@ export function MobileThreeDayView({ classes, events, currentDate }: Props) {
                                 {classesByDay[format(day, 'EEEE').toUpperCase()]?.map((cls) => {
                                     const style = getClassStyle(cls);
                                     const colors = getTypeColors(cls.type);
+                                    const status = getClassStatus(cls, day);
+
+                                    // Status Styles (Same as WeekView)
+                                    const isCompleted = status === 'COMPLETED';
+                                    const isPending = status === 'PENDING';
+                                    const isInProgress = status === 'IN_PROGRESS';
+
                                     return (
                                         <div
                                             key={cls.id}
                                             onClick={() => handleClassClick(cls.id)}
-                                            className="absolute left-0.5 right-0.5 px-1 py-1 cursor-pointer overflow-hidden z-10 rounded-sm"
+                                            className={cn(
+                                                "absolute left-0.5 right-0.5 px-1 py-1 cursor-pointer overflow-hidden z-10 rounded-md border transition-all duration-200",
+                                                isCompleted && "opacity-70 grayscale-[0.3]",
+                                                isInProgress && "ring-1 ring-primary ring-offset-0 shadow-sm z-20"
+                                            )}
                                             style={{
                                                 ...style,
                                                 backgroundColor: cls.color || colors.bg,
-                                                borderLeft: `2px solid ${colors.border}`,
+                                                borderColor: colors.border,
+                                                borderLeftWidth: "3px",
                                                 color: colors.text
                                             }}
                                         >
-                                            <div className="font-bold text-[10px] truncate leading-tight">
-                                                {cls.name}
+                                            <div className="flex justify-between items-start gap-0.5">
+                                                <div className="font-bold text-[10px] truncate leading-tight">
+                                                    {cls.name}
+                                                </div>
+                                                {isCompleted && <CheckCircle2 className="h-2.5 w-2.5 opacity-80 shrink-0" />}
+                                                {isInProgress && <Clock className="h-2.5 w-2.5 animate-pulse shrink-0" />}
+                                                {isPending && <div className="h-1 w-1 rounded-full bg-current opacity-60 mt-0.5 ml-auto shrink-0" />}
                                             </div>
-                                            <div className="text-[9px] opacity-90 truncate -mt-0.5">
+
+                                            <div className="text-[9px] opacity-95 truncate -mt-0.5 font-mono tracking-tight">
                                                 {cls.startTime}
                                             </div>
                                         </div>

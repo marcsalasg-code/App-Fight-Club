@@ -5,9 +5,10 @@ import { cn } from "@/lib/utils";
 import { ClassDetailModal } from "./class-detail-modal";
 import { format, startOfWeek, addDays, isSameDay } from "date-fns";
 import { es } from "date-fns/locale";
-import { Users, Trophy } from "lucide-react";
+import { Users, Trophy, CheckCircle2, Clock } from "lucide-react";
 import { Class, CalendarEvent, TYPE_COLORS } from "./types";
 import { MobileThreeDayView } from "./mobile-three-day-view";
+import { getClassStatus } from "./utils";
 
 type Props = {
     classes: Class[];
@@ -33,15 +34,20 @@ export function WeekView({ classes, events, currentDate }: Props) {
         setDetailsOpen(true);
     };
 
+    const blockHeight = (durationMinutes: number) => (durationMinutes / 60) * HOUR_HEIGHT;
+    const blockTop = (startMinutes: number) => (startMinutes / 60) * HOUR_HEIGHT;
+
     const getClassStyle = (cls: Class) => {
         const [startH, startM] = cls.startTime.split(":").map(Number);
         const [endH, endM] = cls.endTime.split(":").map(Number);
         const startMinutes = (startH - START_HOUR) * 60 + startM;
         const endMinutes = (endH - START_HOUR) * 60 + endM;
         const durationMinutes = endMinutes - startMinutes;
-        const top = (startMinutes / 60) * HOUR_HEIGHT;
-        const height = (durationMinutes / 60) * HOUR_HEIGHT;
-        return { top: `${top}px`, height: `${Math.max(height, 32)}px` };
+
+        return {
+            top: `${blockTop(startMinutes)}px`,
+            height: `${Math.max(blockHeight(durationMinutes), 32)}px`
+        };
     };
 
     const getTypeColors = (type: string) => TYPE_COLORS[type] || TYPE_COLORS.default;
@@ -55,30 +61,30 @@ export function WeekView({ classes, events, currentDate }: Props) {
         <div className="h-full">
             {/* Mobile: 3-Day Swipe View */}
             <div className="md:hidden h-full">
-                <MobileThreeDayView classes={classes} currentDate={currentDate} />
+                <MobileThreeDayView classes={classes} events={events} currentDate={currentDate} />
             </div>
 
             {/* Desktop: Full week grid */}
-            <div className="hidden md:flex h-full flex-col overflow-auto custom-scrollbar">
+            <div className="hidden md:flex h-full flex-col overflow-auto custom-scrollbar bg-background/50">
                 {/* Header */}
-                <div className="flex border-b border-border bg-card/80 sticky top-0 z-20 backdrop-blur-md">
+                <div className="flex border-b border-border bg-background/95 sticky top-0 z-20 backdrop-blur-sm">
                     <div className="w-14 shrink-0 p-3 text-center text-xs font-medium text-muted-foreground border-r border-border">
-                        <span>Hora</span>
+                        <span className="sr-only">Hora</span>
                     </div>
                     {weekDays.map((day, i) => (
                         <div
                             key={i}
                             className={cn(
                                 "flex-1 py-3 px-2 text-center border-r border-border min-w-[140px] transition-colors",
-                                isSameDay(day, new Date()) && "bg-primary/10"
+                                isSameDay(day, new Date()) && "bg-primary/5"
                             )}
                         >
                             <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                                 {format(day, 'EEE', { locale: es })}
                             </div>
                             <div className={cn(
-                                "text-xl font-bold mt-0.5",
-                                isSameDay(day, new Date()) ? "text-primary" : "text-foreground"
+                                "text-xl font-bold mt-0.5 inline-flex items-center justify-center w-8 h-8 rounded-full",
+                                isSameDay(day, new Date()) ? "bg-primary text-primary-foreground" : "text-foreground"
                             )}>
                                 {format(day, 'd')}
                             </div>
@@ -88,14 +94,14 @@ export function WeekView({ classes, events, currentDate }: Props) {
                 {/* Body */}
                 <div className="flex flex-1 min-w-[900px]">
                     {/* Time column */}
-                    <div className="w-14 shrink-0 border-r border-border bg-card/50">
+                    <div className="w-14 shrink-0 border-r border-border bg-background">
                         {Array.from({ length: TOTAL_HOURS }, (_, i) => (
                             <div
                                 key={i}
-                                className="border-b border-border/50 text-xs text-right pr-2 text-muted-foreground font-mono flex items-start justify-end pt-1"
+                                className="border-b border-border/30 text-xs text-right pr-2 text-muted-foreground font-mono flex items-start justify-end pt-1"
                                 style={{ height: `${HOUR_HEIGHT}px` }}
                             >
-                                <span className="tabular-nums">{String(START_HOUR + i).padStart(2, '0')}:00</span>
+                                <span className="tabular-nums opacity-50">{String(START_HOUR + i).padStart(2, '0')}:00</span>
                             </div>
                         ))}
                     </div>
@@ -105,54 +111,39 @@ export function WeekView({ classes, events, currentDate }: Props) {
                         <div
                             key={day}
                             className={cn(
-                                "flex-1 border-r border-border relative min-w-[140px]",
+                                "flex-1 border-r border-border/50 relative min-w-[140px]",
                                 isSameDay(weekDays[dayIndex], new Date()) && "bg-primary/5"
                             )}
                             style={{ height: `${TOTAL_HOURS * HOUR_HEIGHT}px` }}
                         >
-                            {/* Hour grid lines */}
+                            {/* Hour grid lines - Subtler */}
                             {Array.from({ length: TOTAL_HOURS }, (_, i) => (
                                 <div
                                     key={i}
-                                    className="absolute w-full border-b border-border/40"
+                                    className="absolute w-full border-b border-dashed border-border/30 pointer-events-none"
                                     style={{ top: `${i * HOUR_HEIGHT}px`, height: `${HOUR_HEIGHT}px` }}
-                                />
-                            ))}
-
-                            {/* Half-hour lines */}
-                            {Array.from({ length: TOTAL_HOURS }, (_, i) => (
-                                <div
-                                    key={`half-${i}`}
-                                    className="absolute w-full border-b border-border/20"
-                                    style={{ top: `${i * HOUR_HEIGHT + HOUR_HEIGHT / 2}px` }}
                                 />
                             ))}
 
                             {/* Events */}
                             {events.filter(e => isSameDay(e.date, weekDays[dayIndex])).map(event => {
-                                // Default to 8:00 AM if time is before start hour or defined as 00:00
                                 const eventDate = new Date(event.date);
                                 const hours = eventDate.getHours();
                                 const minutes = eventDate.getMinutes();
 
                                 let topPos = 0;
-                                // If time is within view range (6am - 10pm), position accordingly
                                 if (hours >= START_HOUR && hours <= END_HOUR) {
                                     topPos = ((hours - START_HOUR) * 60 + minutes) / 60 * HOUR_HEIGHT;
-                                } else {
-                                    // Default to "All Day" or fixed slot (e.g. 8 AM visualization) if out of bounds
-                                    // For now, let's pin it to the top (6 AM) + offset to not hide it completely
-                                    topPos = 0;
                                 }
 
                                 return (
                                     <div
                                         key={event.id}
-                                        className="absolute left-1 right-1 px-2 py-1 z-20 rounded-md border shadow-sm flex flex-col justify-center"
+                                        className="absolute left-1 right-1 px-2 py-1 z-20 rounded-md border shadow-sm flex flex-col justify-center group hover:scale-[1.02] transition-transform"
                                         style={{
                                             top: `${topPos}px`,
-                                            height: `${HOUR_HEIGHT}px`, // Fixed height for events
-                                            backgroundColor: "rgba(147, 51, 234, 0.9)", // Purple
+                                            height: `${HOUR_HEIGHT}px`,
+                                            backgroundColor: "rgba(147, 51, 234, 0.9)",
                                             borderColor: "#7e22ce",
                                             color: "white"
                                         }}
@@ -173,27 +164,46 @@ export function WeekView({ classes, events, currentDate }: Props) {
                             {classesByDay[day]?.map((cls) => {
                                 const style = getClassStyle(cls);
                                 const colors = getTypeColors(cls.type);
+                                const status = getClassStatus(cls, weekDays[dayIndex]);
+
+                                // Status Styles
+                                const isCompleted = status === 'COMPLETED';
+                                const isPending = status === 'PENDING';
+                                const isInProgress = status === 'IN_PROGRESS';
+
                                 return (
                                     <div
                                         key={cls.id}
                                         onClick={() => handleClassClick(cls.id)}
-                                        className="calendar-block absolute left-1 right-1 px-2.5 py-1.5 cursor-pointer overflow-hidden z-10 group"
+                                        className={cn(
+                                            "absolute left-1 right-1 px-2 py-1 cursor-pointer overflow-hidden z-10 rounded-md border transition-all duration-200 group hover:shadow-md",
+                                            isCompleted && "opacity-60 grayscale-[0.3]",
+                                            isInProgress && "ring-2 ring-primary ring-offset-1 shadow-lg scale-[1.01]"
+                                        )}
                                         style={{
                                             ...style,
                                             backgroundColor: cls.color || colors.bg,
-                                            borderLeft: `3px solid ${colors.border}`,
+                                            borderColor: colors.border,
+                                            borderLeftWidth: "4px",
                                             color: colors.text
                                         }}
                                     >
-                                        <div className="font-bold text-sm truncate leading-tight">
-                                            {cls.name}
+                                        <div className="flex justify-between items-start">
+                                            <div className="font-bold text-xs truncate leading-tight pr-4">
+                                                {cls.name}
+                                            </div>
+                                            {isCompleted && <CheckCircle2 className="h-3 w-3 opacity-70 shrink-0" />}
+                                            {isInProgress && <Clock className="h-3 w-3 animate-pulse shrink-0" />}
                                         </div>
-                                        <div className="text-xs opacity-90 truncate mt-0.5">
+
+                                        <div className="text-[10px] opacity-90 truncate mt-0.5 font-mono">
                                             {cls.startTime} - {cls.endTime}
                                         </div>
-                                        <div className="absolute bottom-1.5 right-2 flex items-center gap-1 text-[10px] opacity-80">
-                                            <Users className="h-3 w-3" />
-                                            <span className="font-mono tabular-nums">{cls._count.attendances}</span>
+
+                                        {/* Attendance Count */}
+                                        <div className="absolute bottom-1 right-1 flex items-center gap-1 text-[9px] bg-black/10 px-1 py-0.5 rounded-sm backdrop-blur-[1px]">
+                                            <Users className="h-2.5 w-2.5" />
+                                            <span className="font-mono">{cls._count.attendances}</span>
                                         </div>
                                     </div>
                                 );
