@@ -39,31 +39,22 @@ export default function LoginPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <form action={formAction} className="space-y-4">
+                        <form action={(formData) => {
+                            formData.append("email", "marc@gymmanager.com"); // Hardcoded admin email
+                            formAction(formData);
+                        }} className="space-y-6">
                             <div className="space-y-2">
-                                <Label htmlFor="email" className="text-zinc-300">Usuario o Email</Label>
+                                <Label htmlFor="password" className="text-zinc-300 text-center block text-lg font-medium">Contraseña de Acceso</Label>
                                 <div className="relative">
-                                    <User className="absolute left-3 top-3 h-4 w-4 text-zinc-500" />
-                                    <Input
-                                        id="email"
-                                        type="text"
-                                        name="email"
-                                        placeholder="Marc Salas"
-                                        required
-                                        className="pl-9 bg-zinc-900/50 border-zinc-800 text-white placeholder:text-zinc-600 focus:ring-purple-500/50 focus:border-purple-500/50"
-                                    />
-                                </div>
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="password" className="text-zinc-300">PIN / Contraseña</Label>
-                                <div className="relative">
-                                    <Lock className="absolute left-3 top-3 h-4 w-4 text-zinc-500" />
+                                    <Lock className="absolute left-3 top-3.5 h-5 w-5 text-zinc-500" />
                                     <Input
                                         id="password"
                                         type="password"
                                         name="password"
+                                        placeholder="Ingrese su PIN"
                                         required
-                                        className="pl-9 bg-zinc-900/50 border-zinc-800 text-white focus:ring-purple-500/50 focus:border-purple-500/50"
+                                        className="pl-10 h-12 text-lg bg-zinc-900/50 border-zinc-800 text-white focus:ring-purple-500/50 focus:border-purple-500/50 text-center tracking-widest"
+                                        autoFocus
                                     />
                                 </div>
                             </div>
@@ -79,17 +70,17 @@ export default function LoginPage() {
                             )}
 
                             <Button
-                                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white border-0 shadow-lg shadow-purple-500/25 transition-all duration-300"
+                                className="w-full h-12 text-lg bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white border-0 shadow-lg shadow-purple-500/25 transition-all duration-300"
                                 type="submit"
                                 disabled={isPending}
                             >
                                 {isPending ? (
                                     <>
-                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                        Iniciando sesión...
+                                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                                        Verificando...
                                     </>
                                 ) : (
-                                    "Ingresar"
+                                    "Entrar al Sistema"
                                 )}
                             </Button>
                         </form>
