@@ -82,30 +82,34 @@ async function getDashboardStats() {
     }),
   ]);
 
-  // If no classes today, find the next active day
+  // If no classes today, find the next active day (single query)
   let displayClasses = todayClasses;
   let displayDate = "Hoy";
 
   if (todayClasses.length === 0) {
+    // Get all active classes grouped by day in one query
+    const allActiveClasses = await prisma.class.findMany({
+      where: { active: true },
+      orderBy: { startTime: "asc" },
+      select: {
+        id: true,
+        name: true,
+        startTime: true,
+        endTime: true,
+        color: true,
+        maxCapacity: true,
+        dayOfWeek: true,
+        _count: { select: { attendances: true } },
+      },
+    });
+
+    // Find the nearest future day with classes
     for (let i = 1; i <= 7; i++) {
       const nextDate = new Date();
       nextDate.setDate(now.getDate() + i);
       const dayOfWeek = DAYS_MAP[nextDate.getDay()];
 
-      const nextClasses = await prisma.class.findMany({
-        where: { dayOfWeek, active: true },
-        orderBy: { startTime: "asc" },
-        select: {
-          id: true,
-          name: true,
-          startTime: true,
-          endTime: true,
-          color: true,
-          maxCapacity: true,
-          _count: { select: { attendances: true } },
-        },
-      });
-
+      const nextClasses = allActiveClasses.filter(c => c.dayOfWeek === dayOfWeek);
       if (nextClasses.length > 0) {
         displayClasses = nextClasses;
         const dayName = format(nextDate, "EEEE", { locale: es });

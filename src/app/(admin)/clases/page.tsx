@@ -3,7 +3,7 @@ import prisma from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Clock, Users, Calendar, QrCode } from "lucide-react";
+import { Plus, Clock, Users, Calendar, QrCode, Pencil } from "lucide-react";
 import { PageHeader } from "@/components/ui/page-header";
 
 export const dynamic = 'force-dynamic';
@@ -142,12 +142,20 @@ export default async function ClassesPage() {
                                                     )}
                                                 </div>
 
-                                                <Link href={`/clases/${cls.id}/checkin`} className="w-full block">
-                                                    <Button variant="secondary" className="w-full gap-2">
-                                                        <QrCode className="h-4 w-4" />
-                                                        Iniciar Check-in
-                                                    </Button>
-                                                </Link>
+                                                <div className="flex gap-2">
+                                                    <Link href={`/clases/${cls.id}/editar`} className="flex-1">
+                                                        <Button variant="outline" className="w-full gap-2" size="sm">
+                                                            <Pencil className="h-4 w-4" />
+                                                            Editar
+                                                        </Button>
+                                                    </Link>
+                                                    <Link href={`/clases/${cls.id}/checkin`} className="flex-1">
+                                                        <Button variant="secondary" className="w-full gap-2" size="sm">
+                                                            <QrCode className="h-4 w-4" />
+                                                            Check-in
+                                                        </Button>
+                                                    </Link>
+                                                </div>
                                             </div>
                                         </CardContent>
                                     </Card>

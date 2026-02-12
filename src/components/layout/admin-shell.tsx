@@ -43,16 +43,6 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                 className={cn(
                     "flex-1 h-full overflow-y-auto overflow-x-hidden transition-all duration-300 ease-in-out relative z-10",
                     isCollapsed ? "md:ml-20" : "md:ml-64",
-                    // Reset margin on mobile since Sidebar is fixed/overlay there, 
-                    // but wait, internal scroll means we behave differently.
-                    // Actually, if Sidebar is fixed in desktop, we need to account for it in the flex flow or keep it fixed.
-                    // The original Sidebar was fixed: "md:fixed md:top-0...". 
-                    // If we want "App Shell" with flex, Sidebar should ideally be relative in the flex container OR we keep margin.
-                    // Let's keep margin logic for desktop compatibility if Sidebar stays fixed.
-                    // BUT checking sidebar.tsx: it has "md:fixed".
-                    // So we must keep the margin logic.
-                    // CRITICAL: "overflow-y-auto" enables the internal scroll.
-                    // We remove "pb-20" here if we want the scroll to be clean, or keep it inside the scroll area.
                 )}
             >
                 <div className="min-h-full p-4 md:p-6 pb-32 md:pb-10 max-w-[1600px] xl:mx-auto w-full">

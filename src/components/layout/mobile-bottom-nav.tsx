@@ -22,7 +22,7 @@ import {
 import { useState } from "react";
 
 const navItems = [
-    { name: "Inicio", href: "/", icon: LayoutDashboard },
+    { name: "Inicio", href: "/dashboard", icon: LayoutDashboard },
     { name: "Calendario", href: "/calendario", icon: Calendar },
     { name: "Atletas", href: "/atletas", icon: Users },
     { name: "Pagos", href: "/pagos", icon: CreditCard },

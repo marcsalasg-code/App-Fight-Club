@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, Suspense, useRef } from "react";
+import { useEffect, useState, Suspense, useRef, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { PinKeypad } from "@/components/checkin/pin-keypad";
 import { performCheckInWithPin } from "@/app/actions/checkin";
@@ -41,18 +41,34 @@ function CheckInContent() {
         }
     }, [token]);
 
-    const handlePinSubmit = async (pin: string) => {
+    const resetToInput = useCallback(() => {
+        setStatus('input');
+        setPin('');
+        setMessage('');
+        setAthleteName('');
+    }, []);
+
+    // Auto-reset after success
+    useEffect(() => {
+        if (status === 'success') {
+            const timer = setTimeout(resetToInput, 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [status, resetToInput]);
+
+    const [pin, setPin] = useState('');
+
+    const handlePinSubmit = async (pinValue: string) => {
         if (!token) return;
 
         setStatus('processing');
         try {
-            const result = await performCheckInWithPin(pin, token);
+            const result = await performCheckInWithPin(pinValue, token);
 
             if (result.success) {
                 setMessage(result.message || "Check-in exitoso");
                 setAthleteName(result.athleteName || "");
                 setStatus('success');
-                // Removed auto-reset for personal device flow
             } else {
                 setMessage(result.message || "Error al verificar PIN");
                 setStatus('error');
@@ -70,12 +86,8 @@ function CheckInContent() {
                     <CardContent className="flex flex-col items-center justify-center p-8 text-center bg-white dark:bg-zinc-950 rounded-xl">
                         <AlertCircle className="h-16 w-16 text-red-600 mb-4" />
                         <h2 className="text-xl font-bold text-red-700 mb-2">{message}</h2>
-                        <div className="bg-red-50 p-2 rounded text-xs text-left w-full overflow-hidden">
-                            <p className="font-bold">Info de depuración:</p>
-                            <p className="break-all">{typeof window !== 'undefined' ? window.location.href : ''}</p>
-                            <p className="mt-1">Params: {searchParams.toString()}</p>
-                        </div>
-                        <Button variant="outline" onClick={() => setStatus('input')} className="mt-4">Intentar de nuevo</Button>
+                        <p className="text-sm text-muted-foreground mb-4">Inténtalo de nuevo o habla con tu entrenador.</p>
+                        <Button variant="outline" onClick={() => setStatus('input')}>Intentar de nuevo</Button>
                     </CardContent>
                 </Card>
             </div>
@@ -91,6 +103,9 @@ function CheckInContent() {
                         <h2 className="text-3xl font-bold text-green-700 mb-2">¡Bienvenido!</h2>
                         <p className="text-xl text-green-600 font-medium">{athleteName}</p>
                         <p className="text-sm text-green-600/80 mt-2">{message}</p>
+                        <Button variant="outline" onClick={resetToInput} className="mt-6 gap-2">
+                            Siguiente atleta
+                        </Button>
                     </CardContent>
                 </Card>
             </div>
