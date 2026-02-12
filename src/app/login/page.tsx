@@ -176,7 +176,7 @@ export default function LoginPage() {
                                                         value={pin}
                                                         onChange={handlePinChange}
                                                         placeholder="••••"
-                                                        maxLength={6}
+                                                        maxLength={4}
                                                         className="h-16 text-center text-3xl tracking-[0.5em] bg-black/50 border-zinc-700 text-white focus:ring-purple-500/50 focus:border-purple-500 placeholder:text-zinc-700 rounded-xl transition-all"
                                                         autoFocus
                                                         autoComplete="off"

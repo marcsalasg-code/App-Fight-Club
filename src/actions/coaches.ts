@@ -8,7 +8,7 @@ import { requireAdmin, requireRole } from "@/lib/safe-action";
 export type CoachFormData = {
     name: string;
     email: string;
-    password?: string;
+    pin?: string;
     role?: string;
 };
 
@@ -63,30 +63,22 @@ export async function getCoach(id: string) {
 }
 
 export async function createCoach(data: CoachFormData) {
-    await requireAdmin(); // Only admin creates coaches/users
+    await requireAdmin();
 
-    // Validate input
     const validation = validateData(coachSchema, data);
     if (!validation.success) {
         return { success: false, error: validation.error };
     }
 
     try {
-        // Check for duplicate email
         const existing = await prisma.user.findUnique({ where: { email: data.email } });
         if (existing) {
             return { success: false, error: "Este email ya está registrado" };
         }
 
-        // In production, you'd hash the password
-        const password = data.password || "temp123"; // Default temporary password
-        // TODO: Hash password here using bcryptjs, similar to auth.ts logic or a helper
-        // Since we are in the middle of a refactor, I won't introduce hashing HERE yet 
-        // to avoid breaking existing simple login if it expects plain text (it likely expects hash due to bcrypt verify).
-        // Wait, auth.ts USES bcrypt.compare. So we MUST hash here if we want login to work.
-        // Importing bcryptjs in server action:
+        const pin = data.pin || "1234"; // Default PIN
         const bcrypt = await import("bcryptjs");
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const hashedPassword = await bcrypt.hash(pin, 10);
 
         const coach = await prisma.user.create({
             data: {
@@ -110,9 +102,8 @@ export async function updateCoach(id: string, data: CoachFormData) {
 
     if (!id) return { success: false, error: "ID requerido" };
 
-    // Validate input (password optional for update)
     const updateSchema = coachSchema.extend({
-        password: coachSchema.shape.password.optional(),
+        pin: coachSchema.shape.pin.optional(),
     });
     const validation = validateData(updateSchema, data);
     if (!validation.success) {
@@ -120,7 +111,6 @@ export async function updateCoach(id: string, data: CoachFormData) {
     }
 
     try {
-        // Check for duplicate email (excluding current coach)
         const existing = await prisma.user.findFirst({
             where: { email: data.email, id: { not: id } },
         });
@@ -134,9 +124,9 @@ export async function updateCoach(id: string, data: CoachFormData) {
             role: data.role || "COACH",
         };
 
-        if (data.password) {
+        if (data.pin) {
             const bcrypt = await import("bcryptjs");
-            updateData.password = await bcrypt.hash(data.password, 10);
+            updateData.password = await bcrypt.hash(data.pin, 10);
         }
 
         const coach = await prisma.user.update({
@@ -161,7 +151,7 @@ export async function assignCoachesToClasses(
         type?: string;
     }
 ) {
-    await requireAdmin(); // Mass assignment is powerful, keep to Admin
+    await requireAdmin();
 
     if (!coachId || filters.days.length === 0) {
         return { success: false, error: "Faltan datos requeridos (Entrenador o Días)" };
@@ -171,7 +161,7 @@ export async function assignCoachesToClasses(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const whereClause: any = {
             dayOfWeek: { in: filters.days },
-            active: true, // Only assign to active classes
+            active: true,
         };
 
         if (filters.startTime) {
@@ -184,7 +174,6 @@ export async function assignCoachesToClasses(
             whereClause.type = filters.type;
         }
 
-        // Find classes to update (for logging/count)
         const classesToUpdate = await prisma.class.findMany({
             where: whereClause,
             select: { id: true }
@@ -194,7 +183,6 @@ export async function assignCoachesToClasses(
             return { success: false, error: "No se encontraron clases con estos filtros" };
         }
 
-        // Update all matching classes
         const updatePromises = classesToUpdate.map(cls =>
             prisma.class.update({
                 where: { id: cls.id },
@@ -225,14 +213,12 @@ export async function deleteCoach(id: string) {
     if (!id) return { success: false, error: "ID requerido" };
 
     try {
-        // Check if coach has classes
         const classCount = await prisma.class.count({
             where: {
                 coaches: { some: { id } }
             }
         });
         if (classCount > 0) {
-            // Soft delete - just deactivate
             await prisma.user.update({
                 where: { id },
                 data: { active: false },
@@ -250,7 +236,7 @@ export async function deleteCoach(id: string) {
 }
 
 export async function getCoachesForSelect() {
-    await requireRole(["ADMIN", "COACH"]); // Needed for dropdowns
+    await requireRole(["ADMIN", "COACH"]);
     try {
         const coaches = await prisma.user.findMany({
             where: { active: true },
@@ -263,5 +249,3 @@ export async function getCoachesForSelect() {
         return [];
     }
 }
-
-// End of file

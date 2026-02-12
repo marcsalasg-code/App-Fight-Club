@@ -30,7 +30,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Users, Plus, Trash2, PenSquare, Mail, Calendar, Dumbbell } from "lucide-react";
+import { Users, Plus, Trash2, PenSquare, Mail, Calendar, Dumbbell, Shield } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { createCoach, updateCoach, deleteCoach, CoachFormData } from "./actions";
@@ -56,12 +56,12 @@ export function CoachesClient({ initialCoaches }: Props) {
     const [formData, setFormData] = useState<CoachFormData>({
         name: "",
         email: "",
-        password: "",
+        pin: "",
         role: "COACH",
     });
 
     const resetForm = () => {
-        setFormData({ name: "", email: "", password: "", role: "COACH" });
+        setFormData({ name: "", email: "", pin: "", role: "COACH" });
         setEditingCoach(null);
     };
 
@@ -111,7 +111,7 @@ export function CoachesClient({ initialCoaches }: Props) {
         setFormData({
             name: coach.name,
             email: coach.email,
-            password: "",
+            pin: "",
             role: coach.role,
         });
         setDialogOpen(true);
@@ -179,17 +179,38 @@ export function CoachesClient({ initialCoaches }: Props) {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="password">
-                                    {editingCoach ? "Nueva Contraseña (dejar vacío para mantener)" : "Contraseña"}
+                                <Label htmlFor="pin">
+                                    {editingCoach ? "Nuevo PIN (dejar vacío para mantener)" : "PIN de acceso"}
                                 </Label>
                                 <Input
-                                    id="password"
+                                    id="pin"
                                     type="password"
-                                    value={formData.password}
-                                    onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
+                                    inputMode="numeric"
+                                    pattern="[0-9]{4}"
+                                    value={formData.pin}
+                                    onChange={(e) => {
+                                        const val = e.target.value.replace(/\D/g, "").slice(0, 4);
+                                        setFormData(prev => ({ ...prev, pin: val }));
+                                    }}
+                                    placeholder="4 dígitos"
+                                    maxLength={4}
                                     required={!editingCoach}
-                                    minLength={6}
                                 />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="role">Rol</Label>
+                                <Select
+                                    value={formData.role || "COACH"}
+                                    onValueChange={(value) => setFormData(prev => ({ ...prev, role: value }))}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Seleccionar rol" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="ADMIN">Administrador</SelectItem>
+                                        <SelectItem value="COACH">Entrenador</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
                             <div className="flex justify-end gap-2 pt-4">
                                 <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
@@ -211,7 +232,9 @@ export function CoachesClient({ initialCoaches }: Props) {
                             <div className="flex items-start justify-between">
                                 <div>
                                     <CardTitle className="text-lg">{coach.name}</CardTitle>
-                                    <p className="text-xs text-muted-foreground">Entrenador</p>
+                                    <Badge variant={coach.role === "ADMIN" ? "default" : "secondary"} className="text-xs">
+                                        {coach.role === "ADMIN" ? "Admin" : "Coach"}
+                                    </Badge>
                                 </div>
                                 <div className="flex gap-1">
                                     <BulkAssignDialog coachId={coach.id} coachName={coach.name} />

@@ -108,7 +108,7 @@ export type GymSettingsInput = z.infer<typeof gymSettingsSchema>;
 export const coachSchema = z.object({
     name: z.string().min(1, "El nombre es requerido").max(100),
     email: z.string().email("Email inválido"),
-    password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres").optional(),
+    pin: z.string().length(4, "El PIN debe tener 4 dígitos").regex(/^\d{4}$/, "El PIN debe ser numérico").optional(),
     role: z.enum(["ADMIN", "COACH"]).default("COACH"),
 });
 
