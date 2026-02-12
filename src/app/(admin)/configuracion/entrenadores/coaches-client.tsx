@@ -30,11 +30,13 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Users, Plus, Trash2, PenSquare, Mail, Calendar, Dumbbell, Shield } from "lucide-react";
+import { Users, Plus, Trash2, PenSquare, Mail, Calendar, Dumbbell } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { createCoach, updateCoach, deleteCoach, CoachFormData } from "./actions";
 import { BulkAssignDialog } from "./bulk-assign-dialog";
+import { ScheduleCalendar } from "./schedule-calendar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type Coach = {
     id: string;
@@ -43,6 +45,7 @@ type Coach = {
     role: string;
     createdAt: string | Date;
     _count: { classes: number };
+    weeklyCount?: number;
 };
 
 type Props = {
@@ -95,6 +98,7 @@ export function CoachesClient({ initialCoaches }: Props) {
                         role: formData.role || "COACH",
                         createdAt: new Date(),
                         _count: { classes: 0 },
+                        weeklyCount: 0,
                     },
                 ]);
             } else {
@@ -135,9 +139,9 @@ export function CoachesClient({ initialCoaches }: Props) {
                         <Users className="h-6 w-6 text-primary" />
                     </div>
                     <div>
-                        <h1 className="text-3xl font-bold">Entrenadores</h1>
+                        <h1 className="text-3xl font-bold">Gestión de Entrenadores</h1>
                         <p className="text-muted-foreground">
-                            Gestiona el equipo de entrenadores
+                            Equipo y Horarios
                         </p>
                     </div>
                 </div>
@@ -225,77 +229,98 @@ export function CoachesClient({ initialCoaches }: Props) {
                 </Dialog>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {coaches.map((coach) => (
-                    <Card key={coach.id} className="relative">
-                        <CardHeader className="pb-3">
-                            <div className="flex items-start justify-between">
-                                <div>
-                                    <CardTitle className="text-lg">{coach.name}</CardTitle>
-                                    <Badge variant={coach.role === "ADMIN" ? "default" : "secondary"} className="text-xs">
-                                        {coach.role === "ADMIN" ? "Admin" : "Coach"}
-                                    </Badge>
-                                </div>
-                                <div className="flex gap-1">
-                                    <BulkAssignDialog coachId={coach.id} coachName={coach.name} />
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        onClick={() => handleEdit(coach)}
-                                    >
-                                        <PenSquare className="h-4 w-4" />
-                                    </Button>
-                                    <AlertDialog>
-                                        <AlertDialogTrigger asChild>
-                                            <Button variant="ghost" size="icon" className="text-destructive">
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
-                                        </AlertDialogTrigger>
-                                        <AlertDialogContent>
-                                            <AlertDialogHeader>
-                                                <AlertDialogTitle>¿Eliminar entrenador?</AlertDialogTitle>
-                                                <AlertDialogDescription>
-                                                    Esta acción no se puede deshacer. Si el entrenador tiene clases asignadas, será desactivado en lugar de eliminado.
-                                                </AlertDialogDescription>
-                                            </AlertDialogHeader>
-                                            <AlertDialogFooter>
-                                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                                <AlertDialogAction onClick={() => handleDelete(coach.id)}>
-                                                    Eliminar
-                                                </AlertDialogAction>
-                                            </AlertDialogFooter>
-                                        </AlertDialogContent>
-                                    </AlertDialog>
-                                </div>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="space-y-2 text-sm text-muted-foreground">
-                            <div className="flex items-center gap-2">
-                                <Mail className="h-4 w-4" />
-                                <span>{coach.email}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <Dumbbell className="h-4 w-4" />
-                                <span>{coach._count.classes} clases asignadas</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <Calendar className="h-4 w-4" />
-                                <span>Desde {new Date(coach.createdAt).toLocaleDateString("es-ES")}</span>
-                            </div>
-                        </CardContent>
-                    </Card>
-                ))}
+            <Tabs defaultValue="list" className="space-y-4">
+                <TabsList>
+                    <TabsTrigger value="list">Lista de Entrenadores</TabsTrigger>
+                    <TabsTrigger value="calendar">Calendario y Sustituciones</TabsTrigger>
+                </TabsList>
 
-                {coaches.length === 0 && (
-                    <Card className="col-span-full">
-                        <CardContent className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                            <Users className="h-12 w-12 mb-4 opacity-50" />
-                            <p>No hay entrenadores registrados</p>
-                            <p className="text-sm">Haz clic en &quot;Nuevo Entrenador&quot; para agregar uno</p>
-                        </CardContent>
-                    </Card>
-                )}
-            </div>
+                <TabsContent value="list" className="space-y-4">
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                        {coaches.map((coach) => (
+                            <Card key={coach.id} className="relative">
+                                <CardHeader className="pb-3">
+                                    <div className="flex items-start justify-between">
+                                        <div>
+                                            <CardTitle className="text-lg">{coach.name}</CardTitle>
+                                            <Badge variant={coach.role === "ADMIN" ? "default" : "secondary"} className="text-xs">
+                                                {coach.role === "ADMIN" ? "Admin" : "Coach"}
+                                            </Badge>
+                                        </div>
+                                        <div className="flex gap-1">
+                                            <BulkAssignDialog coachId={coach.id} coachName={coach.name} />
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => handleEdit(coach)}
+                                            >
+                                                <PenSquare className="h-4 w-4" />
+                                            </Button>
+                                            <AlertDialog>
+                                                <AlertDialogTrigger asChild>
+                                                    <Button variant="ghost" size="icon" className="text-destructive">
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader>
+                                                        <AlertDialogTitle>¿Eliminar entrenador?</AlertDialogTitle>
+                                                        <AlertDialogDescription>
+                                                            Esta acción no se puede deshacer. Si el entrenador tiene clases asignadas, será desactivado en lugar de eliminado.
+                                                        </AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                                        <AlertDialogAction onClick={() => handleDelete(coach.id)}>
+                                                            Eliminar
+                                                        </AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
+                                        </div>
+                                    </div>
+                                </CardHeader>
+                                <CardContent className="space-y-2 text-sm text-muted-foreground">
+                                    <div className="flex items-center gap-2">
+                                        <Mail className="h-4 w-4" />
+                                        <span>{coach.email}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Dumbbell className="h-4 w-4" />
+                                        <span className="font-medium text-primary">
+                                            {coach.weeklyCount !== undefined
+                                                ? `${coach.weeklyCount} clases esta semana`
+                                                : `${coach._count.classes} clases asignadas`
+                                            }
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Calendar className="h-4 w-4" />
+                                        <span>Desde {new Date(coach.createdAt).toLocaleDateString("es-ES")}</span>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        ))}
+
+                        {coaches.length === 0 && (
+                            <Card className="col-span-full">
+                                <CardContent className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+                                    <Users className="h-12 w-12 mb-4 opacity-50" />
+                                    <p>No hay entrenadores registrados</p>
+                                    <p className="text-sm">Haz clic en &quot;Nuevo Entrenador&quot; para agregar uno</p>
+                                </CardContent>
+                            </Card>
+                        )}
+                    </div>
+                </TabsContent>
+
+                <TabsContent value="calendar">
+                    <ScheduleCalendar
+                        initialSchedule={[]}
+                        coaches={coaches.map(c => ({ id: c.id, name: c.name }))}
+                    />
+                </TabsContent>
+            </Tabs>
         </div>
     );
 }

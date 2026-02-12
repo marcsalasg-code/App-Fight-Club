@@ -1,5 +1,6 @@
 import prisma from "@/lib/prisma";
 import { CoachesClient } from "./coaches-client";
+import { getCoachWeeklyCount } from "@/actions/schedule";
 
 export const dynamic = "force-dynamic";
 
@@ -17,10 +18,14 @@ export default async function CoachesPage() {
         },
     });
 
-    const serializedCoaches = coaches.map(coach => ({
-        ...coach,
-        createdAt: coach.createdAt.toISOString()
+    const coachesWithWeekly = await Promise.all(coaches.map(async (coach) => {
+        const weeklyCount = await getCoachWeeklyCount(coach.id);
+        return {
+            ...coach,
+            createdAt: coach.createdAt.toISOString(),
+            weeklyCount,
+        };
     }));
 
-    return <CoachesClient initialCoaches={serializedCoaches} />;
+    return <CoachesClient initialCoaches={coachesWithWeekly} />;
 }

@@ -20,9 +20,8 @@ import {
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AttendanceTab } from "./components/attendance-tab";
-import { AttendanceTab } from "./components/attendance-tab";
-import { WeighInHistory } from "./components/weigh-in-history";
-import { EvaluationsTab } from "./components/evaluations-tab";
+import { WeighInHistory } from "./components/weigh-in-history"; (old import was incorrect path or duplicated)
+import { WeighInHistory } from "./components/weigh-in-history"; (wait, the file is in ./ components / weigh -in -history.tsx relative to page.tsx ?? NO)
 import { SubscriptionStatusCard } from "@/components/athletes/subscription-status-card";
 import { getAthleteSubscriptionStatus } from "../actions";
 import { AthleteProfileCard } from "@/components/athletes/athlete-profile-card";

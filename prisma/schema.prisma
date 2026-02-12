@@ -25,6 +25,7 @@ model User {
   updatedAt DateTime @updatedAt
 
   classes Class[] @relation("ClassCoaches")
+  substitutions ClassCoachSubstitution[] @relation("CoachSubstitutions")
 }
 
 // ==========================================================
@@ -263,6 +264,7 @@ model Class {
 
   coaches     User[]       @relation("ClassCoaches")
   attendances Attendance[]
+  substitutions ClassCoachSubstitution[]
 }
 
 // ==========================================================
@@ -360,3 +362,20 @@ model Evaluation {
 }
 
 
+
+// ==========================================================
+// SCHEDULE OVERRIDES (Substitute Coaches)
+// ==========================================================
+model ClassCoachSubstitution {
+  id              String   @id @default(cuid())
+  classId         String
+  date            DateTime // Specific date of the class instance
+  originalCoachId String?  // Optional: who they are replacing
+  newCoachId      String   // The assigned coach for this date
+  createdAt       DateTime @default(now())
+  
+  class    Class @relation(fields: [classId], references: [id], onDelete: Cascade)
+  newCoach User  @relation(fields: [newCoachId], references: [id], name: "CoachSubstitutions")
+
+  @@unique([classId, date])
+}
