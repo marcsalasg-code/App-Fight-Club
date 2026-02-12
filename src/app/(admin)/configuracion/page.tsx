@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getGymSettings, updateGymSettings, GymSettingsData } from "@/app/actions/settings";
 import { toast } from "sonner";
-import { Loader2, Save, Settings as SettingsIcon, Tag as TagIcon, Users, CalendarClock, Trophy } from "lucide-react";
+import { Loader2, Save, Settings as SettingsIcon, Tag as TagIcon, Users, CalendarClock, Trophy, Check } from "lucide-react";
 import Link from "next/link";
 
 export default function SettingsPage() {
@@ -44,13 +44,17 @@ export default function SettingsPage() {
         }));
     };
 
+    const [saved, setSaved] = useState(false);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setSaving(true);
         const result = await updateGymSettings(formData);
         setSaving(false);
         if (result.success) {
+            setSaved(true);
             toast.success("Configuración guardada correctamente");
+            setTimeout(() => setSaved(false), 2000);
         } else {
             toast.error(result.error || "Error al guardar");
         }
@@ -130,10 +134,13 @@ export default function SettingsPage() {
                             </div>
                         </div>
 
-                        <Button type="submit" disabled={saving} className="w-full sm:w-auto">
+                        <Button type="submit" disabled={saving || saved} className="w-full sm:w-auto">
                             {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            <Save className="mr-2 h-4 w-4" />
-                            Guardar Cambios
+                            {saved ? (
+                                <><Check className="mr-2 h-4 w-4" />Guardado</>
+                            ) : (
+                                <><Save className="mr-2 h-4 w-4" />Guardar Cambios</>
+                            )}
                         </Button>
                     </form>
                 </CardContent>

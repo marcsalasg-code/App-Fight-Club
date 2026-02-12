@@ -2,6 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { requireAdmin } from "@/lib/safe-action";
 
 export type GymSettingsData = {
     gymName: string;
@@ -30,6 +31,8 @@ export async function getGymSettings() {
 }
 
 export async function updateGymSettings(data: GymSettingsData) {
+    await requireAdmin();
+
     try {
         // Upsert ensures we have only one settings record
         const first = await prisma.gymSettings.findFirst();

@@ -127,6 +127,22 @@ export async function registerPayment(data: PaymentFormData) {
             return { success: false, error: "Membresía no encontrada" };
         }
 
+        // Check for duplicate active subscription of same membership type
+        const existingActive = await prisma.subscription.findFirst({
+            where: {
+                athleteId: data.athleteId,
+                membershipId: data.membershipId,
+                status: "ACTIVE",
+            },
+        });
+
+        if (existingActive) {
+            return {
+                success: false,
+                error: "El atleta ya tiene una suscripción activa de este tipo. Espera a que expire o anúlala primero.",
+            };
+        }
+
         const now = new Date();
         let startDate: Date;
 
