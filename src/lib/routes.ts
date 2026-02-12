@@ -1,35 +1,20 @@
-
 /**
- * Routes that are accessible to the public
- * These routes do not require authentication
- * @type {string[]}
+ * Routes accessible without authentication.
+ * Every other route is protected by default.
  */
 export const publicRoutes = [
-    "/login",
-    "/api/auth",
-    "/checkin"
+    "/checkin",
 ];
 
 /**
- * Routes that are used for authentication
- * These routes will redirect logged in users to /settings
- * @type {string[]}
+ * Authentication routes — accessible to guests,
+ * redirect logged-in users to DEFAULT_LOGIN_REDIRECT.
  */
 export const authRoutes = [
     "/login",
-    "/register",
-    "/error",
 ];
 
 /**
- * The prefix for API authentication routes
- * Routes that start with this prefix are used for API authentication purposes
- * @type {string}
- */
-export const apiAuthPrefix = "/api/auth";
-
-/**
- * The default redirect path after logging in
- * @type {string}
+ * Default redirect after successful login.
  */
 export const DEFAULT_LOGIN_REDIRECT = "/dashboard";

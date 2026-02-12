@@ -4,54 +4,29 @@ import Credentials from "next-auth/providers/credentials";
 import { z } from "zod";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
-import { User } from "@prisma/client";
-
-async function getUser(email: string): Promise<User | null> {
-    try {
-        const user = await prisma.user.findUnique({ where: { email } });
-        return user;
-    } catch (error) {
-        console.error("Failed to fetch user:", error);
-        throw new Error("Failed to fetch user.");
-    }
-}
 
 export const { auth, signIn, signOut, handlers } = NextAuth({
     ...authConfig,
     providers: [
         Credentials({
             async authorize(credentials) {
-                const parsedCredentials = z
+                const parsed = z
                     .object({ email: z.string(), password: z.string().min(1) })
                     .safeParse(credentials);
 
-                if (parsedCredentials.success) {
-                    const { email, password } = parsedCredentials.data;
+                if (!parsed.success) return null;
 
-                    // Search by email OR name
-                    const user = await prisma.user.findFirst({
-                        where: {
-                            OR: [
-                                { email: email },
-                                { name: email } // We treat the 'email' field as universal identifier
-                            ]
-                        }
-                    });
+                const { email, password } = parsed.data;
 
-                    if (!user) return null;
+                // Find by email or name (supports Kiosk Mode where name is used)
+                const user = await prisma.user.findFirst({
+                    where: { OR: [{ email }, { name: email }] },
+                });
 
-                    // Fallback for plain text passwords (ONLY FOR MIGRATION/DEV)
-                    if (!user.password.startsWith("$2")) {
-                        if (user.password === password) return user;
-                        return null;
-                    }
+                if (!user?.password) return null;
 
-                    const passwordsMatch = await bcrypt.compare(password, user.password);
-                    if (passwordsMatch) return user;
-                }
-
-                console.log("Invalid credentials");
-                return null;
+                const valid = await bcrypt.compare(password, user.password);
+                return valid ? user : null;
             },
         }),
     ],

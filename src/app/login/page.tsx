@@ -164,16 +164,7 @@ export default function LoginPage() {
 
                                         <form action={(formData) => {
                                             if (!selectedUser) return;
-
-                                            // Append fields manually since we manage state
-                                            formData.append("email", selectedUser.email); // We need email for Auth
-                                            // password field is already in input named "password" (which is the PIN)
-
-                                            // Handle callbackUrl
-                                            const params = new URLSearchParams(window.location.search);
-                                            const callbackUrl = params.get("callbackUrl");
-                                            if (callbackUrl) formData.append("callbackUrl", callbackUrl);
-
+                                            formData.append("email", selectedUser.email);
                                             formAction(formData);
                                         }} className="space-y-6">
 

@@ -83,7 +83,6 @@ async function main() {
     }
 
     console.log("Seeding finished.");
-    console.log("Seeding finished.");
 
     // Create/Upsert Users (Admin & Coach)
     // Hash passwords: "1234" (Marc) and "0000" (Javi)
@@ -112,7 +111,7 @@ async function main() {
 
     // Javi (Coach)
     await prisma.user.upsert({
-        where: { email: "coach@gymmanager.com" },
+        where: { email: "javi@gymmanager.com" },
         update: {
             password: coachPassword,
             role: "COACH",
@@ -120,7 +119,7 @@ async function main() {
             active: true
         },
         create: {
-            email: "coach@gymmanager.com",
+            email: "javi@gymmanager.com",
             password: coachPassword,
             name: "Javi",
             role: "COACH",

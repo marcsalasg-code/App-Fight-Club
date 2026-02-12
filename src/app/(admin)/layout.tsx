@@ -1,19 +1,21 @@
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 import { AdminShell } from "@/components/layout/admin-shell";
 import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav";
 import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { CommandPalette } from "@/components/layout/command-palette";
-
-import Link from "next/link"; // Not needed but harmless if auto-added
 import Image from "next/image";
 
-
-export default function AdminLayout({
+export default async function AdminLayout({
     children,
 }: Readonly<{
     children: React.ReactNode;
 }>) {
-    return (
+    // Defense-in-depth: verify session server-side even if middleware allows through
+    const session = await auth();
+    if (!session?.user) redirect("/login");
 
+    return (
         <div className="flex min-h-screen relative bg-background">
             {/* Background Watermark */}
             <div className="fixed inset-0 z-0 pointer-events-none flex items-center justify-center overflow-hidden">

@@ -9,22 +9,15 @@ export async function authenticate(
     formData: FormData,
 ) {
     try {
-        const rawData = Object.fromEntries(formData);
-        const callbackUrl = rawData.callbackUrl as string | undefined;
-
         await signIn("credentials", {
-            ...rawData,
-            // Force redirect to dashboard to prevent loops/malformed URLs for now
-            redirectTo: DEFAULT_LOGIN_REDIRECT
+            ...Object.fromEntries(formData),
+            redirectTo: DEFAULT_LOGIN_REDIRECT,
         });
     } catch (error) {
         if (error instanceof AuthError) {
-            switch (error.type) {
-                case "CredentialsSignin":
-                    return "Credenciales inválidas.";
-                default:
-                    return "Algo salió mal.";
-            }
+            return error.type === "CredentialsSignin"
+                ? "Credenciales inválidas."
+                : "Algo salió mal.";
         }
         throw error;
     }

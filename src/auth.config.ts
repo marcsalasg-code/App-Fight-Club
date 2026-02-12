@@ -1,46 +1,27 @@
 import type { NextAuthConfig } from "next-auth";
-import { publicRoutes, authRoutes, apiAuthPrefix } from "@/lib/routes";
+import { publicRoutes, authRoutes, DEFAULT_LOGIN_REDIRECT } from "@/lib/routes";
 
 export const authConfig = {
-    pages: {
-        signIn: "/login",
-    },
+    pages: { signIn: "/login" },
     callbacks: {
         authorized({ auth, request: { nextUrl } }) {
             const isLoggedIn = !!auth?.user;
-            const isOnDashboard = nextUrl.pathname.startsWith('/dashboard') || nextUrl.pathname === '/';
-            const isOnLogin = nextUrl.pathname.startsWith('/login');
-
-            // 1. If user is logged in and trying to reach login page, redirect to dashboard
-            if (isOnLogin && isLoggedIn) {
-                return Response.redirect(new URL('/dashboard', nextUrl));
-            }
-
-            // 2. If user is trying to reach dashboard (or root) and is NOT logged in, redirect to login
-            // Note: We use "startsWith" to protect all sub-routes of dashboard
-
-            // Let's rely on specific check for now to be safe
-            // Any route NOT in publicRoutes/authRoutes/api is protected
-            const isApi = nextUrl.pathname.startsWith('/api');
-            const isPublic = publicRoutes.includes(nextUrl.pathname);
             const isAuth = authRoutes.includes(nextUrl.pathname);
+            const isPublic = publicRoutes.includes(nextUrl.pathname);
 
-            if (isApi) return true;
-
-            if (isAuth) {
-                if (isLoggedIn) return Response.redirect(new URL('/dashboard', nextUrl));
-                return true;
+            // Logged-in user hitting /login → send to dashboard
+            if (isAuth && isLoggedIn) {
+                return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
             }
-
-            if (!isLoggedIn && !isPublic) {
-                return false; // Redirects to login automatically
-            }
-
-            return true;
+            // Auth pages always accessible to guests
+            if (isAuth) return true;
+            // Public pages always accessible
+            if (isPublic) return true;
+            // Everything else requires login (returning false auto-redirects to signIn page)
+            return isLoggedIn;
         },
         jwt({ token, user }) {
             if (user) {
-                // Add role to the token
                 token.role = user.role;
                 if (user.id) token.id = user.id;
             }
