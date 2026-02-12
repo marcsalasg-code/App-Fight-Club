@@ -26,6 +26,7 @@ import { getAthleteSubscriptionStatus } from "../actions";
 import { AthleteProfileCard } from "@/components/athletes/athlete-profile-card";
 import { cn } from "@/lib/utils";
 import { ChevronRight } from "lucide-react";
+import { AthleteProgressTab } from "@/components/athletes/athlete-progress-tab";
 
 export const dynamic = 'force-dynamic';
 
@@ -135,11 +136,12 @@ export default async function AthleteDetailPage({ params }: Props) {
             </div>
 
             <Tabs defaultValue="general" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 lg:w-[400px]">
+                <TabsList className="grid w-full grid-cols-2 lg:w-[500px] lg:grid-cols-4">
                     <TabsTrigger value="general">General</TabsTrigger>
+                    <TabsTrigger value="progress">Progreso</TabsTrigger>
                     <TabsTrigger value="attendance">Asistencia</TabsTrigger>
-                    <TabsTrigger value="evaluations">Evaluaciones</TabsTrigger>
                     {athlete.isCompetitor && <TabsTrigger value="weighins">Pesajes</TabsTrigger>}
+                    {!athlete.isCompetitor && <TabsTrigger value="evaluations">Evaluaciones</TabsTrigger>}
                 </TabsList>
 
                 <TabsContent value="general" className="space-y-6 mt-6">
@@ -280,6 +282,14 @@ export default async function AthleteDetailPage({ params }: Props) {
                     </div>
                 </TabsContent>
 
+                <TabsContent value="progress" className="mt-6">
+                    <AthleteProgressTab
+                        attendances={athlete.attendances}
+                        weighIns={athlete.weighIns}
+                        isCompetitor={athlete.isCompetitor}
+                    />
+                </TabsContent>
+
                 <TabsContent value="attendance">
                     <AttendanceTab attendances={athlete.attendances} />
                 </TabsContent>
@@ -287,6 +297,15 @@ export default async function AthleteDetailPage({ params }: Props) {
                 {athlete.isCompetitor && (
                     <TabsContent value="weighins">
                         <WeighInHistory athleteId={athlete.id} weighIns={athlete.weighIns} />
+                    </TabsContent>
+                )}
+
+                {!athlete.isCompetitor && (
+                    <TabsContent value="evaluations">
+                        {/* Placeholder or actual evaluations component */}
+                        <div className="py-6 text-center text-muted-foreground border-2 border-dashed rounded-lg">
+                            Sección de evaluaciones en desarrollo
+                        </div>
                     </TabsContent>
                 )}
             </Tabs>

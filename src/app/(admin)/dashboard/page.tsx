@@ -8,6 +8,8 @@ import { es } from "date-fns/locale";
 import { Suspense } from "react";
 import { DashboardSkeleton } from "@/components/ui/skeleton";
 import { WeeklyActivityChart } from "@/components/dashboard/weekly-activity-chart";
+import { QuickActions } from "@/components/dashboard/quick-actions";
+import { NextClassCard } from "@/components/dashboard/next-class-card";
 
 export const dynamic = 'force-dynamic';
 
@@ -119,6 +121,28 @@ async function getDashboardStats() {
     }
   }
 
+  // Determine "Next Class"
+  let nextClass = null;
+  const currentHour = now.getHours();
+  const currentMinute = now.getMinutes();
+  const currentTimeVal = currentHour * 60 + currentMinute;
+
+  // 1. Check classes remaining today
+  const upcomingToday = todayClasses.filter(c => {
+    const [h, m] = c.startTime.split(':').map(Number);
+    return (h * 60 + m) >= currentTimeVal - 30; // Show if started less than 30 mins ago
+  });
+
+  if (upcomingToday.length > 0) {
+    nextClass = { ...upcomingToday[0], attendancesCount: upcomingToday[0]._count.attendances };
+  } else if (displayClasses !== todayClasses && displayClasses.length > 0) {
+    // 2. If no more today, show first of next valid day
+    const firstNext = displayClasses[0];
+    // We need to map the _count structure flat
+    nextClass = { ...firstNext, attendancesCount: firstNext._count.attendances };
+  }
+
+
   // Process weekly attendance
   const weeklyActivity = Array.from({ length: 7 }).map((_, i) => {
     const d = subDays(now, 6 - i);
@@ -146,6 +170,7 @@ async function getDashboardStats() {
     displayClasses,
     displayDate,
     weeklyActivity,
+    nextClass,
   };
 }
 
@@ -190,12 +215,17 @@ async function DashboardContent() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold">Dashboard</h1>
-        <p className="text-muted-foreground capitalize">{today}</p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold">Dashboard</h1>
+          <p className="text-muted-foreground capitalize">{today}</p>
+        </div>
       </div>
 
-      {/* Primary Stats - Top Priority for "at a glance" info */}
+      {/* Quick Actions - New Feature */}
+      <QuickActions />
+
+      {/* Primary Stats - Adjusted Layout */}
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         <Link href="/atletas">
           <Card className="hover:shadow-lg transition-all cursor-pointer hover:border-primary/50 hover:scale-[1.02]">
@@ -213,7 +243,6 @@ async function DashboardContent() {
             </CardContent>
           </Card>
         </Link>
-
         <Link href="/calendario">
           <Card className="hover:shadow-lg transition-all cursor-pointer hover:border-primary/50 hover:scale-[1.02]">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -269,21 +298,26 @@ async function DashboardContent() {
       {/* Alert Banner */}
       <AlertBanner expired={stats.expiredSubscriptions} expiring={stats.expiringSubscriptions} />
 
-      {/* Main Content Grid: Classes (Left/Top) & Charts (Right/Bottom) */}
+      {/* Main Content Grid: Next Class & Charts */}
       <div className="grid gap-6 md:grid-cols-7">
 
-        {/* Today's Classes - Spans 4 columns on desktop */}
+        {/* Left Column: Next Class & Today's Schedule */}
         <div className="md:col-span-4 space-y-6">
-          <Card className="w-full border-primary/20 bg-primary/5 shadow-sm h-full">
+          {/* Next Class Highlight - New Feature */}
+          <div className="h-auto">
+            <CardHeader className="px-0 pt-0">
+              <CardTitle className="text-lg">Próxima Sesión</CardTitle>
+            </CardHeader>
+            <NextClassCard nextClass={stats.nextClass} />
+          </div>
+
+          <Card className="w-full border-primary/20 bg-primary/5 shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
                 <CardTitle className="flex items-center gap-2">
                   <Clock className="h-5 w-5 text-primary" />
-                  {stats.displayDate === "Hoy" ? "Clases de Hoy" : stats.displayDate}
+                  {stats.displayDate === "Hoy" ? "Resto del día" : stats.displayDate}
                 </CardTitle>
-                <CardDescription className="mt-1.5">
-                  {stats.displayClasses.length} sesiones programadas
-                </CardDescription>
               </div>
               <Link href="/calendario">
                 <Button variant="outline" size="sm" className="gap-2 bg-background">
@@ -294,37 +328,29 @@ async function DashboardContent() {
             </CardHeader>
             <CardContent>
               {stats.displayClasses.length === 0 ? (
-                <div className="text-center py-12 text-muted-foreground">
-                  <p>No hay clases programadas próximamente</p>
+                <div className="text-center py-6 text-muted-foreground">
+                  <p>No hay más clases programadas</p>
                 </div>
               ) : (
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-3">
                   {stats.displayClasses.map((cls) => (
                     <Link
                       key={cls.id}
                       href={`/clases/${cls.id}/checkin`}
-                      className="group flex flex-col justify-between p-4 rounded-xl bg-card border hover:border-primary/50 transition-all hover:shadow-md"
+                      className="group flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-lg bg-card border hover:border-primary/50 transition-all hover:shadow-sm"
                     >
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <div
-                            className="px-2 py-1 rounded-md text-xs font-medium bg-secondary text-secondary-foreground"
-                          >
-                            {cls.startTime} - {cls.endTime}
-                          </div>
-                          <div className="h-2.5 w-2.5 rounded-full ring-2 ring-background" style={{ backgroundColor: cls.color || "#D4AF37" }} />
-                        </div>
+                      <div className="flex items-center gap-3">
+                        <div className="h-3 w-3 rounded-full flex-shrink-0" style={{ backgroundColor: cls.color || "#D4AF37" }} />
                         <div>
-                          <h4 className="font-semibold group-hover:text-primary transition-colors line-clamp-1">{cls.name}</h4>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {cls._count.attendances} / {cls.maxCapacity} asistentes
-                          </p>
+                          <h4 className="font-semibold text-sm group-hover:text-primary transition-colors">{cls.name}</h4>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <span className="font-medium text-foreground">{cls.startTime} - {cls.endTime}</span>
+                            <span>•</span>
+                            <span>{cls._count.attendances} / {cls.maxCapacity}</span>
+                          </div>
                         </div>
                       </div>
-                      <div className="mt-4 pt-3 border-t flex items-center justify-between">
-                        <span className="text-xs text-muted-foreground font-medium">REALIZAR CHECK-IN</span>
-                        <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-transform group-hover:translate-x-0.5" />
-                      </div>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-transform group-hover:translate-x-0.5 hidden sm:block" />
                     </Link>
                   ))}
                 </div>
@@ -333,11 +359,13 @@ async function DashboardContent() {
           </Card>
         </div>
 
-        {/* Activity Chart - Spans 3 columns on desktop */}
+        {/* Right Column: Analytics */}
         <div className="md:col-span-3">
           <WeeklyActivityChart data={stats.weeklyActivity} />
         </div>
+
       </div>
     </div>
   );
 }
+
