@@ -1,4 +1,5 @@
 import type { NextAuthConfig } from "next-auth";
+import { publicRoutes, authRoutes, apiAuthPrefix } from "@/lib/routes";
 
 export const authConfig = {
     pages: {
@@ -7,30 +8,32 @@ export const authConfig = {
     callbacks: {
         authorized({ auth, request: { nextUrl } }) {
             const isLoggedIn = !!auth?.user;
+            const isOnDashboard = nextUrl.pathname.startsWith('/dashboard') || nextUrl.pathname === '/';
+            const isOnLogin = nextUrl.pathname.startsWith('/login');
 
-            const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
-            const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
-            const isAuthRoute = authRoutes.includes(nextUrl.pathname);
+            // 1. If user is logged in and trying to reach login page, redirect to dashboard
+            if (isOnLogin && isLoggedIn) {
+                return Response.redirect(new URL('/dashboard', nextUrl));
+            }
 
-            if (isApiAuthRoute) {
+            // 2. If user is trying to reach dashboard (or root) and is NOT logged in, redirect to login
+            // Note: We use "startsWith" to protect all sub-routes of dashboard
+
+            // Let's rely on specific check for now to be safe
+            // Any route NOT in publicRoutes/authRoutes/api is protected
+            const isApi = nextUrl.pathname.startsWith('/api');
+            const isPublic = publicRoutes.includes(nextUrl.pathname);
+            const isAuth = authRoutes.includes(nextUrl.pathname);
+
+            if (isApi) return true;
+
+            if (isAuth) {
+                if (isLoggedIn) return Response.redirect(new URL('/dashboard', nextUrl));
                 return true;
             }
 
-            if (isAuthRoute) {
-                if (isLoggedIn) {
-                    return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
-                }
-                return true;
-            }
-
-            if (!isLoggedIn && !isPublicRoute) {
-                let callbackUrl = nextUrl.pathname;
-                if (nextUrl.search) {
-                    callbackUrl += nextUrl.search;
-                }
-
-                const encodedCallbackUrl = encodeURIComponent(callbackUrl);
-                return Response.redirect(new URL(`/login?callbackUrl=${encodedCallbackUrl}`, nextUrl));
+            if (!isLoggedIn && !isPublic) {
+                return false; // Redirects to login automatically
             }
 
             return true;

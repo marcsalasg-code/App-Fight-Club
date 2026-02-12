@@ -14,7 +14,8 @@ export async function authenticate(
 
         await signIn("credentials", {
             ...rawData,
-            redirectTo: callbackUrl || DEFAULT_LOGIN_REDIRECT
+            // Force redirect to dashboard to prevent loops/malformed URLs for now
+            redirectTo: DEFAULT_LOGIN_REDIRECT
         });
     } catch (error) {
         if (error instanceof AuthError) {
