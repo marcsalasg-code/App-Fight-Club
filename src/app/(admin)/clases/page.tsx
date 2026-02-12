@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Clock, Users, Calendar, QrCode, Pencil } from "lucide-react";
 import { PageHeader } from "@/components/ui/page-header";
+import { getActiveClassTypes, buildTypeLabels } from "@/actions/class-types";
 
 export const dynamic = 'force-dynamic';
 
@@ -39,24 +40,12 @@ const dayLabels: Record<string, string> = {
     SUNDAY: "Domingo",
 };
 
-const typeColors: Record<string, string> = {
-    MUAY_THAI: "bg-red-500/10 text-red-700 border-red-200",
-    KICKBOXING: "bg-orange-500/10 text-orange-700 border-orange-200",
-    SPARRING: "bg-purple-500/10 text-purple-700 border-purple-200",
-    CONDITIONING: "bg-blue-500/10 text-blue-700 border-blue-200",
-    COMPETITION: "bg-yellow-500/10 text-yellow-700 border-yellow-200",
-};
-
-const typeLabels: Record<string, string> = {
-    MUAY_THAI: "Muay Thai",
-    KICKBOXING: "Kickboxing",
-    SPARRING: "Sparring",
-    CONDITIONING: "Acondicionamiento",
-    COMPETITION: "Competición",
-};
+// Type labels and colors are now loaded dynamically from DB
 
 export default async function ClassesPage() {
-    const classes = await getClasses();
+    const [classes, classTypes] = await Promise.all([getClasses(), getActiveClassTypes()]);
+    const typeLabels = await buildTypeLabels(classTypes);
+    const typeColorMap = Object.fromEntries(classTypes.map(t => [t.code, t.color]));
 
     // Group by day
     const classesByDay = classes.reduce(
@@ -114,8 +103,15 @@ export default async function ClassesPage() {
                                         <CardHeader className="pb-2">
                                             <CardTitle className="flex items-center justify-between">
                                                 <span>{cls.name}</span>
-                                                <Badge className={typeColors[cls.type]}>
-                                                    {typeLabels[cls.type]}
+                                                <Badge
+                                                    variant="outline"
+                                                    style={{
+                                                        borderColor: typeColorMap[cls.type] || "#888",
+                                                        color: typeColorMap[cls.type] || "#888",
+                                                        backgroundColor: `${typeColorMap[cls.type] || "#888"}15`,
+                                                    }}
+                                                >
+                                                    {typeLabels[cls.type] || cls.type}
                                                 </Badge>
                                             </CardTitle>
                                         </CardHeader>

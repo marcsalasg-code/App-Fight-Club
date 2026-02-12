@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useClassTypes } from "@/hooks/use-class-types";
 import { Plus, Trash2, Calendar, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -53,6 +54,7 @@ export default function PatternsPage() {
     const [patterns, setPatterns] = useState<Pattern[]>([]);
     const [loading, setLoading] = useState(true);
     const [isOpen, setIsOpen] = useState(false);
+    const { types: classTypes } = useClassTypes();
 
     // Form State
     const [selectedDays, setSelectedDays] = useState<string[]>([]);
@@ -149,14 +151,14 @@ export default function PatternsPage() {
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="type">Tipo</Label>
-                                    <Select name="type" required defaultValue="MUAY_THAI">
+                                    <Select name="type" required defaultValue={classTypes[0]?.code}>
                                         <SelectTrigger>
                                             <SelectValue placeholder="Selecciona tipo" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="MUAY_THAI">Muay Thai</SelectItem>
-                                            <SelectItem value="KICKBOXING">Kickboxing</SelectItem>
-                                            <SelectItem value="BOXING">Boxeo</SelectItem>
+                                            {classTypes.map(t => (
+                                                <SelectItem key={t.code} value={t.code}>{t.label}</SelectItem>
+                                            ))}
                                         </SelectContent>
                                     </Select>
                                 </div>

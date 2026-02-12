@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useClassTypes } from "@/hooks/use-class-types";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -48,6 +49,7 @@ export function EditClassForm({ classData }: { classData: ClassData }) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [deleting, setDeleting] = useState(false);
+    const { types: classTypes } = useClassTypes();
     const [coaches, setCoaches] = useState<{ id: string; name: string }[]>([]);
 
     useEffect(() => {
@@ -188,11 +190,9 @@ export function EditClassForm({ classData }: { classData: ClassData }) {
                                         <SelectValue placeholder="Seleccionar tipo" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="MUAY_THAI">Muay Thai</SelectItem>
-                                        <SelectItem value="KICKBOXING">Kickboxing</SelectItem>
-                                        <SelectItem value="SPARRING">Sparring</SelectItem>
-                                        <SelectItem value="CONDITIONING">Acondicionamiento</SelectItem>
-                                        <SelectItem value="COMPETITION">Competición</SelectItem>
+                                        {classTypes.map(t => (
+                                            <SelectItem key={t.code} value={t.code}>{t.label}</SelectItem>
+                                        ))}
                                     </SelectContent>
                                 </Select>
                             </div>

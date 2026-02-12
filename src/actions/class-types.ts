@@ -107,4 +107,33 @@ export async function deleteClassType(id: string) {
     }
 }
 
+// --- HELPERS (no auth, for form rendering) ---
+
+const FALLBACK_TYPES = [
+    { code: "MUAY_THAI", label: "Muay Thai", color: "#D97706", borderColor: "#B45309" },
+    { code: "KICKBOXING", label: "Kickboxing", color: "#E11D48", borderColor: "#BE123C" },
+    { code: "SPARRING", label: "Sparring", color: "#7C3AED", borderColor: "#6D28D9" },
+    { code: "CONDITIONING", label: "Acondicionamiento", color: "#2563EB", borderColor: "#1D4ED8" },
+    { code: "COMPETITION", label: "Competición", color: "#D4AF37", borderColor: "#B8962E" },
+];
+
+/** Fetch active class types for forms/selects. No auth — used in client renders. */
+export async function getActiveClassTypes() {
+    try {
+        const types = await prisma.classType.findMany({
+            where: { active: true },
+            orderBy: { label: "asc" },
+            select: { code: true, label: true, color: true, borderColor: true },
+        });
+        return types.length > 0 ? types : FALLBACK_TYPES;
+    } catch {
+        return FALLBACK_TYPES;
+    }
+}
+
+/** Build a code→label map for display. */
+export async function buildTypeLabels(types: { code: string; label: string }[]): Promise<Record<string, string>> {
+    return Object.fromEntries(types.map(t => [t.code, t.label]));
+}
+
 // End of file

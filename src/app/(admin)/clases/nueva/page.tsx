@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -17,14 +17,14 @@ import {
 import { createClass, ClassFormData } from "../actions";
 import { toast } from "sonner";
 import { ArrowLeft, Loader2 } from "lucide-react";
-
 import { getCoachesForSelect } from "@/app/(admin)/configuracion/entrenadores/actions";
-import { useEffect } from "react";
+import { useClassTypes } from "@/hooks/use-class-types";
 
 export default function NewClassPage() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [coaches, setCoaches] = useState<{ id: string, name: string }[]>([]);
+    const { types: classTypes } = useClassTypes();
 
     useEffect(() => {
         getCoachesForSelect().then(setCoaches);
@@ -127,16 +127,14 @@ export default function NewClassPage() {
                         <div className="grid gap-4 sm:grid-cols-2">
                             <div className="space-y-2">
                                 <Label htmlFor="type">Tipo *</Label>
-                                <Select name="type" required defaultValue="MUAY_THAI">
+                                <Select name="type" required defaultValue={classTypes[0]?.code}>
                                     <SelectTrigger>
                                         <SelectValue placeholder="Seleccionar tipo" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="MUAY_THAI">Muay Thai</SelectItem>
-                                        <SelectItem value="KICKBOXING">Kickboxing</SelectItem>
-                                        <SelectItem value="SPARRING">Sparring</SelectItem>
-                                        <SelectItem value="CONDITIONING">Acondicionamiento</SelectItem>
-                                        <SelectItem value="COMPETITION">Competición</SelectItem>
+                                        {classTypes.map(t => (
+                                            <SelectItem key={t.code} value={t.code}>{t.label}</SelectItem>
+                                        ))}
                                     </SelectContent>
                                 </Select>
                             </div>

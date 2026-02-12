@@ -27,7 +27,7 @@ export type AthleteInput = z.infer<typeof athleteSchema>;
 // ==========================================================
 export const classSchema = z.object({
     name: z.string().min(1, "El nombre es requerido").max(100),
-    type: z.enum(["MUAY_THAI", "KICKBOXING", "SPARRING", "CONDITIONING", "COMPETITION"]),
+    type: z.string().min(1, "Tipo de clase requerido"),
     dayOfWeek: z.enum(["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"]),
     startTime: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Formato de hora inválido (HH:mm)"),
     endTime: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Formato de hora inválido (HH:mm)"),
