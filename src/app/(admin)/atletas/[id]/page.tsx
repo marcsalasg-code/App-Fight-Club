@@ -20,7 +20,9 @@ import {
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AttendanceTab } from "./components/attendance-tab";
-import { WeighInHistory } from "../components/weigh-in-history";
+import { AttendanceTab } from "./components/attendance-tab";
+import { WeighInHistory } from "./components/weigh-in-history";
+import { EvaluationsTab } from "./components/evaluations-tab";
 import { SubscriptionStatusCard } from "@/components/athletes/subscription-status-card";
 import { getAthleteSubscriptionStatus } from "../actions";
 import { AthleteProfileCard } from "@/components/athletes/athlete-profile-card";
@@ -50,6 +52,9 @@ async function getAthlete(id: string) {
                 orderBy: { date: "desc" },
             },
             weighIns: {
+                orderBy: { date: "desc" },
+            },
+            evaluations: {
                 orderBy: { date: "desc" },
             },
         },
@@ -135,6 +140,7 @@ export default async function AthleteDetailPage({ params }: Props) {
                 <TabsList className="grid w-full grid-cols-2 lg:w-[400px]">
                     <TabsTrigger value="general">General</TabsTrigger>
                     <TabsTrigger value="attendance">Asistencia</TabsTrigger>
+                    <TabsTrigger value="evaluations">Evaluaciones</TabsTrigger>
                     {athlete.isCompetitor && <TabsTrigger value="weighins">Pesajes</TabsTrigger>}
                 </TabsList>
 
