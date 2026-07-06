@@ -1,6 +1,6 @@
 "use client"
 
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts"
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 type ActivityData = {
@@ -24,15 +24,16 @@ export function WeeklyActivityChart({ data }: WeeklyActivityChartProps) {
             <CardContent className="pl-2">
                 <ResponsiveContainer width="100%" height={350}>
                     <BarChart data={data}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" opacity={0.5} />
                         <XAxis
                             dataKey="day"
-                            stroke="#888888"
+                            stroke="hsl(var(--muted-foreground))"
                             fontSize={12}
                             tickLine={false}
                             axisLine={false}
                         />
                         <YAxis
-                            stroke="#888888"
+                            stroke="hsl(var(--muted-foreground))"
                             fontSize={12}
                             tickLine={false}
                             axisLine={false}
@@ -40,13 +41,14 @@ export function WeeklyActivityChart({ data }: WeeklyActivityChartProps) {
                         />
                         <Tooltip
                             cursor={{ fill: 'rgba(255,255,255,0.05)' }}
-                            contentStyle={{ background: 'hsl(var(--background))', border: '1px solid hsl(var(--border))', borderRadius: '6px' }}
+                            contentStyle={{ background: 'hsl(var(--background))', border: '1px solid hsl(var(--border))', borderRadius: '8px' }}
                             labelStyle={{ color: 'hsl(var(--muted-foreground))' }}
                         />
                         <Bar
                             dataKey="attendance"
+                            name="Asistencia"
                             fill="hsl(var(--primary))"
-                            radius={[4, 4, 0, 0]}
+                            radius={[6, 6, 0, 0]}
                             className="fill-primary"
                         />
                     </BarChart>

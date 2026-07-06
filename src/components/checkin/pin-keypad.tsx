@@ -18,6 +18,9 @@ export function PinKeypad({ onComplete, onCancel, isLoading }: PinKeypadProps) {
         if (pin.length < 4) {
             const newPin = pin + num;
             setPin(newPin);
+            if (newPin.length === 4) {
+                onComplete(newPin);
+            }
         }
     };
 
@@ -81,16 +84,6 @@ export function PinKeypad({ onComplete, onCancel, isLoading }: PinKeypadProps) {
                     disabled={isLoading || pin.length === 0}
                 >
                     <Delete className="w-8 h-8" />
-                </Button>
-            </div>
-
-            <div className="pt-4">
-                <Button
-                    className="w-full h-14 text-xl font-bold rounded-xl"
-                    onClick={() => onComplete(pin)}
-                    disabled={isLoading || pin.length < 4}
-                >
-                    {isLoading ? "Verificando..." : "ENTRAR"}
                 </Button>
             </div>
         </div>

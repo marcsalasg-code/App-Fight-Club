@@ -34,7 +34,7 @@ function QuickAction({ href, icon: Icon, label, description, color = "text-prima
 
 export function QuickActions() {
     return (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <QuickAction
                 href="/atletas/nuevo"
                 icon={UserPlus}

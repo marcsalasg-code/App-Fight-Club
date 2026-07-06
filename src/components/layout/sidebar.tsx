@@ -9,7 +9,8 @@ import {
     Calendar,
     Trophy,
     LayoutDashboard,
-    Menu,
+    PanelLeftClose,
+    PanelLeftOpen,
     Settings as SettingsIcon,
     FileText,
 } from "lucide-react";
@@ -133,12 +134,12 @@ export function Sidebar({ isCollapsed = false, toggleCollapse }: SidebarProps) {
                     className={cn("w-full mb-2", isCollapsed ? "px-0" : "")}
                     title={isCollapsed ? "Expandir" : "Colapsar"}
                 >
-                    {isCollapsed ? <Menu className="h-4 w-4" /> : <div className="flex items-center gap-2 text-xs text-muted-foreground"><Menu className="h-3 w-3 rotate-90" /> Colapsar menú</div>}
+                    {isCollapsed ? <PanelLeftOpen className="h-4 w-4" /> : <div className="flex items-center gap-2 text-xs text-muted-foreground"><PanelLeftClose className="h-4 w-4" /> Colapsar</div>}
                 </Button>
 
                 {!isCollapsed && (
                     <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-sidebar-accent/50">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shrink-0">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-gold to-brand-red flex items-center justify-center shrink-0">
                             <span className="text-white font-semibold text-sm">A</span>
                         </div>
                         <div className="flex flex-col overflow-hidden">

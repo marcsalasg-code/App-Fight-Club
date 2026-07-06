@@ -7,6 +7,7 @@ import { performCheckInWithPin } from "@/app/actions/checkin";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
 function CheckInContent() {
     const searchParams = useSearchParams();
@@ -83,7 +84,7 @@ function CheckInContent() {
         return (
             <div className="min-h-screen flex items-center justify-center p-4">
                 <Card className="w-full max-w-md border-red-500/50 bg-red-500/10">
-                    <CardContent className="flex flex-col items-center justify-center p-8 text-center bg-white dark:bg-zinc-950 rounded-xl">
+                    <CardContent className="flex flex-col items-center justify-center p-8 text-center bg-card rounded-xl">
                         <AlertCircle className="h-16 w-16 text-red-600 mb-4" />
                         <h2 className="text-xl font-bold text-red-700 mb-2">{message}</h2>
                         <p className="text-sm text-muted-foreground mb-4">Inténtalo de nuevo o habla con tu entrenador.</p>
@@ -98,8 +99,10 @@ function CheckInContent() {
         return (
             <div className="min-h-screen flex items-center justify-center p-4">
                 <Card className="w-full max-w-md border-green-500/50 bg-green-500/10">
-                    <CardContent className="flex flex-col items-center justify-center p-8 text-center bg-white dark:bg-zinc-950 rounded-xl">
-                        <CheckCircle2 className="h-20 w-20 text-green-600 mb-6" />
+                    <CardContent className="flex flex-col items-center justify-center p-8 text-center bg-card rounded-xl">
+                        <div className="animate-bounce">
+                            <CheckCircle2 className="h-20 w-20 text-green-600 mb-6" />
+                        </div>
                         <h2 className="text-3xl font-bold text-green-700 mb-2">¡Bienvenido!</h2>
                         <p className="text-xl text-green-600 font-medium">{athleteName}</p>
                         <p className="text-sm text-green-600/80 mt-2">{message}</p>
@@ -114,7 +117,10 @@ function CheckInContent() {
 
     return (
         <div className="min-h-screen flex flex-col items-center justify-center p-4 space-y-8">
-            <div className="text-center space-y-2">
+            <div className="text-center space-y-3">
+                <div className="relative w-12 h-12 mx-auto mb-2">
+                    <Image src="/logo.png" alt="RC Fight Club" fill className="object-contain" priority />
+                </div>
                 <h1 className="text-3xl font-bold tracking-tight">Check-in</h1>
                 <p className="text-muted-foreground">Introduce tu PIN personal</p>
             </div>

@@ -11,7 +11,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { Plus, CreditCard, Settings, TrendingUp } from "lucide-react";
+import { Plus, CreditCard, Settings, TrendingUp, TrendingDown, Clock, AlertTriangle } from "lucide-react";
 import { ExportButton } from "@/components/ui/export-button";
 import { PaymentsExportButton } from "@/components/payments-export-button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -130,20 +130,22 @@ export default async function PaymentsPage() {
 
             {/* Stats */}
             <div className="grid gap-4 md:grid-cols-3">
-                <Card>
+                <Card className="border-l-4 border-l-green-500">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground">
                             Ingresos del Mes
                         </CardTitle>
-                        <CreditCard className="h-5 w-5 text-green-500" />
+                        <div className="p-2 rounded-full bg-green-500/10">
+                            <CreditCard className="h-4 w-4 text-green-500" />
+                        </div>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">€{stats.thisMonth.toFixed(2)}</div>
+                        <div className="text-2xl font-bold stat-number">€{stats.thisMonth.toFixed(2)}</div>
                         <p className="text-xs text-muted-foreground flex items-center gap-1">
                             {growth >= 0 ? (
                                 <TrendingUp className="h-3 w-3 text-green-500" />
                             ) : (
-                                <TrendingUp className="h-3 w-3 text-red-500 rotate-180" />
+                                <TrendingDown className="h-3 w-3 text-red-500" />
                             )}
                             {growth.toFixed(1)}% vs mes anterior
                         </p>
@@ -154,10 +156,12 @@ export default async function PaymentsPage() {
                         <CardTitle className="text-sm font-medium text-muted-foreground">
                             Mes Anterior
                         </CardTitle>
-                        <CreditCard className="h-5 w-5 text-muted-foreground" />
+                        <div className="p-2 rounded-full bg-muted">
+                            <Clock className="h-4 w-4 text-muted-foreground" />
+                        </div>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">€{stats.lastMonth.toFixed(2)}</div>
+                        <div className="text-2xl font-bold stat-number">€{stats.lastMonth.toFixed(2)}</div>
                     </CardContent>
                 </Card>
                 <Card>
@@ -165,19 +169,13 @@ export default async function PaymentsPage() {
                         <CardTitle className="text-sm font-medium text-muted-foreground">
                             Suscripciones Vencidas
                         </CardTitle>
-                        <Badge
-                            variant="outline"
-                            className={
-                                stats.pendingCount > 0
-                                    ? "bg-red-500/10 text-red-700"
-                                    : "bg-green-500/10 text-green-700"
-                            }
-                        >
-                            {stats.pendingCount}
-                        </Badge>
+                        <div className={`p-2 rounded-full ${stats.pendingCount > 0 ? 'bg-red-500/10' : 'bg-green-500/10'}`}>
+                            <AlertTriangle className={`h-4 w-4 ${stats.pendingCount > 0 ? 'text-red-500' : 'text-green-500'}`} />
+                        </div>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-sm text-muted-foreground">
+                        <div className="text-2xl font-bold stat-number">{stats.pendingCount}</div>
+                        <p className="text-xs text-muted-foreground">
                             {stats.pendingCount > 0
                                 ? "Atletas con pagos pendientes"
                                 : "Todos los pagos al día"}

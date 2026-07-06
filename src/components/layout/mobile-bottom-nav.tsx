@@ -53,9 +53,9 @@ export function MobileBottomNav() {
                             key={item.name}
                             href={item.href}
                             className={cn(
-                                "flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition-colors min-w-[64px]",
+                                "flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition-all min-w-[64px]",
                                 isActive
-                                    ? "text-primary"
+                                    ? "text-primary bg-primary/10"
                                     : "text-muted-foreground hover:text-foreground"
                             )}
                             aria-label={item.name}
@@ -63,7 +63,7 @@ export function MobileBottomNav() {
                         >
                             <div className={cn(
                                 "relative flex items-center justify-center w-6 h-6",
-                                isActive && "after:absolute after:-bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-1 after:h-1 after:bg-primary after:rounded-full"
+                                isActive && "after:absolute after:-bottom-1.5 after:left-1/2 after:-translate-x-1/2 after:w-4 after:h-0.5 after:bg-primary after:rounded-full after:transition-all"
                             )}>
                                 <Icon className="h-5 w-5" aria-hidden="true" />
                             </div>
@@ -79,9 +79,9 @@ export function MobileBottomNav() {
                     <DropdownMenuTrigger asChild>
                         <button
                             className={cn(
-                                "flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition-colors min-w-[64px]",
+                                "flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition-all min-w-[64px]",
                                 isMoreActive
-                                    ? "text-primary"
+                                    ? "text-primary bg-primary/10"
                                     : "text-muted-foreground hover:text-foreground"
                             )}
                             aria-label="Más opciones"
@@ -89,7 +89,7 @@ export function MobileBottomNav() {
                         >
                             <div className={cn(
                                 "relative flex items-center justify-center w-6 h-6",
-                                isMoreActive && "after:absolute after:-bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-1 after:h-1 after:bg-primary after:rounded-full"
+                                isMoreActive && "after:absolute after:-bottom-1.5 after:left-1/2 after:-translate-x-1/2 after:w-4 after:h-0.5 after:bg-primary after:rounded-full after:transition-all"
                             )}>
                                 <MoreHorizontal className="h-5 w-5" aria-hidden="true" />
                             </div>

@@ -153,7 +153,7 @@ export function WeekView({ classes, events, currentDate }: Props) {
                                         key={cls.id}
                                         onClick={() => handleClassClick(cls.id)}
                                         className={cn(
-                                            "absolute left-1 right-1 px-2 py-1 cursor-pointer overflow-hidden z-10 rounded-md border transition-all duration-200 group hover:shadow-md",
+                                            "absolute left-1 right-1 px-2 py-1 cursor-pointer overflow-hidden z-10 rounded-lg border transition-all duration-200 group hover:shadow-md",
                                             isCompleted && "opacity-60 grayscale-[0.3]",
                                             isInProgress && "ring-2 ring-primary ring-offset-1 shadow-lg scale-[1.01]"
                                         )}
@@ -173,12 +173,12 @@ export function WeekView({ classes, events, currentDate }: Props) {
                                             {isInProgress && <Clock className="h-3 w-3 animate-pulse shrink-0" />}
                                         </div>
 
-                                        <div className="text-[10px] opacity-90 truncate mt-0.5 font-mono">
+                                        <div className="text-[11px] opacity-90 truncate mt-0.5 font-mono">
                                             {cls.startTime} - {cls.endTime}
                                         </div>
 
                                         {/* Attendance Count */}
-                                        <div className="absolute bottom-1 right-1 flex items-center gap-1 text-[9px] bg-black/10 px-1 py-0.5 rounded-sm backdrop-blur-[1px]">
+                                        <div className="absolute bottom-1 right-1 flex items-center gap-1 text-[10px] bg-black/20 text-white px-1.5 py-0.5 rounded backdrop-blur-[2px]">
                                             <Users className="h-2.5 w-2.5" />
                                             <span className="font-mono">{cls._count.attendances}</span>
                                         </div>
@@ -195,7 +195,7 @@ export function WeekView({ classes, events, currentDate }: Props) {
                 open={detailsOpen}
                 onOpenChange={setDetailsOpen}
             />
-        </div>
+        </div >
     );
 }
 

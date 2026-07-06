@@ -10,6 +10,11 @@
 }
 
 :root {
+  /* ── Brand Identity ── */
+  /* Primary Gold: oklch(0.78 0.15 85) — from RC Fight Club logo */
+  /* Accent Red:   oklch(0.50 0.20 25) — fight/martial arts identity */
+  /* Base Black:   oklch(0.08 0    0 ) — premium dark background */
+
   /* Background & Foreground */
   --background: oklch(0.08 0 0);
   --foreground: oklch(0.98 0 0);

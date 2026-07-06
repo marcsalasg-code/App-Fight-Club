@@ -7,6 +7,7 @@ import { ArrowRight, Clock, MapPin, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 interface ClassData {
     id: string;
@@ -59,7 +60,18 @@ export function NextClassCard({ nextClass }: NextClassCardProps) {
             <CardHeader className="pb-2">
                 <div className="flex justify-between items-start">
                     <div>
-                        <Badge variant="outline" className="mb-2 bg-background/50 backdrop-blur-sm">
+                        <Badge variant="outline" className={cn(
+                            "mb-2 backdrop-blur-sm gap-1.5",
+                            isLive
+                                ? "bg-green-500/10 text-green-600 border-green-500/30"
+                                : "bg-muted text-muted-foreground"
+                        )}>
+                            {isLive && (
+                                <span className="relative flex h-2 w-2">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75" />
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
+                                </span>
+                            )}
                             {isLive ? "EN CURSO" : "PRÓXIMA CLASE"}
                         </Badge>
                         <CardTitle className="text-2xl font-bold">{nextClass.name}</CardTitle>

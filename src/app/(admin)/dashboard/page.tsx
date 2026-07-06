@@ -233,7 +233,9 @@ async function DashboardContent() {
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Atletas Activos
               </CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
+              <div className="p-2 rounded-full bg-blue-500/10">
+                <Users className="h-4 w-4 text-blue-500" />
+              </div>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold stat-number">{stats.activeAthletes}</div>
@@ -249,7 +251,9 @@ async function DashboardContent() {
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Check-ins Hoy
               </CardTitle>
-              <CalendarCheck className="h-4 w-4 text-muted-foreground" />
+              <div className="p-2 rounded-full bg-green-500/10">
+                <CalendarCheck className="h-4 w-4 text-green-500" />
+              </div>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold stat-number">{stats.todayAttendance}</div>
@@ -266,7 +270,9 @@ async function DashboardContent() {
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Competidores
               </CardTitle>
-              <Trophy className="h-4 w-4 text-muted-foreground" />
+              <div className="p-2 rounded-full bg-amber-500/10">
+                <Trophy className="h-4 w-4 text-amber-500" />
+              </div>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold stat-number">{stats.competitorAthletes}</div>
@@ -283,7 +289,9 @@ async function DashboardContent() {
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Alertas Pago
               </CardTitle>
-              <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+              <div className="p-2 rounded-full bg-red-500/10">
+                <AlertTriangle className="h-4 w-4 text-red-500" />
+              </div>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold stat-number">{stats.expiredSubscriptions}</div>
@@ -303,11 +311,9 @@ async function DashboardContent() {
 
         {/* Left Column: Next Class & Today's Schedule */}
         <div className="md:col-span-4 space-y-6">
-          {/* Next Class Highlight - New Feature */}
+          {/* Next Class Highlight */}
           <div className="h-auto">
-            <CardHeader className="px-0 pt-0">
-              <CardTitle className="text-lg">Próxima Sesión</CardTitle>
-            </CardHeader>
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3">Próxima Sesión</h3>
             <NextClassCard nextClass={stats.nextClass} />
           </div>
 
