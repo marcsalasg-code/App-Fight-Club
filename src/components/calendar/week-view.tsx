@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { ClassDetailModal } from "./class-detail-modal";
 import { format, startOfWeek, addDays, isSameDay } from "date-fns";
@@ -23,6 +23,23 @@ export function WeekView({ classes, events, currentDate }: Props) {
     const { types: classTypes } = useClassTypes();
     const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
     const [detailsOpen, setDetailsOpen] = useState(false);
+    const [now, setNow] = useState(new Date());
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setNow(new Date());
+        }, 60000);
+        return () => clearInterval(interval);
+    }, []);
+
+    const getNowIndicatorPos = () => {
+        const hours = now.getHours();
+        const minutes = now.getMinutes();
+        if (hours < CALENDAR_CONSTANTS.START_HOUR || hours >= CALENDAR_CONSTANTS.END_HOUR) return null;
+
+        const relativeMinutes = (hours - CALENDAR_CONSTANTS.START_HOUR) * 60 + minutes;
+        return (relativeMinutes / 60) * CALENDAR_CONSTANTS.HOUR_HEIGHT;
+    };
 
     const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
     const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
@@ -109,6 +126,19 @@ export function WeekView({ classes, events, currentDate }: Props) {
                                 />
                             ))}
 
+                            {/* Current Time Indicator */}
+                            {isSameDay(weekDays[dayIndex], new Date()) && getNowIndicatorPos() !== null && (
+                                <div
+                                    className="absolute left-0 right-0 z-30 flex items-center pointer-events-none"
+                                    style={{ top: `${getNowIndicatorPos()}px` }}
+                                >
+                                    <div className="w-2.5 h-2.5 rounded-full bg-red-500 -ml-1.25 shrink-0 shadow-sm relative">
+                                        <div className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-75" />
+                                    </div>
+                                    <div className="flex-1 h-0.5 bg-red-500" />
+                                </div>
+                            )}
+
                             {/* Events */}
                             {events.filter(e => isSameDay(e.date, weekDays[dayIndex])).map(event => {
                                 const eventStyle = calculateEventDimensions(event.date);
@@ -153,9 +183,9 @@ export function WeekView({ classes, events, currentDate }: Props) {
                                         key={cls.id}
                                         onClick={() => handleClassClick(cls.id)}
                                         className={cn(
-                                            "absolute left-1 right-1 px-2 py-1 cursor-pointer overflow-hidden z-10 rounded-lg border transition-all duration-200 group hover:shadow-md",
+                                            "calendar-block absolute left-[3px] right-[3px] px-2 py-1 cursor-pointer overflow-hidden z-10",
                                             isCompleted && "opacity-60 grayscale-[0.3]",
-                                            isInProgress && "ring-2 ring-primary ring-offset-1 shadow-lg scale-[1.01]"
+                                            isInProgress && "ring-2 ring-primary ring-offset-1 scale-[1.01]"
                                         )}
                                         style={{
                                             ...style,

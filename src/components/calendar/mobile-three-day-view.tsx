@@ -158,9 +158,9 @@ export function MobileThreeDayView({ classes, events, currentDate }: Props) {
                                             key={cls.id}
                                             onClick={() => handleClassClick(cls.id)}
                                             className={cn(
-                                                "absolute left-0.5 right-0.5 px-1 py-1 cursor-pointer overflow-hidden z-10 rounded-md border transition-all duration-200",
-                                                isCompleted && "opacity-70 grayscale-[0.3]",
-                                                isInProgress && "ring-1 ring-primary ring-offset-0 shadow-sm z-20"
+                                                "calendar-block absolute left-[2px] right-[2px] px-1.5 py-1 cursor-pointer overflow-hidden z-10",
+                                                isCompleted && "opacity-75 grayscale-[0.2]",
+                                                isInProgress && "ring-1 ring-primary ring-offset-0 scale-[1.01]"
                                             )}
                                             style={{
                                                 ...style,

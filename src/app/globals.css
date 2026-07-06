@@ -276,8 +276,8 @@ html {
 
 /* Calendar specific */
 .calendar-block {
-  @apply rounded-md shadow-sm transition-all duration-150;
-  @apply hover:shadow-md hover:scale-[1.02];
+  @apply rounded-xl border border-black/5 dark:border-white/5 shadow-sm transition-all duration-200 backdrop-blur-[1px];
+  @apply hover:shadow-lg hover:scale-[1.02] hover:z-25;
 }
 
 /* Card hover effect */

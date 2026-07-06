@@ -113,14 +113,15 @@ export function MonthView({ classes, events, currentDate }: Props) {
                                             <button
                                                 key={cls.id}
                                                 onClick={(e) => handleClassClick(cls.id, e)}
-                                                className="text-[11px] text-left px-2 py-1 rounded-md truncate font-medium transition-all hover:scale-[1.02] hover:shadow-sm"
+                                                className="text-[10px] text-left px-1.5 py-0.5 rounded border border-black/5 dark:border-white/5 truncate font-medium transition-all hover:scale-[1.02] hover:shadow-sm"
                                                 style={{
                                                     backgroundColor: cls.color || colors.bg,
+                                                    borderLeft: `2px solid ${colors.border}`,
                                                     color: colors.text
                                                 }}
                                             >
                                                 <span className="font-mono opacity-80">{cls.startTime}</span>
-                                                <span className="mx-1">·</span>
+                                                <span className="mx-1 opacity-50">·</span>
                                                 <span>{cls.name}</span>
                                             </button>
                                         );

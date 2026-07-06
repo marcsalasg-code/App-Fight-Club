@@ -92,14 +92,14 @@ export function MobileMonthSplitView({ classes, events, currentDate }: Props) {
                                 <div className={cn(
                                     "h-7 w-7 flex items-center justify-center rounded-full text-sm transition-all",
                                     isSelected ? "bg-primary text-primary-foreground font-bold shadow-md scale-105" :
-                                        isToday ? "text-primary font-bold bg-primary/10" :
-                                            !isCurrentMonth ? "text-muted-foreground/30" : "text-foreground hover:bg-muted"
+                                        isToday ? "text-primary font-bold border border-primary/40 bg-primary/5" :
+                                            !isCurrentMonth ? "text-muted-foreground/20" : "text-foreground hover:bg-muted"
                                 )}>
                                     {format(day, 'd')}
                                 </div>
                                 <div className="flex gap-0.5 mt-0.5 h-1">
-                                    {hasEvents && <div className="w-1 h-1 rounded-full bg-red-500" />}
-                                    {hasClasses && <div className={cn("w-1 h-1 rounded-full", isSelected ? "bg-primary-foreground" : "bg-primary/50")} />}
+                                    {hasEvents && <div className="w-1.5 h-1.5 rounded-full bg-red-500" />}
+                                    {hasClasses && <div className={cn("w-1.5 h-1.5 rounded-full", isSelected ? "bg-primary-foreground" : "bg-primary/50")} />}
                                 </div>
                             </div>
                         );
@@ -113,7 +113,7 @@ export function MobileMonthSplitView({ classes, events, currentDate }: Props) {
                     <h3 className="text-sm font-semibold capitalize text-muted-foreground">
                         {format(selectedDate, "EEEE d 'de' MMMM", { locale: es })}
                     </h3>
-                    <span className="text-xs bg-muted px-2 py-0.5 rounded text-muted-foreground">
+                    <span className="text-xs bg-muted px-2.5 py-0.5 rounded-full text-muted-foreground font-medium">
                         {selectedDayClasses.length} clases
                     </span>
                 </div>
@@ -124,6 +124,7 @@ export function MobileMonthSplitView({ classes, events, currentDate }: Props) {
                             <AgendaItem
                                 key={cls.id}
                                 cls={cls}
+                                date={selectedDate}
                                 onClick={handleClassClick}
                             />
                         ))
@@ -141,6 +142,6 @@ export function MobileMonthSplitView({ classes, events, currentDate }: Props) {
                 open={detailsOpen}
                 onOpenChange={setDetailsOpen}
             />
-        </div>
+        </div >
     );
 }

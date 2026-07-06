@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { ClassDetailModal } from "./class-detail-modal";
-import { format } from "date-fns";
+import { format, isSameDay } from "date-fns";
 import { es } from "date-fns/locale";
 import { Users, Clock } from "lucide-react";
 import { Class, CalendarEvent, TYPE_COLORS } from "./types";
@@ -23,6 +23,23 @@ const HOURS = Array.from({ length: END_HOUR - START_HOUR + 1 }, (_, i) => START_
 export function DayView({ classes, currentDate }: Props) {
     const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
     const [detailsOpen, setDetailsOpen] = useState(false);
+    const [now, setNow] = useState(new Date());
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setNow(new Date());
+        }, 60000);
+        return () => clearInterval(interval);
+    }, []);
+
+    const getNowIndicatorPos = () => {
+        const hours = now.getHours();
+        const minutes = now.getMinutes();
+        if (hours < START_HOUR || hours >= END_HOUR) return null;
+
+        const relativeMinutes = (hours - START_HOUR) * 60 + minutes;
+        return (relativeMinutes / 60) * HOUR_HEIGHT;
+    };
 
     const handleClassClick = (id: string) => {
         setSelectedClassId(id);
@@ -48,6 +65,7 @@ export function DayView({ classes, currentDate }: Props) {
                         <AgendaItem
                             key={cls.id}
                             cls={cls}
+                            date={currentDate}
                             onClick={handleClassClick}
                         />
                     ))
@@ -114,6 +132,19 @@ export function DayView({ classes, currentDate }: Props) {
                     >
                         <div /> {/* Spacer for time column */}
                         <div className="relative">
+                            {/* Current Time Indicator */}
+                            {isSameDay(currentDate, new Date()) && getNowIndicatorPos() !== null && (
+                                <div
+                                    className="absolute left-0 right-0 z-30 flex items-center pointer-events-none"
+                                    style={{ top: `${getNowIndicatorPos()}px` }}
+                                >
+                                    <div className="w-2.5 h-2.5 rounded-full bg-red-500 -ml-1.25 shrink-0 shadow-sm relative">
+                                        <div className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-75" />
+                                    </div>
+                                    <div className="flex-1 h-0.5 bg-red-500" />
+                                </div>
+                            )}
+
                             {dayClasses.map((cls) => {
                                 const [startH, startM] = cls.startTime.split(":").map(Number);
                                 const [endH, endM] = cls.endTime.split(":").map(Number);
