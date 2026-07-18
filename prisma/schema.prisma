@@ -134,12 +134,19 @@ model WeighIn {
 // CONFIGURATION (Global App Settings)
 // ==========================================================
 model GymSettings {
-  id                  String   @id @default(cuid())
-  gymName             String   @default("RC Fight Club")
-  timezone            String   @default("Europe/Madrid")
-  checkInEarlyMinutes Int      @default(15)
-  checkInLateMinutes  Int      @default(40)
-  updatedAt           DateTime @updatedAt
+  id                        String   @id @default(cuid())
+  gymName                   String   @default("RC Fight Club")
+  timezone                  String   @default("Europe/Madrid")
+  checkInEarlyMinutes       Int      @default(15)
+  checkInLateMinutes        Int      @default(40)
+  bookingMaxDaysInAdvance  Int      @default(7)
+  lateCancellationHours     Int      @default(2)
+  consecutiveNoShowsLimit   Int      @default(3)
+  walletPassBackgroundColor String   @default("#000000")
+  walletInstagram           String?
+  walletAddress             String?
+  walletPhone               String?
+  updatedAt                 DateTime @updatedAt
 }
 
 // ==========================================================

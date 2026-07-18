@@ -102,6 +102,20 @@ export async function createBooking(athleteId: string, classId: string, dateStr:
             return { success: false, error: "La clase no existe o ya no está disponible" };
         }
 
+        // 2.1 Verificación de días de anticipación de reserva
+        const settings = await prisma.gymSettings.findFirst();
+        const maxDays = settings?.bookingMaxDaysInAdvance ?? 7;
+        const nowZoned = await getGymNow();
+        const maxAllowedDate = addDays(nowZoned, maxDays);
+        maxAllowedDate.setHours(23, 59, 59, 999);
+
+        if (date > maxAllowedDate) {
+            return {
+                success: false,
+                error: `Solo se pueden hacer reservas con un máximo de ${maxDays} días de anticipación.`
+            };
+        }
+
         // 3. Duplicado
         const existing = await prisma.classBooking.findFirst({
             where: {
@@ -174,11 +188,33 @@ export async function cancelBooking(athleteId: string, classId: string, dateStr:
                 athleteId,
                 classId,
                 date
+            },
+            include: {
+                class: true
             }
         });
 
         if (!booking) {
             return { success: false, error: "Reserva no encontrada." };
+        }
+
+        // Verificación de cancelación tardía
+        const settings = await prisma.gymSettings.findFirst();
+        const lateCancellationHours = settings?.lateCancellationHours ?? 2;
+
+        const classDate = new Date(booking.date);
+        const [hours, minutes] = booking.class.startTime.split(":").map(Number);
+        classDate.setHours(hours, minutes, 0, 0);
+
+        const gymNow = await getGymNow();
+        const diffInMs = classDate.getTime() - gymNow.getTime();
+        const diffInHours = diffInMs / (1000 * 60 * 60);
+
+        if (diffInHours < lateCancellationHours) {
+            return {
+                success: false,
+                error: `No puedes cancelar reservas con menos de ${lateCancellationHours} horas de antelación.`
+            };
         }
 
         await prisma.classBooking.delete({
@@ -220,9 +256,11 @@ export async function getClientReservations(athleteId: string) {
 export async function getScheduleForReservations(athleteId: string) {
     try {
         const gymNow = await getGymNow();
+        const settings = await prisma.gymSettings.findFirst();
+        const maxDays = settings?.bookingMaxDaysInAdvance ?? 7;
 
-        // Rolling 7 days from today
-        const days = Array.from({ length: 7 }, (_, i) => {
+        // Rolling maxDays days from today
+        const days = Array.from({ length: maxDays }, (_, i) => {
             const d = addDays(gymNow, i);
             d.setHours(0, 0, 0, 0);
             return d;

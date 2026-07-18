@@ -9,21 +9,47 @@ export type GymSettingsData = {
     timezone: string;
     checkInEarlyMinutes: number;
     checkInLateMinutes: number;
+    bookingMaxDaysInAdvance: number;
+    lateCancellationHours: number;
+    consecutiveNoShowsLimit: number;
+    walletPassBackgroundColor: string;
+    walletInstagram?: string | null;
+    walletAddress?: string | null;
+    walletPhone?: string | null;
 };
 
 export async function getGymSettings() {
     try {
         const settings = await prisma.gymSettings.findFirst();
         if (!settings) {
-            // Return defaults if not set (or create one)
             return {
                 gymName: "RC Fight Club",
                 timezone: "Europe/Madrid",
                 checkInEarlyMinutes: 15,
                 checkInLateMinutes: 40,
+                bookingMaxDaysInAdvance: 7,
+                lateCancellationHours: 2,
+                consecutiveNoShowsLimit: 3,
+                walletPassBackgroundColor: "#000000",
+                walletInstagram: "",
+                walletAddress: "",
+                walletPhone: "",
             };
         }
-        return settings;
+        return {
+            id: settings.id,
+            gymName: settings.gymName,
+            timezone: settings.timezone,
+            checkInEarlyMinutes: settings.checkInEarlyMinutes,
+            checkInLateMinutes: settings.checkInLateMinutes,
+            bookingMaxDaysInAdvance: settings.bookingMaxDaysInAdvance ?? 7,
+            lateCancellationHours: settings.lateCancellationHours ?? 2,
+            consecutiveNoShowsLimit: settings.consecutiveNoShowsLimit ?? 3,
+            walletPassBackgroundColor: settings.walletPassBackgroundColor ?? "#000000",
+            walletInstagram: settings.walletInstagram ?? "",
+            walletAddress: settings.walletAddress ?? "",
+            walletPhone: settings.walletPhone ?? "",
+        };
     } catch (error) {
         console.error("Error fetching settings:", error);
         return null;
@@ -34,7 +60,6 @@ export async function updateGymSettings(data: GymSettingsData) {
     await requireAdmin();
 
     try {
-        // Upsert ensures we have only one settings record
         const first = await prisma.gymSettings.findFirst();
 
         if (first) {
