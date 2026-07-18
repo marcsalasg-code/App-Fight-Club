@@ -45,12 +45,16 @@ export function AthletesTable({ data }: AthletesTableProps) {
 
 
 
+import { useVirtualizer } from "@tanstack/react-virtual"
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function CustomDataTable({ data, columns }: { data: AthleteColumn[], columns: any[] }) {
     const [rowSelection, setRowSelection] = React.useState({})
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
     const [sorting, setSorting] = React.useState<SortingState>([])
+
+    const parentRef = React.useRef<HTMLDivElement>(null)
 
     // eslint-disable-next-line react-hooks/incompatible-library
     const table = useReactTable({
@@ -76,6 +80,15 @@ function CustomDataTable({ data, columns }: { data: AthleteColumn[], columns: an
         getFacetedUniqueValues: getFacetedUniqueValues(),
     })
 
+    const { rows } = table.getRowModel()
+
+    const rowVirtualizer = useVirtualizer({
+        count: rows.length,
+        getScrollElement: () => parentRef.current,
+        estimateSize: () => 53, // Average height of a table row
+        overscan: 5,
+    })
+
     const selectedIds = Object.keys(rowSelection); // Now this contains actual IDs
 
     const handleBulkDelete = async () => {
@@ -92,6 +105,12 @@ function CustomDataTable({ data, columns }: { data: AthleteColumn[], columns: an
             error: 'Error al eliminar',
         });
     }
+
+    const virtualItems = rowVirtualizer.getVirtualItems()
+    const totalSize = rowVirtualizer.getTotalSize()
+
+    const paddingTop = virtualItems.length > 0 ? virtualItems[0].start : 0
+    const paddingBottom = virtualItems.length > 0 ? totalSize - virtualItems[virtualItems.length - 1].end : 0
 
     return (
         <div className="space-y-4">
@@ -116,9 +135,12 @@ function CustomDataTable({ data, columns }: { data: AthleteColumn[], columns: an
                 </div>
                 <DataTableViewOptions table={table} />
             </div>
-            <div className="rounded-md border">
+            <div
+                ref={parentRef}
+                className="rounded-md border max-h-[600px] overflow-auto relative"
+            >
                 <Table>
-                    <TableHeader>
+                    <TableHeader className="sticky top-0 bg-background z-20 shadow-[0_1px_0_0_rgba(0,0,0,0.1)]">
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id}>
                                 {headerGroup.headers.map((header) => {
@@ -137,22 +159,39 @@ function CustomDataTable({ data, columns }: { data: AthleteColumn[], columns: an
                         ))}
                     </TableHeader>
                     <TableBody>
-                        {table.getRowModel().rows?.length ? (
-                            table.getRowModel().rows.map((row) => (
-                                <TableRow
-                                    key={row.id}
-                                    data-state={row.getIsSelected() && "selected"}
-                                >
-                                    {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id}>
-                                            {flexRender(
-                                                cell.column.columnDef.cell,
-                                                cell.getContext()
-                                            )}
-                                        </TableCell>
-                                    ))}
-                                </TableRow>
-                            ))
+                        {rows.length ? (
+                            <>
+                                {paddingTop > 0 && (
+                                    <TableRow>
+                                        <TableCell style={{ height: `${paddingTop}px` }} colSpan={columns.length} />
+                                    </TableRow>
+                                )}
+                                {virtualItems.map((virtualRow) => {
+                                    const row = rows[virtualRow.index]
+                                    return (
+                                        <TableRow
+                                            key={row.id}
+                                            data-state={row.getIsSelected() && "selected"}
+                                            data-index={virtualRow.index}
+                                            ref={rowVirtualizer.measureElement}
+                                        >
+                                            {row.getVisibleCells().map((cell) => (
+                                                <TableCell key={cell.id}>
+                                                    {flexRender(
+                                                        cell.column.columnDef.cell,
+                                                        cell.getContext()
+                                                    )}
+                                                </TableCell>
+                                            ))}
+                                        </TableRow>
+                                    )
+                                })}
+                                {paddingBottom > 0 && (
+                                    <TableRow>
+                                        <TableCell style={{ height: `${paddingBottom}px` }} colSpan={columns.length} />
+                                    </TableRow>
+                                )}
+                            </>
                         ) : (
                             <TableRow>
                                 <TableCell

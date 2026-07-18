@@ -3,6 +3,8 @@
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/safe-action";
+import { getWeekBoundaries, resolveMembershipStatus } from "@/lib/domain/athlete-stats";
+import { validateData, athleteSchema } from "@/lib/schemas";
 
 
 export type AthleteFormData = {
@@ -26,10 +28,16 @@ export type AthleteFormData = {
 export async function createAthlete(data: AthleteFormData) {
     await requireRole(["ADMIN", "COACH"]);
 
+    const validation = validateData(athleteSchema, data);
+    if (!validation.success) {
+        return { success: false, error: validation.error };
+    }
+    const validated = validation.data;
+
     try {
         // Check for duplicate PIN
-        if (data.pin) {
-            const existingPin = await prisma.athlete.findUnique({ where: { pin: data.pin } });
+        if (validated.pin) {
+            const existingPin = await prisma.athlete.findUnique({ where: { pin: validated.pin } });
             if (existingPin) {
                 return { success: false, error: "Este PIN ya está en uso" };
             }
@@ -37,22 +45,22 @@ export async function createAthlete(data: AthleteFormData) {
 
         const athlete = await prisma.athlete.create({
             data: {
-                firstName: data.firstName,
-                lastName: data.lastName,
-                email: data.email || null,
-                phone: data.phone || null,
-                pin: data.pin || null,
-                dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : null,
-                emergencyContact: data.emergencyContact || null,
-                medicalConditions: data.medicalConditions || null,
-                height: data.height || null,
-                weight: data.weight || null,
-                level: data.level,
-                goal: data.goal,
-                isCompetitor: data.isCompetitor,
-                competitionCategory: data.competitionCategory || null,
+                firstName: validated.firstName,
+                lastName: validated.lastName,
+                email: validated.email || null,
+                phone: validated.phone || null,
+                pin: validated.pin || null,
+                dateOfBirth: validated.dateOfBirth ? new Date(validated.dateOfBirth) : null,
+                emergencyContact: validated.emergencyContact || null,
+                medicalConditions: validated.medicalConditions || null,
+                height: validated.height || null,
+                weight: validated.weight || null,
+                level: validated.level,
+                goal: validated.goal,
+                isCompetitor: validated.isCompetitor,
+                competitionCategory: validated.competitionCategory || null,
                 tags: {
-                    connect: data.tagIds?.map(id => ({ id })) || []
+                    connect: validated.tagIds?.map(id => ({ id })) || []
                 }
             },
         });
@@ -67,11 +75,17 @@ export async function createAthlete(data: AthleteFormData) {
 export async function updateAthlete(id: string, data: AthleteFormData) {
     await requireRole(["ADMIN", "COACH"]);
 
+    const validation = validateData(athleteSchema, data);
+    if (!validation.success) {
+        return { success: false, error: validation.error };
+    }
+    const validated = validation.data;
+
     try {
         // Check for duplicate PIN (excluding current athlete)
-        if (data.pin) {
+        if (validated.pin) {
             const existingPin = await prisma.athlete.findFirst({
-                where: { pin: data.pin, id: { not: id } }
+                where: { pin: validated.pin, id: { not: id } }
             });
             if (existingPin) {
                 return { success: false, error: "Este PIN ya está en uso" };
@@ -81,22 +95,22 @@ export async function updateAthlete(id: string, data: AthleteFormData) {
         const athlete = await prisma.athlete.update({
             where: { id },
             data: {
-                firstName: data.firstName,
-                lastName: data.lastName,
-                email: data.email || null,
-                phone: data.phone || null,
-                pin: data.pin || null,
-                dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : null,
-                emergencyContact: data.emergencyContact || null,
-                medicalConditions: data.medicalConditions || null,
-                height: data.height || null,
-                weight: data.weight || null,
-                level: data.level,
-                goal: data.goal,
-                isCompetitor: data.isCompetitor,
-                competitionCategory: data.competitionCategory || null,
+                firstName: validated.firstName,
+                lastName: validated.lastName,
+                email: validated.email || null,
+                phone: validated.phone || null,
+                pin: validated.pin || null,
+                dateOfBirth: validated.dateOfBirth ? new Date(validated.dateOfBirth) : null,
+                emergencyContact: validated.emergencyContact || null,
+                medicalConditions: validated.medicalConditions || null,
+                height: validated.height || null,
+                weight: validated.weight || null,
+                level: validated.level,
+                goal: validated.goal,
+                isCompetitor: validated.isCompetitor,
+                competitionCategory: validated.competitionCategory || null,
                 tags: {
-                    set: data.tagIds?.map(id => ({ id })) || []
+                    set: validated.tagIds?.map(id => ({ id })) || []
                 }
             },
         });
@@ -209,16 +223,8 @@ export async function searchAthletes(query: string = "") {
             }
             : {}; // No filter, return recent athletes
 
-        // Calculate current week boundaries (Monday-Sunday)
-        const now = new Date();
-        const dayOfWeek = now.getDay();
-        const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-        const weekStart = new Date(now);
-        weekStart.setDate(now.getDate() + mondayOffset);
-        weekStart.setHours(0, 0, 0, 0);
-        const weekEnd = new Date(weekStart);
-        weekEnd.setDate(weekStart.getDate() + 6);
-        weekEnd.setHours(23, 59, 59, 999);
+        // Calculate current week boundaries (Monday-Sunday) Using Domain rules
+        const { start: weekStart, end: weekEnd } = getWeekBoundaries();
 
         const athletes = await prisma.athlete.findMany({
             where: whereClause,
@@ -247,42 +253,14 @@ export async function searchAthletes(query: string = "") {
             },
         });
 
+        const now = new Date();
         return athletes.map(a => {
             const subscription = a.subscriptions[0];
             const sessionsUsed = a.attendances.length;
             const sessionsLimit = subscription?.membership.weeklyLimit || null;
 
-            // Calculate membership color based on endDate
-            let membershipColor: "green" | "yellow" | "red" = "red";
-            let membershipLabel = "Sin membresía";
-            let membershipName: string | null = null;
-
-            if (subscription) {
-                membershipName = subscription.membership.name;
-                const endDate = subscription.endDate ? new Date(subscription.endDate) : null;
-
-                if (endDate) {
-                    const daysSinceExpiry = Math.floor((now.getTime() - endDate.getTime()) / (1000 * 60 * 60 * 24));
-
-                    if (daysSinceExpiry < 0) {
-                        // Not expired yet
-                        membershipColor = "green";
-                        membershipLabel = "Activo";
-                    } else if (daysSinceExpiry <= 5) {
-                        // Grace period (0-5 days expired)
-                        membershipColor = "yellow";
-                        membershipLabel = "Prórroga";
-                    } else {
-                        // Expired > 5 days
-                        membershipColor = "red";
-                        membershipLabel = "Vencido";
-                    }
-                } else {
-                    // No end date means unlimited/active
-                    membershipColor = "green";
-                    membershipLabel = "Activo";
-                }
-            }
+            // Resolve membership using Domain pure calculations
+            const { color: membershipColor, label: membershipLabel, name: membershipName } = resolveMembershipStatus(subscription, now);
 
             return {
                 id: a.id,
@@ -326,18 +304,8 @@ export async function getAthleteSubscriptionStatus(athleteId: string) {
             return { hasSubscription: false };
         }
 
-        // Calculate current week boundaries
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const dayOfWeek = today.getDay();
-        const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-        const weekStart = new Date(today);
-        weekStart.setDate(today.getDate() + mondayOffset);
-        weekStart.setHours(0, 0, 0, 0);
-
-        const weekEnd = new Date(weekStart);
-        weekEnd.setDate(weekStart.getDate() + 6);
-        weekEnd.setHours(23, 59, 59, 999);
+        // Calculate current week boundaries using Domain Rules
+        const { start: weekStart, end: weekEnd } = getWeekBoundaries();
 
         // Count weekly attendances
         const weeklyAttendances = await prisma.attendance.count({

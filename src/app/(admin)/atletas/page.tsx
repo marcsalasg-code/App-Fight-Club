@@ -1,5 +1,6 @@
 import Link from "next/link";
 import prisma from "@/lib/prisma";
+import { getWeekBoundaries, resolveMembershipStatus } from "@/lib/domain/athlete-stats";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -27,19 +28,8 @@ async function getAthletes(search?: string) {
         }
         : {};
 
-    // Calculate week boundaries for attendance counting
-    const now = new Date();
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const dayOfWeek = now.getDay();
-    const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-    const weekStart = new Date(now);
-    weekStart.setDate(now.getDate() + mondayOffset);
-    weekStart.setHours(0, 0, 0, 0);
-    const weekEnd = new Date(weekStart);
-    weekEnd.setDate(weekStart.getDate() + 6);
-    weekEnd.setHours(23, 59, 59, 999);
+    // Calculate week boundaries for attendance counting using Domain rules
+    const { start: weekStart, end: weekEnd } = getWeekBoundaries();
 
     const athletesData = await prisma.athlete.findMany({
         where,
@@ -74,31 +64,9 @@ export default async function AthletesPage({ searchParams }: Props) {
     const athletes = await getAthletes(params.search);
 
     const formattedAthletes: AthleteColumn[] = athletes.map(a => {
-        // Calculate Status Color
-        let statusColor: "green" | "yellow" | "red" = "red";
-        let statusLabel = "Sin membresía";
+        // Calculate Status Color using Domain rules
         const subscription = a.subscriptions[0];
-
-        if (subscription) {
-            if (subscription.endDate) {
-                const endDate = new Date(subscription.endDate);
-                const daysSinceExpiry = Math.floor((new Date().getTime() - endDate.getTime()) / (1000 * 60 * 60 * 24));
-
-                if (daysSinceExpiry < 0) {
-                    statusColor = "green";
-                    statusLabel = "Activo";
-                } else if (daysSinceExpiry <= 5) {
-                    statusColor = "yellow";
-                    statusLabel = "Prórroga";
-                } else {
-                    statusColor = "red";
-                    statusLabel = "Vencido";
-                }
-            } else {
-                statusColor = "green";
-                statusLabel = "Activo";
-            }
-        }
+        const { color: statusColor, label: statusLabel } = resolveMembershipStatus(subscription);
 
         // Calculate Session Badge
         let sessionsBadge: string | null = null;

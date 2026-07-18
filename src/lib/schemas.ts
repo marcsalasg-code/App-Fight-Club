@@ -18,6 +18,7 @@ export const athleteSchema = z.object({
     goal: z.enum(["FITNESS", "WEIGHT_LOSS", "SELF_DEFENSE", "COMPETITION", "RECREATIONAL"]),
     isCompetitor: z.boolean(),
     competitionCategory: z.string().max(50).optional().or(z.literal("")),
+    tagIds: z.array(z.string()).optional(),
 });
 
 export type AthleteInput = z.infer<typeof athleteSchema>;
