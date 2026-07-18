@@ -13,6 +13,7 @@ import {
     PanelLeftOpen,
     Settings as SettingsIcon,
     FileText,
+    Dumbbell,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,7 @@ import { Button } from "@/components/ui/button";
 const mainNavigation = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, description: "Panel principal" },
     { name: "Calendario", href: "/calendario", icon: Calendar, description: "Ver clases y horarios" },
+    { name: "Clases", href: "/clases", icon: Dumbbell, description: "Gestionar disciplinas" },
     { name: "Atletas", href: "/atletas", icon: Users, description: "Gestionar miembros" },
     { name: "Pagos", href: "/pagos", icon: CreditCard, description: "Facturación y suscripciones" },
 ];

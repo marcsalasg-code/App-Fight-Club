@@ -1,0 +1,41 @@
+
+> gym-manager@0.1.0 build
+> next build
+
+Ôû▓ Next.js 16.1.6 (Turbopack)
+- Environments: .env.production.local, .env.local, .env
+
+ÔÜá The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+Error: Cannot apply unknown utility class `to-red-650`
+    [at onInvalidCandidate (C:\Users\Marc\Desktop\App\gym-manager\node_modules\tailwindcss\dist\lib.js:21:1511)]
+    [at Te (C:\Users\Marc\Desktop\App\gym-manager\node_modules\tailwindcss\dist\lib.js:16:36652)]
+    [at C:\Users\Marc\Desktop\App\gym-manager\node_modules\tailwindcss\dist\lib.js:21:355]
+    [at Rr (C:\Users\Marc\Desktop\App\gym-manager\node_modules\tailwindcss\dist\lib.js:3:1718)]
+    [at _ (C:\Users\Marc\Desktop\App\gym-manager\node_modules\tailwindcss\dist\lib.js:3:1377)]
+    [at $e (C:\Users\Marc\Desktop\App\gym-manager\node_modules\tailwindcss\dist\lib.js:21:172)]
+    [at un (C:\Users\Marc\Desktop\App\gym-manager\node_modules\tailwindcss\dist\lib.js:38:294)]
+    [at async cn (C:\Users\Marc\Desktop\App\gym-manager\node_modules\tailwindcss\dist\lib.js:38:631)]
+    [at async Xr (C:\Users\Marc\Desktop\App\gym-manager\node_modules\@tailwindcss\node\dist\index.js:10:3417)]
+    [at async I (C:\Users\Marc\Desktop\App\gym-manager\node_modules\@tailwindcss\postcss\dist\index.js:10:3977)]
+
+> Build error occurred
+Error: Turbopack build failed with 1 errors:
+./src/app/globals.css
+Error evaluating Node.js code
+CssSyntaxError: tailwindcss: C:\Users\Marc\Desktop\App\gym-manager\src\app\globals.css:1:1: Cannot apply unknown utility class `to-red-650`
+    at Input.error (node_modules/postcss/lib/input.js:135:16) [C:\Users\Marc\Desktop\App\gym-manager\.next\build\chunks\node_modules_fe693df6._.js:4651:22]
+    at Root.error (node_modules/postcss/lib/node.js:146:32) [C:\Users\Marc\Desktop\App\gym-manager\.next\build\chunks\node_modules_fe693df6._.js:928:38]
+    [at Object.Once (C:\Users\Marc\Desktop\App\gym-manager\node_modules\@tailwindcss\postcss\dist\index.js:10:6911)]
+    at async LazyResult.runAsync (node_modules/postcss/lib/lazy-result.js:293:11) [C:\Users\Marc\Desktop\App\gym-manager\.next\build\chunks\node_modules_fe693df6._.js:6206:21]
+    at async transform (turbopack:///[turbopack-node]/transforms/postcss.ts:70:34) [C:\Users\Marc\Desktop\App\gym-manager\.next\build\chunks\[root-of-the-server]__51225daf._.js:146:36]
+    at async run (turbopack:///[turbopack-node]/ipc/evaluate.ts:92:23) [C:\Users\Marc\Desktop\App\gym-manager\.next\build\chunks\[root-of-the-server]__974941ed._.js:443:31]
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component]
+
+
+    at async transform (turbopack:///[turbopack-node]/transforms/postcss.ts:70:34) [C:\Users\Marc\Desktop\App\gym-manager\.next\build\chunks\[root-of-the-server]__51225daf._.js:146:36])
+    at async run (turbopack:///[turbopack-node]/ipc/evaluate.ts:92:23) [C:\Users\Marc\Desktop\App\gym-manager\.next\build\chunks\[root-of-the-server]__974941ed._.js:443:31])

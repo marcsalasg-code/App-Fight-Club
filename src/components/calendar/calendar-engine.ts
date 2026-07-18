@@ -84,17 +84,19 @@ export function calculateEventDimensions(date: Date, durationMinutes: number = 6
 
 export function resolveClassColors(typeCode: string, dynamicTypes: any[]) {
     const normCode = typeCode.toUpperCase().replace(/\s+/g, "_");
-    if (TYPE_COLORS[normCode]) {
-        return TYPE_COLORS[normCode];
-    }
+    // Prioritize DB-configured types over hardcoded fallback
     const typeData = dynamicTypes.find(t => t.code === typeCode);
     if (typeData) {
-        const hex = typeData.color || "#8E8E93";
+        const hex = typeData.borderColor || typeData.color || "#8E8E93";
         return {
             bg: hexToRgba(hex, 0.12),
             border: hex,
             text: "#FFFFFF"
         };
+    }
+    // Fallback to hardcoded map for legacy/unknown types
+    if (TYPE_COLORS[normCode]) {
+        return TYPE_COLORS[normCode];
     }
     return TYPE_COLORS.default;
 }

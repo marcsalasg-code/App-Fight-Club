@@ -10,58 +10,6 @@ import { CheckCircle2, AlertCircle, Loader2, Scan } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 
-// Helper: Play Success Synth Chime
-function playAudioSuccess() {
-    try {
-        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-        if (!AudioContextClass) return;
-        const ctx = new AudioContextClass();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-
-        const now = ctx.currentTime;
-        osc.frequency.setValueAtTime(587.33, now); // D5
-        osc.frequency.setValueAtTime(880.00, now + 0.1); // A5
-
-        gain.gain.setValueAtTime(0.08, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
-
-        osc.start(now);
-        osc.stop(now + 0.35);
-    } catch (e) {
-        console.warn("AudioContext block", e);
-    }
-}
-
-// Helper: Play Error Synth Chime
-function playAudioError() {
-    try {
-        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-        if (!AudioContextClass) return;
-        const ctx = new AudioContextClass();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-
-        osc.type = "sawtooth";
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-
-        const now = ctx.currentTime;
-        osc.frequency.setValueAtTime(220, now); // A3
-        osc.frequency.setValueAtTime(146.83, now + 0.12); // D3
-
-        gain.gain.setValueAtTime(0.12, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
-
-        osc.start(now);
-        osc.stop(now + 0.4);
-    } catch (e) {
-        console.warn("AudioContext block", e);
-    }
-}
 
 function CheckInContent() {
     const searchParams = useSearchParams();
@@ -123,16 +71,13 @@ function CheckInContent() {
                 setMessage(result.message || "Check-in exitoso");
                 setAthleteName(result.athleteName || "");
                 setStatus('success');
-                playAudioSuccess();
             } else {
                 setMessage(result.message || "Error al verificar PIN");
                 setStatus('error');
-                playAudioError();
             }
         } catch (e) {
             setMessage("Error de conexión");
             setStatus('error');
-            playAudioError();
         }
     };
 

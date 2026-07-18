@@ -112,6 +112,11 @@ export function NewClassModal() {
         }
     }
 
+    // Build color palette from dynamic class types
+    const colorPalette = classTypes.length > 0
+        ? classTypes.map(ct => ({ value: ct.borderColor || ct.color, label: ct.label }))
+        : COLORS; // Legacy fallback
+
     return (
         <ResponsiveDialog
             isOpen={open}
@@ -268,7 +273,7 @@ export function NewClassModal() {
                 <div className="space-y-2">
                     <Label>Color</Label>
                     <div className="flex gap-3 flex-wrap">
-                        {COLORS.map((c, i) => (
+                        {colorPalette.map((c) => (
                             <label key={c.value} className="cursor-pointer">
                                 <input
                                     type="radio"

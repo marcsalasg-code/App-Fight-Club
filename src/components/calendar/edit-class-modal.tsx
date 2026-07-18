@@ -138,6 +138,11 @@ export function EditClassModal({ classData, onSuccess, children }: Props) {
         }
     }
 
+    // Build color palette from dynamic class types
+    const colorPalette = classTypes.length > 0
+        ? classTypes.map(ct => ({ value: ct.borderColor || ct.color, label: ct.label }))
+        : COLORS; // Legacy fallback
+
     const defaultCoach1 = classData.coaches?.[0]?.id || "";
     const defaultCoach2 = classData.coaches?.[1]?.id || "";
 
@@ -302,7 +307,7 @@ export function EditClassModal({ classData, onSuccess, children }: Props) {
                     <div className="space-y-2">
                         <Label>Color</Label>
                         <div className="flex gap-3 flex-wrap">
-                            {COLORS.map((c) => (
+                            {colorPalette.map((c) => (
                                 <label key={c.value} className="cursor-pointer">
                                     <input
                                         type="radio"

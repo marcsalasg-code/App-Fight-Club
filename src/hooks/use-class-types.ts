@@ -43,7 +43,7 @@ export function useClassTypes() {
                             id: `fallback-${t.value}`,
                             code: t.value,
                             label: t.label,
-                            color: colors.bg,
+                            color: colors.border, // Hex for consistent downstream usage
                             borderColor: colors.border,
                             icon: iconName,
                             active: true

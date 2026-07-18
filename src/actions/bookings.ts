@@ -2,7 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { startOfWeek, endOfWeek, addDays, getDay, isSameDay } from "date-fns";
+import { startOfWeek, endOfWeek, addDays, getDay, isSameDay, startOfDay } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 
 const GYM_TIMEZONE = "Europe/Madrid";
@@ -276,6 +276,19 @@ export async function getScheduleForReservations(athleteId: string) {
             }
         });
 
+        // Load coach substitutions for the booking window
+        const substitutions = await prisma.classCoachSubstitution.findMany({
+            where: {
+                date: {
+                    gte: startOfDay(days[0]),
+                    lte: days[days.length - 1]
+                }
+            },
+            include: {
+                newCoach: { select: { id: true, name: true } }
+            }
+        });
+
         // Compile class occurrences
         const occurrences: any[] = [];
 
@@ -303,6 +316,10 @@ export async function getScheduleForReservations(athleteId: string) {
                     }
                 });
 
+                // Apply coach substitution if exists
+                const sub = substitutions.find(s => s.classId === cls.id && isSameDay(s.date, day));
+                const effectiveCoaches = sub ? [sub.newCoach] : cls.coaches;
+
                 occurrences.push({
                     id: `${cls.id}_${day.toISOString().split("T")[0]}`,
                     classId: cls.id,
@@ -316,7 +333,8 @@ export async function getScheduleForReservations(athleteId: string) {
                     date: day.toISOString(),
                     bookingsCount: currentBookingsCount,
                     isBooked: !!isBooked,
-                    coaches: cls.coaches
+                    coaches: effectiveCoaches,
+                    isSubstitute: !!sub
                 });
             }
         }

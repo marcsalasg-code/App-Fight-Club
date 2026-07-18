@@ -1,0 +1,25 @@
+f52973a style: rediseño profesional de la interfaz del calendario (desktop y mobile)
+db4d95a style: implement 12 visual, aesthetic and UX improvements across dashboard, login, payments, and calendar
+62de343 feat: Add dashboard quick actions, next class highlight and athlete progress tab
+8acf488 fix(athlete-detail): remove duplicate and malformed import
+932a485 chore: manual redeploy trigger 2
+b9006a9 chore: trigger manual redeploy
+d1645e0 feat: implement advanced coach scheduling with substitution logic
+b69bd15 feat: evaluations UI - added evaluations tab to athlete detail
+9018878 feat: dynamic ClassType - all forms and views now load types from DB
+6c3d593 fix: audit batch 2 - pagination, guards, duplicate check, UX
+a52d1c1 fix: audit batch 1 - critical bugs, performance, class edit, UX
+7dea820 feat: unified PIN system - coach management now edits PIN + role
+db8af2c chore: retrigger Vercel build (Supabase reactivated)
+885d001 refactor: definitive login architecture - clean, scalable, professional
+57f47cb fix: simplify auth config, repair login hashes, remove temp scripts
+0204496 Fix syntax error in middleware.ts causing build failure
+024ef7a Fix 404: Refactor Routing with Explicit Dashboard Redirect
+4efdb8f Login System Overhaul & Priority Fixes: Coach Permissions, Middleware, Indexes
+4c63518 Emergency fix: Login redirect, callbackUrl handling, and strict middleware
+1fc9222 Simplify login UI to single PIN input
+3af4d72 Fix login redirect to dashboard
+0059d1b Fix redundant function, missing imports, and configure simplified login
+b09313e Fix duplicate function declarations in server actions
+53377b6 feat: Login simplification (Name/PIN support) and admin seeding
+5fef900 feat: Implement strict RBAC, authentication, and secure server actions
