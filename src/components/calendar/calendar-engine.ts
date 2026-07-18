@@ -83,15 +83,20 @@ export function calculateEventDimensions(date: Date, durationMinutes: number = 6
 // ==========================================================
 
 export function resolveClassColors(typeCode: string, dynamicTypes: any[]) {
+    const normCode = typeCode.toUpperCase().replace(/\s+/g, "_");
+    if (TYPE_COLORS[normCode]) {
+        return TYPE_COLORS[normCode];
+    }
     const typeData = dynamicTypes.find(t => t.code === typeCode);
     if (typeData) {
+        const hex = typeData.color || "#8E8E93";
         return {
-            bg: typeData.color,
-            border: typeData.borderColor,
-            text: typeData.color === "#D4AF37" ? "#000000" : "#FFFFFF"
+            bg: hexToRgba(hex, 0.12),
+            border: hex,
+            text: "#FFFFFF"
         };
     }
-    return TYPE_COLORS[typeCode] || TYPE_COLORS.default;
+    return TYPE_COLORS.default;
 }
 
 export function hexToRgba(hex: string, alpha: number = 0.15): string {
@@ -100,4 +105,34 @@ export function hexToRgba(hex: string, alpha: number = 0.15): string {
     if (!match) return hex;
     const [r, g, b] = match.map(x => parseInt(x, 16));
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+/**
+ * Shortens a class name to initials or clear short codes
+ */
+export function getShortClassName(name: string): string {
+    const clean = name.trim();
+    if (!clean) return "";
+
+    const upper = clean.toUpperCase();
+
+    // Check known categories
+    if (upper.includes("MUAY THAI")) {
+        return upper.includes("MAÑANA") ? "MT AM" : upper.includes("MEDIODÍA") || upper.includes("TARDE") ? "MT PM" : "MT";
+    }
+    if (upper.includes("CALISTENIA")) return "CAL";
+    if (upper.includes("WOMAN") || upper.includes("FUNCIONAL")) {
+        if (upper.includes("WOMAN") && upper.includes("FUNCIONAL")) return "WF";
+        return upper.includes("WOMAN") ? "W-FUNC" : "FUNC";
+    }
+    if (upper.includes("JIU JITSU") || upper.includes("BJJ")) return "BJJ";
+    if (upper.includes("WRESTLING") || upper.includes("LUCHA")) return "LCH";
+    if (upper.includes("BOXING") || upper.includes("BOXEO")) return "BOX";
+    if (upper.includes("KIDS") || upper.includes("NIÑOS")) return "KID";
+
+    const words = clean.split(/\s+/);
+    if (words.length > 1) {
+        return words.map(w => w[0].toUpperCase()).join("");
+    }
+    return clean.slice(0, 3).toUpperCase();
 }

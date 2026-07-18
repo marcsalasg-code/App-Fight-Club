@@ -10,107 +10,111 @@
 }
 
 :root {
-  /* ── Brand Identity ── */
-  /* Primary Gold: oklch(0.78 0.15 85) — from RC Fight Club logo */
-  /* Accent Red:   oklch(0.50 0.20 25) — fight/martial arts identity */
-  /* Base Black:   oklch(0.08 0    0 ) — premium dark background */
-
-  /* Background & Foreground */
-  --background: oklch(0.08 0 0);
+  /* ── Apple Monochrome Design System ── */
+  --background: oklch(0.05 0 0);
+  /* Pure Apple OLED Black */
   --foreground: oklch(0.98 0 0);
+  /* Crisp White */
 
-  /* Card */
-  --card: oklch(0.12 0 0);
+  /* Cards & Containers - iOS System Grays */
+  --card: oklch(0.15 0 0);
+  /* #1C1C1E - System Gray 6 */
   --card-foreground: oklch(0.98 0 0);
 
   /* Popover */
-  --popover: oklch(0.12 0 0);
+  --popover: oklch(0.15 0 0);
   --popover-foreground: oklch(0.98 0 0);
 
-  /* Primary - Gold (from logo outline) */
-  --primary: oklch(0.78 0.15 85);
-  --primary-foreground: oklch(0.08 0 0);
+  /* Primary Accent - Clean Mono White */
+  --primary: oklch(0.98 0 0);
+  /* White */
+  --primary-foreground: oklch(0.05 0 0);
+  /* Black */
 
-  /* Secondary - Dark Grey */
-  --secondary: oklch(0.22 0 0);
+  /* Secondary Accent - Control Gray */
+  --secondary: oklch(0.24 0 0);
+  /* #2C2C2E - System Gray 4 */
   --secondary-foreground: oklch(0.98 0 0);
 
-  /* Muted */
-  --muted: oklch(0.18 0 0);
-  --muted-foreground: oklch(0.65 0 0);
+  /* Muted Text / Content */
+  --muted: oklch(0.12 0 0);
+  /* #121212 - Pure Dark Gray */
+  --muted-foreground: oklch(0.62 0 0);
+  /* #8E8E93 - iOS Gray */
 
-  /* Accent - Brand Red (from logo) */
-  --accent: oklch(0.50 0.20 25);
+  --accent: oklch(0.24 0 0);
   --accent-foreground: oklch(0.98 0 0);
 
-  /* Destructive */
   --destructive: oklch(0.55 0.22 25);
   --destructive-foreground: oklch(0.98 0 0);
 
-  /* Border & Input */
-  --border: oklch(0.22 0 0);
-  --input: oklch(0.22 0 0);
-  --ring: oklch(0.78 0.15 85);
+  /* Borders & Inputs */
+  --border: oklch(0.20 0 0);
+  /* #222224 - Clean iOS Dark Border */
+  --input: oklch(0.20 0 0);
+  --ring: oklch(0.98 0 0);
 
-  /* Charts */
-  --chart-1: oklch(0.78 0.15 85);
-  --chart-2: oklch(0.50 0.20 25);
-  --chart-3: oklch(0.30 0 0);
-  --chart-4: oklch(0.90 0 0);
-  --chart-5: oklch(0.65 0.12 85);
+  --chart-1: oklch(0.98 0 0);
+  --chart-2: oklch(0.62 0 0);
+  --chart-3: oklch(0.24 0 0);
+  --chart-4: oklch(0.15 0 0);
+  --chart-5: oklch(0.40 0 0);
 
-  /* Radius */
+  /* Radius - Apple Apple Rounded Rounded */
   --radius: 0.625rem;
 
-  /* Sidebar */
-  --sidebar: oklch(0.10 0 0);
+  /* Sidebar - Apple Dark Sidebar */
+  --sidebar: oklch(0.08 0 0);
+  /* #0E0E10 */
   --sidebar-foreground: oklch(0.98 0 0);
-  --sidebar-primary: oklch(0.78 0.15 85);
-  --sidebar-primary-foreground: oklch(0.08 0 0);
+  --sidebar-primary: oklch(0.98 0 0);
+  --sidebar-primary-foreground: oklch(0.05 0 0);
   --sidebar-accent: oklch(0.18 0 0);
+  /* #222224 */
   --sidebar-accent-foreground: oklch(0.98 0 0);
-  --sidebar-border: oklch(0.22 0 0);
-  --sidebar-ring: oklch(0.78 0.15 85);
+  --sidebar-border: oklch(0.15 0 0);
+  /* #1C1C1E */
+  --sidebar-ring: oklch(0.98 0 0);
 
-  /* Brand Colors - RC Fight Club */
-  --brand-red: oklch(0.50 0.22 25);
-  --brand-gold: oklch(0.78 0.15 85);
-  --brand-black: oklch(0.08 0 0);
+  --brand-red: oklch(0.55 0.22 25);
+  --brand-gold: oklch(0.98 0 0);
+  /* Monochromatic logo override */
+  --brand-black: oklch(0.05 0 0);
 }
 
 .dark {
-  --background: oklch(0.08 0 0);
+  --background: oklch(0.05 0 0);
   --foreground: oklch(0.98 0 0);
-  --card: oklch(0.12 0 0);
+  --card: oklch(0.15 0 0);
   --card-foreground: oklch(0.98 0 0);
-  --popover: oklch(0.12 0 0);
+  --popover: oklch(0.15 0 0);
   --popover-foreground: oklch(0.98 0 0);
-  --primary: oklch(0.78 0.15 85);
-  --primary-foreground: oklch(0.08 0 0);
-  --secondary: oklch(0.22 0 0);
+  --primary: oklch(0.98 0 0);
+  --primary-foreground: oklch(0.05 0 0);
+  --secondary: oklch(0.24 0 0);
   --secondary-foreground: oklch(0.98 0 0);
-  --muted: oklch(0.18 0 0);
-  --muted-foreground: oklch(0.65 0 0);
-  --accent: oklch(0.50 0.20 25);
+  --muted: oklch(0.12 0 0);
+  --muted-foreground: oklch(0.62 0 0);
+  --accent: oklch(0.24 0 0);
   --accent-foreground: oklch(0.98 0 0);
   --destructive: oklch(0.55 0.22 25);
   --destructive-foreground: oklch(0.98 0 0);
-  --border: oklch(0.22 0 0);
-  --input: oklch(0.22 0 0);
-  --ring: oklch(0.78 0.15 85);
-  --chart-1: oklch(0.78 0.15 85);
-  --chart-2: oklch(0.50 0.20 25);
-  --chart-3: oklch(0.30 0 0);
-  --chart-4: oklch(0.90 0 0);
-  --chart-5: oklch(0.65 0.12 85);
-  --sidebar: oklch(0.10 0 0);
+  --border: oklch(0.20 0 0);
+  --input: oklch(0.20 0 0);
+  --ring: oklch(0.98 0 0);
+  --chart-1: oklch(0.98 0 0);
+  --chart-2: oklch(0.62 0 0);
+  --chart-3: oklch(0.24 0 0);
+  --chart-4: oklch(0.15 0 0);
+  --chart-5: oklch(0.40 0 0);
+  --sidebar: oklch(0.08 0 0);
   --sidebar-foreground: oklch(0.98 0 0);
-  --sidebar-primary: oklch(0.78 0.15 85);
-  --sidebar-primary-foreground: oklch(0.08 0 0);
+  --sidebar-primary: oklch(0.98 0 0);
+  --sidebar-primary-foreground: oklch(0.05 0 0);
   --sidebar-accent: oklch(0.18 0 0);
   --sidebar-accent-foreground: oklch(0.98 0 0);
-  --sidebar-border: oklch(0.22 0 0);
-  --sidebar-ring: oklch(0.78 0.15 85);
+  --sidebar-border: oklch(0.15 0 0);
+  --sidebar-ring: oklch(0.98 0 0);
 }
 
 @theme inline {

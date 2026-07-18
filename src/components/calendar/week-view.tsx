@@ -17,7 +17,7 @@ type Props = {
     currentDate: Date;
 };
 
-import { CALENDAR_CONSTANTS, TOTAL_HOURS, TOTAL_HEIGHT, calculateBlockDimensions, calculateEventDimensions, resolveClassColors, hexToRgba } from "./calendar-engine";
+import { CALENDAR_CONSTANTS, TOTAL_HOURS, TOTAL_HEIGHT, calculateBlockDimensions, calculateEventDimensions, resolveClassColors, hexToRgba, getShortClassName } from "./calendar-engine";
 
 export function WeekView({ classes, events, currentDate }: Props) {
     const { types: classTypes } = useClassTypes();
@@ -184,34 +184,37 @@ export function WeekView({ classes, events, currentDate }: Props) {
                                         key={cls.id}
                                         onClick={() => handleClassClick(cls.id)}
                                         className={cn(
-                                            "calendar-block absolute left-[3px] right-[3px] px-2 py-1.5 cursor-pointer overflow-hidden z-10",
-                                            isCompleted && "opacity-60 grayscale-[0.3]",
-                                            isInProgress && "ring-2 ring-primary ring-offset-1 scale-[1.01]"
+                                            "absolute left-[4px] right-[4px] px-2 py-1.5 cursor-pointer z-10 rounded-r-lg border border-border border-l-[3px] bg-zinc-950/80 hover:bg-zinc-900 transition-all",
+                                            isCompleted && "opacity-55 grayscale-[0.2]",
+                                            isInProgress && "ring-1 ring-white/30 scale-[1.01]"
                                         )}
                                         style={{
                                             ...style,
-                                            backgroundColor: hexToRgba(cls.color || colors.bg, 0.16),
-                                            borderColor: colors.border,
-                                            borderLeftWidth: "4px",
-                                            color: colors.border
+                                            borderLeftColor: colors.border,
                                         }}
                                     >
-                                        <div className="flex justify-between items-start">
-                                            <div className="font-bold text-xs truncate leading-tight pr-4">
-                                                {cls.name}
+                                        <div className="flex flex-col h-full justify-between">
+                                            <div>
+                                                <div className="flex items-center gap-1.5 flex-wrap">
+                                                    <span
+                                                        style={{ backgroundColor: colors.border }}
+                                                        className="text-[9px] font-extrabold text-white px-1.5 py-0.2 rounded uppercase tracking-wider shrink-0 shadow-sm"
+                                                    >
+                                                        {getShortClassName(cls.name)}
+                                                    </span>
+                                                    {isInProgress && <Clock className="h-3 w-3 text-red-500 animate-pulse shrink-0" />}
+                                                    {isCompleted && <CheckCircle2 className="h-3.5 w-3.5 text-zinc-400 shrink-0" />}
+                                                </div>
+                                                <div className="text-[10px] text-zinc-400 mt-1 font-mono leading-none tracking-tight">
+                                                    {cls.startTime} - {cls.endTime}
+                                                </div>
                                             </div>
-                                            {isCompleted && <CheckCircle2 className="h-3 w-3 opacity-70 shrink-0" />}
-                                            {isInProgress && <Clock className="h-3 w-3 animate-pulse shrink-0" />}
-                                        </div>
 
-                                        <div className="text-[11px] opacity-90 truncate mt-0.5 font-mono">
-                                            {cls.startTime} - {cls.endTime}
-                                        </div>
-
-                                        {/* Attendance Count */}
-                                        <div className="absolute bottom-1 right-1 flex items-center gap-1 text-[10px] bg-black/20 text-white px-1.5 py-0.5 rounded backdrop-blur-[2px]">
-                                            <Users className="h-2.5 w-2.5" />
-                                            <span className="font-mono">{cls._count.attendances}</span>
+                                            {/* Attendance Count */}
+                                            <div className="absolute bottom-1 right-1 flex items-center gap-1 text-[9px] bg-zinc-800/80 text-zinc-300 border border-zinc-700/50 px-1 py-0.5 rounded font-mono">
+                                                <Users className="h-2.5 w-2.5 opacity-70" />
+                                                <span>{cls._count.attendances}</span>
+                                            </div>
                                         </div>
                                     </div>
                                 );
