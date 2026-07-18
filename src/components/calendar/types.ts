@@ -9,6 +9,9 @@ export type Class = {
     endTime: string;
     color: string;
     _count: { attendances: number };
+    date?: Date;
+    isSubstitute?: boolean;
+    overrideId?: string;
 };
 
 export type CalendarEvent = {

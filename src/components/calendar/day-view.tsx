@@ -46,9 +46,8 @@ export function DayView({ classes, currentDate }: Props) {
         setDetailsOpen(true);
     };
 
-    const dayNameEnActual = format(currentDate, 'EEEE').toUpperCase();
     const dayClasses = classes
-        .filter(c => c.dayOfWeek === dayNameEnActual)
+        .filter(c => c.date && isSameDay(new Date(c.date), currentDate))
         .sort((a, b) => a.startTime.localeCompare(b.startTime));
 
     const getTypeColors = (type: string) => {

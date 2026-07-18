@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { addMonths, subMonths, addWeeks, subWeeks, addDays, subDays, addYears, subYears } from "date-fns";
+import { addMonths, subMonths, addWeeks, subWeeks, addDays, subDays, addYears, subYears, startOfMonth, endOfMonth, startOfWeek, endOfWeek } from "date-fns";
 import { WeekView } from "./week-view";
 import { MonthView } from "./month-view";
 import { DayView } from "./day-view";
@@ -11,6 +11,7 @@ import { NewCompetitionModal } from "./new-competition-modal";
 import { CalendarHeader } from "./calendar-header";
 import { Button } from "@/components/ui/button";
 import { Class, CalendarEvent, ViewMode } from "./types";
+import { getCalendarSchedule } from "@/actions/schedule";
 
 type Props = {
     classes: Class[];
@@ -20,8 +21,40 @@ type Props = {
 export function CalendarView({ classes, events }: Props) {
     const [date, setDate] = useState(new Date());
     const [view, setView] = useState<ViewMode>('week');
+    const [schedule, setSchedule] = useState<any[]>(classes);
+    const [loading, setLoading] = useState(false);
 
-    // ... (rest of simple state hooks)
+    // Fetch dynamic schedule when date changes
+    useEffect(() => {
+        let active = true;
+        async function fetchSchedule() {
+            setLoading(true);
+            try {
+                const monthStart = startOfMonth(date);
+                const monthEnd = endOfMonth(monthStart);
+                const rangeStart = startOfWeek(monthStart, { weekStartsOn: 1 });
+                const rangeEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
+
+                const data = await getCalendarSchedule(rangeStart, rangeEnd);
+                if (active) {
+                    // Map key fields to match expected Class object shape if necessary
+                    const formatted = data.map(item => ({
+                        ...item,
+                        id: item.classId, // Compatibility mapping
+                    }));
+                    setSchedule(formatted);
+                }
+            } catch (error) {
+                console.error("Failed to load dynamic schedule:", error);
+            } finally {
+                if (active) setLoading(false);
+            }
+        }
+        fetchSchedule();
+        return () => {
+            active = false;
+        };
+    }, [date]);
 
     // Load saved view preference from localStorage
     useEffect(() => {
@@ -75,10 +108,10 @@ export function CalendarView({ classes, events }: Props) {
 
             {/* Views */}
             <div className="flex-1 min-h-[600px] bg-background rounded-lg border shadow-sm isolate">
-                {view === 'week' && <WeekView classes={classes} events={events} currentDate={date} />}
-                {view === 'month' && <MonthView classes={classes} events={events} currentDate={date} />}
-                {view === 'year' && <YearView classes={classes} events={events} currentDate={date} onMonthSelect={(d) => { setDate(d); setView('month'); }} />}
-                {view === 'day' && <DayView classes={classes} events={events} currentDate={date} />}
+                {view === 'week' && <WeekView classes={schedule} events={events} currentDate={date} />}
+                {view === 'month' && <MonthView classes={schedule} events={events} currentDate={date} />}
+                {view === 'year' && <YearView classes={schedule} events={events} currentDate={date} onMonthSelect={(d) => { setDate(d); setView('month'); }} />}
+                {view === 'day' && <DayView classes={schedule} events={events} currentDate={date} />}
             </div>
         </div>
     );

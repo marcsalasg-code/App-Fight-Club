@@ -27,6 +27,9 @@ export async function getCalendarSchedule(startDate: Date, endDate: Date) {
         where: { active: true },
         include: {
             coaches: { select: { id: true, name: true, role: true } },
+            _count: {
+                select: { attendances: true }
+            }
         },
     });
 
@@ -61,13 +64,6 @@ export async function getCalendarSchedule(startDate: Date, endDate: Date) {
             );
 
             // Determine effective coaches
-            // If override exists, it replaces ALL original coaches? 
-            // Or just adds/removes? 
-            // Design decision: Substitution replaces the PRIMARY coach logic.
-            // But Class can have multiple coaches. 
-            // For simplicity in this iteration: If override exists, NEW COACH is the coach.
-            // Use 'newCoach' from override if present, else use 'coaches' from template.
-
             let displayedCoaches = cls.coaches;
             let isSubstitute = false;
 
@@ -85,7 +81,11 @@ export async function getCalendarSchedule(startDate: Date, endDate: Date) {
                 endTime: cls.endTime,
                 coaches: displayedCoaches,
                 isSubstitute,
-                overrideId: override?.id
+                overrideId: override?.id,
+                color: cls.color,
+                type: cls.type,
+                maxCapacity: cls.maxCapacity,
+                _count: cls._count
             });
         }
         current = addDays(current, 1);

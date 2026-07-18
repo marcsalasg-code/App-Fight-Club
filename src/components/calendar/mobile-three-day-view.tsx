@@ -50,8 +50,8 @@ export function MobileThreeDayView({ classes, events, currentDate }: Props) {
     const getTypeColors = (type: string) => resolveClassColors(type, classTypes);
 
     const classesByDay = weekDays.reduce((acc, day) => {
-        const dayName = format(day, 'EEEE').toUpperCase();
-        acc[dayName] = classes.filter(c => c.dayOfWeek === dayName);
+        const dayKey = day.toISOString();
+        acc[dayKey] = classes.filter(c => c.date && isSameDay(new Date(c.date), day));
         return acc;
     }, {} as Record<string, Class[]>);
 
@@ -143,7 +143,7 @@ export function MobileThreeDayView({ classes, events, currentDate }: Props) {
                                 })}
 
                                 {/* Classes */}
-                                {classesByDay[format(day, 'EEEE').toUpperCase()]?.map((cls) => {
+                                {classesByDay[day.toISOString()]?.map((cls) => {
                                     const style = calculateBlockDimensions(cls.startTime, cls.endTime); // Use engine
                                     const colors = getTypeColors(cls.type);
                                     const status = getClassStatus(cls, day);

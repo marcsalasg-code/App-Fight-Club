@@ -50,16 +50,14 @@ export function MobileMonthSplitView({ classes, events, currentDate }: Props) {
 
     // Prepare data for dots
     const getDayInfo = (day: Date) => {
-        const dayNameEn = format(day, 'EEEE').toUpperCase();
-        const hasClasses = classes.some(c => c.dayOfWeek === dayNameEn);
+        const hasClasses = classes.some(c => c.date && isSameDay(new Date(c.date), day));
         const hasEvents = events.some(e => isSameDay(new Date(e.date), day));
         return { hasClasses, hasEvents };
     };
 
     // Filter classes for SELECTED date
-    const selectedDayName = format(selectedDate, 'EEEE').toUpperCase();
     const selectedDayClasses = classes
-        .filter(c => c.dayOfWeek === selectedDayName)
+        .filter(c => c.date && isSameDay(new Date(c.date), selectedDate))
         .sort((a, b) => a.startTime.localeCompare(b.startTime));
 
     return (

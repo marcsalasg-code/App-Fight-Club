@@ -4,7 +4,7 @@ import { QrGenerator } from "@/components/checkin/qr-generator";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { ArrowLeft, ChevronDown } from "lucide-react";
+import { ArrowLeft, ChevronDown, Tv } from "lucide-react";
 import { ManualCheckIn } from "@/components/checkin/manual-checkin";
 import { AttendanceList } from "@/components/checkin/attendance-list";
 import {
@@ -116,9 +116,17 @@ export default async function ClassCheckInPage({ params }: PageProps) {
                         <p className="text-sm text-muted-foreground">Modo Check-in</p>
                     </div>
                 </div>
-                <Badge variant="outline" className="text-sm font-mono">
-                    {attendances.length}/{gymClass.maxCapacity}
-                </Badge>
+                <div className="flex items-center gap-2">
+                    <Link href={`/proyectar/${gymClass.id}`} target="_blank">
+                        <Button variant="outline" size="sm" className="gap-1.5 h-8 border-border text-zinc-700 dark:text-zinc-300">
+                            <Tv className="h-4 w-4 text-primary animate-pulse" />
+                            Pantalla del Box
+                        </Button>
+                    </Link>
+                    <Badge variant="outline" className="text-sm font-mono h-8 px-3">
+                        {attendances.length}/{gymClass.maxCapacity}
+                    </Badge>
+                </div>
             </div>
 
             {/* Main content - stacked layout */}

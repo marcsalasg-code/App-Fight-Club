@@ -53,8 +53,9 @@ export function WeekView({ classes, events, currentDate }: Props) {
 
     const DAYS = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"];
 
-    const classesByDay = DAYS.reduce((acc, day) => {
-        acc[day] = classes.filter(c => c.dayOfWeek === day);
+    const classesByDay = DAYS.reduce((acc, day, dayIndex) => {
+        const targetDate = weekDays[dayIndex];
+        acc[day] = classes.filter(c => c.date && isSameDay(new Date(c.date), targetDate));
         return acc;
     }, {} as Record<string, Class[]>);
 

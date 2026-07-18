@@ -162,3 +162,41 @@ export async function performCheckInWithPin(pin: string, token: string) {
     revalidatePath('/calendario');
     return { success: true, message: `¡Bienvenido/a, ${athlete.firstName}!`, athleteName: athlete.firstName };
 }
+
+export async function getClassCheckInStream(classId: string) {
+    if (!classId) throw new Error("ID de clase requerido");
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const nextDay = new Date(today);
+    nextDay.setDate(nextDay.getDate() + 1);
+
+    const attendances = await prisma.attendance.findMany({
+        where: {
+            classId,
+            date: { gte: today, lt: nextDay }
+        },
+        include: {
+            athlete: {
+                select: { id: true, firstName: true, lastName: true }
+            }
+        },
+        orderBy: { createdAt: 'desc' }
+    });
+
+    const gymClass = await prisma.class.findUnique({
+        where: { id: classId },
+        select: { name: true, maxCapacity: true }
+    });
+
+    return {
+        attendances: attendances.map(a => ({
+            id: a.id,
+            athleteName: `${a.athlete.firstName} ${a.athlete.lastName}`,
+            checkInTime: a.checkInTime.toISOString(),
+            method: a.method
+        })),
+        className: gymClass?.name || "Clase",
+        maxCapacity: gymClass?.maxCapacity || 20
+    };
+}

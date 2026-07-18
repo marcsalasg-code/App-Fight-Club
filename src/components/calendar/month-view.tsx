@@ -59,9 +59,8 @@ export function MonthView({ classes, events, currentDate }: Props) {
                     calendarDays.length > 35 ? "grid-rows-6" : "grid-rows-5"
                 )}>
                     {calendarDays.map((day) => {
-                        const dayNameEn = format(day, 'EEEE').toUpperCase();
                         const dayClasses = classes
-                            .filter(c => c.dayOfWeek === dayNameEn)
+                            .filter(c => c.date && isSameDay(new Date(c.date), day))
                             .sort((a, b) => a.startTime.localeCompare(b.startTime));
 
                         const dayEvents = events.filter(e => isSameDay(new Date(e.date), day));

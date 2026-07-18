@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { format, startOfWeek, endOfWeek, addDays, isSameDay } from "date-fns";
 import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -44,6 +44,27 @@ export function ScheduleCalendar({ initialSchedule, coaches }: Props) {
     const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
     const weekEnd = endOfWeek(currentDate, { weekStartsOn: 1 });
 
+    // Fetch schedule on mount if initialSchedule is empty
+    useEffect(() => {
+        if (initialSchedule.length === 0) {
+            // Executing dynamic load on mount
+            const loadCurrWeek = async () => {
+                setLoading(true);
+                const start = startOfWeek(new Date(), { weekStartsOn: 1 });
+                const end = endOfWeek(new Date(), { weekStartsOn: 1 });
+                try {
+                    const newSchedule = await getCalendarSchedule(start, end);
+                    setSchedule(newSchedule);
+                } catch (error) {
+                    toast.error("Error al cargar horario inicial");
+                } finally {
+                    setLoading(false);
+                }
+            };
+            loadCurrWeek();
+        }
+    }, [initialSchedule]);
+
     // Generate days for header
     const days = useMemo(() => {
         const d = [];
@@ -80,31 +101,42 @@ export function ScheduleCalendar({ initialSchedule, coaches }: Props) {
     const handleAssign = async () => {
         if (!selectedInstance || !selectedCoachId) return;
 
-        const result = await assignCoachToInstance(selectedInstance.classId, selectedInstance.date, selectedCoachId);
+        try {
+            const result = await assignCoachToInstance(selectedInstance.classId, selectedInstance.date, selectedCoachId);
 
-        if (result.success) {
-            toast.success("Sustitución asignada");
-            setDialogOpen(false);
-            // Refresh
-            handleNavigate("today"); // Simple refresh logic or re-fetch current week
-        } else {
-            toast.error("Error al asignar");
+            if (result.success) {
+                toast.success("Sustitución asignada");
+                setDialogOpen(false);
+                // Refresh schedule using current view date range
+                const start = startOfWeek(currentDate, { weekStartsOn: 1 });
+                const end = endOfWeek(currentDate, { weekStartsOn: 1 });
+                const newSchedule = await getCalendarSchedule(start, end);
+                setSchedule(newSchedule);
+            } else {
+                toast.error(result.error || "Error al asignar");
+            }
+        } catch (error: any) {
+            toast.error(error.message || "Error al asignar sustitución");
         }
     };
 
     const handleRemoveSubstitution = async (item: ScheduleItem) => {
         if (!confirm("¿Eliminar sustitución y volver al entrenador original?")) return;
 
-        const result = await removeSubstitution(item.classId, item.date);
-        if (result.success) {
-            toast.success("Sustitución eliminada");
-            // Refresh
-            const start = startOfWeek(currentDate, { weekStartsOn: 1 });
-            const end = endOfWeek(currentDate, { weekStartsOn: 1 });
-            const newSchedule = await getCalendarSchedule(start, end);
-            setSchedule(newSchedule);
-        } else {
-            toast.error("Error al eliminar");
+        try {
+            const result = await removeSubstitution(item.classId, item.date);
+            if (result.success) {
+                toast.success("Sustitución eliminada");
+                // Refresh schedule using current view date range
+                const start = startOfWeek(currentDate, { weekStartsOn: 1 });
+                const end = endOfWeek(currentDate, { weekStartsOn: 1 });
+                const newSchedule = await getCalendarSchedule(start, end);
+                setSchedule(newSchedule);
+            } else {
+                toast.error(result.error || "Error al eliminar");
+            }
+        } catch (error: any) {
+            toast.error(error.message || "Error al eliminar sustitución");
         }
     };
 
