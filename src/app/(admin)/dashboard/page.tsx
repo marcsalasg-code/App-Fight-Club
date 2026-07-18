@@ -225,58 +225,59 @@ async function DashboardContent() {
       {/* Quick Actions - New Feature */}
       <QuickActions />
 
-      {/* Primary Stats - Adjusted Layout */}
-      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+      {/* Primary Stats - Bento Grid Layout */}
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <Link href="/atletas">
-          <Card className="hover:shadow-lg transition-all cursor-pointer hover:border-primary/50 hover:scale-[1.02]">
+          <Card className="premium-card hover-premium cursor-pointer h-full border border-border/60 bg-zinc-900/50">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+              <CardTitle className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
                 Atletas Activos
               </CardTitle>
-              <div className="p-2 rounded-full bg-blue-500/10">
-                <Users className="h-4 w-4 text-blue-500" />
+              <div className="p-2 rounded-lg bg-blue-500/10 border border-blue-500/25">
+                <Users className="h-4 w-4 text-blue-400" />
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold stat-number">{stats.activeAthletes}</div>
-              <p className="text-xs text-muted-foreground">
+            <CardContent className="pt-2">
+              <div className="text-3xl font-extrabold text-white tracking-tight">{stats.activeAthletes}</div>
+              <p className="text-xs text-zinc-400 mt-1">
                 + {stats.totalAthletes} registrados
               </p>
             </CardContent>
           </Card>
         </Link>
+
         <Link href="/calendario">
-          <Card className="hover:shadow-lg transition-all cursor-pointer hover:border-primary/50 hover:scale-[1.02]">
+          <Card className="premium-card hover-premium cursor-pointer h-full border border-border/60 bg-zinc-900/50">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+              <CardTitle className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
                 Check-ins Hoy
               </CardTitle>
-              <div className="p-2 rounded-full bg-green-500/10">
-                <CalendarCheck className="h-4 w-4 text-green-500" />
+              <div className="p-2 rounded-lg bg-green-500/10 border border-green-500/25">
+                <CalendarCheck className="h-4 w-4 text-green-400" />
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold stat-number">{stats.todayAttendance}</div>
-              <p className="text-xs text-muted-foreground">
-                atletas entrenando
+            <CardContent className="pt-2">
+              <div className="text-3xl font-extrabold text-white tracking-tight">{stats.todayAttendance}</div>
+              <p className="text-xs text-zinc-400 mt-1">
+                atletas entrenando hoy
               </p>
             </CardContent>
           </Card>
         </Link>
 
         <Link href="/competencias">
-          <Card className="hover:shadow-lg transition-all cursor-pointer hover:border-primary/50 hover:scale-[1.02]">
+          <Card className="premium-card hover-premium cursor-pointer h-full border border-border/60 bg-zinc-900/50">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+              <CardTitle className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
                 Competidores
               </CardTitle>
-              <div className="p-2 rounded-full bg-amber-500/10">
-                <Trophy className="h-4 w-4 text-amber-500" />
+              <div className="p-2 rounded-lg bg-amber-500/10 border border-amber-500/25">
+                <Trophy className="h-4 w-4 text-amber-400" />
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold stat-number">{stats.competitorAthletes}</div>
-              <p className="text-xs text-muted-foreground">
+            <CardContent className="pt-2">
+              <div className="text-3xl font-extrabold text-white tracking-tight">{stats.competitorAthletes}</div>
+              <p className="text-xs text-zinc-400 mt-1">
                 en equipo oficial
               </p>
             </CardContent>
@@ -284,18 +285,18 @@ async function DashboardContent() {
         </Link>
 
         <Link href="/pagos">
-          <Card className="hover:shadow-lg transition-all cursor-pointer hover:border-primary/50 hover:scale-[1.02]">
+          <Card className="premium-card hover-premium cursor-pointer h-full border border-border/60 bg-zinc-900/50">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+              <CardTitle className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
                 Alertas Pago
               </CardTitle>
-              <div className="p-2 rounded-full bg-red-500/10">
-                <AlertTriangle className="h-4 w-4 text-red-500" />
+              <div className="p-2 rounded-lg bg-red-500/10 border border-red-500/25">
+                <AlertTriangle className="h-4 w-4 text-red-400" />
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold stat-number">{stats.expiredSubscriptions}</div>
-              <p className="text-xs text-muted-foreground">
+            <CardContent className="pt-2">
+              <div className="text-3xl font-extrabold text-white tracking-tight">{stats.expiredSubscriptions}</div>
+              <p className="text-xs text-zinc-400 mt-1">
                 suscripciones vencidas
               </p>
             </CardContent>

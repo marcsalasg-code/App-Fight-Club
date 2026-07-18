@@ -199,11 +199,26 @@ export default async function AthleteDetailPage({ params }: Props) {
                             />
 
                             {/* Payment Action Button */}
-                            <Link href={`/pagos/nuevo?athleteId=${athlete.id}`}>
-                                <Button variant="outline" className="w-full">
-                                    {activeSubscription ? "Renovar Suscripción" : "Registrar Pago"}
-                                </Button>
-                            </Link>
+                            <div className="flex flex-col gap-2">
+                                <Link href={`/pagos/nuevo?athleteId=${athlete.id}`} className="w-full">
+                                    <Button variant="outline" className="w-full">
+                                        {activeSubscription ? "Renovar Suscripción" : "Registrar Pago"}
+                                    </Button>
+                                </Link>
+
+                                {athlete.status === "ACTIVE" && (
+                                    <a
+                                        href={`/api/wallet/pass?athleteId=${athlete.id}`}
+                                        download
+                                        className="flex items-center justify-center gap-2 w-full h-10 px-4 py-2 bg-black hover:bg-zinc-900 border border-zinc-800 rounded-lg text-sm font-semibold text-white transition-all hover:scale-[1.01]"
+                                    >
+                                        <svg className="w-4 h-4 text-white fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M19 5H5C3.89 5 3 5.89 3 7V17C3 18.11 3.89 19 5 19H19C20.11 19 21 18.11 21 17V7C21 5.89 20.11 5 19 5ZM19 17H5V10H19V17ZM19 8H5V7H19V8Z" />
+                                        </svg>
+                                        Añadir a Apple Wallet
+                                    </a>
+                                )}
+                            </div>
 
                             {/* Recent Payments Small */}
                             <Card>

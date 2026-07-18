@@ -20,7 +20,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { updateClass, ClassFormData, getCoachesList } from "@/actions/classes";
+import { updateClass, ClassFormData, getCoachesList, checkCoachAvailability } from "@/actions/classes";
 import { toast } from "sonner";
 import { Edit, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -108,6 +108,22 @@ export function EditClassModal({ classData, onSuccess, children }: Props) {
             color: selectedColor,
             coachIds: coachIds.length > 0 ? coachIds : undefined,
         };
+
+        // Check for coach availability conflicts (excluding self)
+        if (coachIds.length > 0) {
+            try {
+                const check = await checkCoachAvailability(coachIds, data.dayOfWeek, data.startTime, data.endTime, classData.id);
+                if (check.success && check.conflict) {
+                    const proceed = window.confirm(`¡Advertencia de Conflicto!:\n${check.message}\n\n¿Deseas guardar los cambios de todas formas?`);
+                    if (!proceed) {
+                        setLoading(false);
+                        return;
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
 
         const result = await updateClass(classData.id, data);
         setLoading(false);

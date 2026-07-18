@@ -15,7 +15,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { createClass, ClassFormData, getCoachesList } from "@/actions/classes";
+import { createClass, ClassFormData, getCoachesList, checkCoachAvailability } from "@/actions/classes";
 import { toast } from "sonner";
 import { Plus, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -83,6 +83,22 @@ export function NewClassModal() {
             color: selectedColor, // Use controlled color
             coachIds: coachIds.length > 0 ? coachIds : undefined,
         };
+
+        // Check for coach availability conflicts
+        if (coachIds.length > 0) {
+            try {
+                const check = await checkCoachAvailability(coachIds, data.dayOfWeek, data.startTime, data.endTime);
+                if (check.success && check.conflict) {
+                    const proceed = window.confirm(`¡Advertencia de Conflicto!:\n${check.message}\n\n¿Deseas guardar la clase de todas formas?`);
+                    if (!proceed) {
+                        setLoading(false);
+                        return;
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
 
         const result = await createClass(data);
         setLoading(false);

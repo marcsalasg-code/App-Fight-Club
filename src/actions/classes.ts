@@ -87,6 +87,103 @@ export async function updateClass(id: string, data: ClassFormData) {
     }
 }
 
+export async function rescheduleClass(id: string, dayOfWeek: string, startTime: string, endTime: string) {
+    const session = await requireRole(["ADMIN", "COACH"]); // Align permissions with update
+
+    if (!id || !dayOfWeek || !startTime || !endTime) {
+        return { success: false, error: "Parámetros inválidos" };
+    }
+
+    try {
+        const updatedClass = await prisma.class.update({
+            where: { id },
+            data: {
+                dayOfWeek,
+                startTime,
+                endTime
+            }
+        });
+
+        // Track action in AuditLog
+        await prisma.auditLog.create({
+            data: {
+                action: "UPDATE",
+                entity: "Class",
+                entityId: id,
+                performedBy: session.user.id,
+                details: {
+                    rescheduled: true,
+                    dayOfWeek,
+                    startTime,
+                    endTime,
+                    timestamp: new Date()
+                }
+            }
+        });
+
+        revalidatePath("/clases");
+        revalidatePath("/calendario");
+        return { success: true, data: updatedClass };
+    } catch (error) {
+        console.error("Error rescheduling class:", error);
+        return { success: false, error: "Error al reprogramar la clase" };
+    }
+}
+
+export async function checkCoachAvailability(
+    coachIds: string[],
+    dayOfWeek: string,
+    startTime: string,
+    endTime: string,
+    excludeClassId?: string
+) {
+    await requireRole(["ADMIN", "COACH"]);
+
+    if (!coachIds || coachIds.length === 0 || !dayOfWeek || !startTime || !endTime) {
+        return { success: true, conflict: false };
+    }
+
+    try {
+        const conflictingClasses = await prisma.class.findMany({
+            where: {
+                active: true,
+                dayOfWeek: dayOfWeek,
+                id: excludeClassId ? { not: excludeClassId } : undefined,
+                coaches: {
+                    some: {
+                        id: { in: coachIds }
+                    }
+                },
+                startTime: { lt: endTime },
+                endTime: { gt: startTime }
+            },
+            include: {
+                coaches: {
+                    select: { id: true, name: true }
+                }
+            }
+        });
+
+        if (conflictingClasses.length > 0) {
+            const conflictDetails = conflictingClasses.map(c => {
+                const affectedCoaches = c.coaches.filter(co => coachIds.includes(co.id)).map(co => co.name).join(", ");
+                return `El entrenador (${affectedCoaches}) está ocupado en la clase "${c.name}" (${c.startTime} - ${c.endTime})`;
+            });
+
+            return {
+                success: true,
+                conflict: true,
+                message: conflictDetails.join(". ")
+            };
+        }
+
+        return { success: true, conflict: false };
+    } catch (error) {
+        console.error("Error checking coach availability:", error);
+        return { success: false, error: "Error al verificar la disponibilidad del entrenador" };
+    }
+}
+
 export async function toggleClassActive(id: string, active: boolean) {
     await requireRole(["ADMIN", "COACH"]);
 

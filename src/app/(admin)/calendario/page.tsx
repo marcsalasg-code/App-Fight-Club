@@ -9,6 +9,9 @@ async function getClasses() {
         include: {
             _count: {
                 select: { attendances: true }
+            },
+            coaches: {
+                select: { id: true, name: true }
             }
         }
     });

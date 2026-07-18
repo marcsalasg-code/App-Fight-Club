@@ -10,6 +10,8 @@ import { Class, CalendarEvent, TYPE_COLORS } from "./types";
 import { MobileThreeDayView } from "./mobile-three-day-view";
 import { getClassStatus } from "./utils";
 import { useClassTypes } from "@/hooks/use-class-types";
+import { rescheduleClass, checkCoachAvailability } from "@/actions/classes";
+import { toast } from "sonner";
 
 type Props = {
     classes: Class[];
@@ -17,13 +19,81 @@ type Props = {
     currentDate: Date;
 };
 
-import { CALENDAR_CONSTANTS, TOTAL_HOURS, TOTAL_HEIGHT, calculateBlockDimensions, calculateEventDimensions, resolveClassColors, hexToRgba, getShortClassName } from "./calendar-engine";
+import { CALENDAR_CONSTANTS, TOTAL_HOURS, TOTAL_HEIGHT, calculateBlockDimensions, calculateEventDimensions, resolveClassColors, hexToRgba, getShortClassName, timeToMinutes } from "./calendar-engine";
 
 export function WeekView({ classes, events, currentDate }: Props) {
     const { types: classTypes } = useClassTypes();
     const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
+    const [hoveredClassId, setHoveredClassId] = useState<string | null>(null);
     const [detailsOpen, setDetailsOpen] = useState(false);
     const [now, setNow] = useState(new Date());
+
+    const handleDragOver = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+    };
+
+    const handleDrop = async (e: React.DragEvent, targetDay: string) => {
+        e.preventDefault();
+        const classId = e.dataTransfer.getData("text/plain");
+        if (!classId) return;
+
+        const cls = classes.find(c => c.id === classId);
+        if (!cls) return;
+
+        const rect = e.currentTarget.getBoundingClientRect();
+        const clickY = e.clientY - rect.top;
+
+        const calendarStartMinutes = CALENDAR_CONSTANTS.START_HOUR * 60;
+        const dropMinutes = (clickY / CALENDAR_CONSTANTS.HOUR_HEIGHT) * 60;
+        const startMinutesTotal = calendarStartMinutes + dropMinutes;
+
+        // Snap to nearest 15 minutes for usability
+        const roundedStartMinutes = Math.round(startMinutesTotal / 15) * 15;
+
+        // Calculate original duration
+        const duration = timeToMinutes(cls.endTime) - timeToMinutes(cls.startTime);
+
+        const newStartHour = Math.floor(roundedStartMinutes / 60);
+        const newStartMin = roundedStartMinutes % 60;
+
+        const endMinutesTotal = roundedStartMinutes + duration;
+        const newEndHour = Math.floor(endMinutesTotal / 60);
+        const newEndMin = endMinutesTotal % 60;
+
+        const newStartTime = `${String(Math.min(23, Math.max(0, newStartHour))).padStart(2, '0')}:${String(newStartMin).padStart(2, '0')}`;
+        const newEndTime = `${String(Math.min(23, Math.max(0, newEndHour))).padStart(2, '0')}:${String(newEndMin).padStart(2, '0')}`;
+
+        if (newStartHour < CALENDAR_CONSTANTS.START_HOUR || newEndHour > CALENDAR_CONSTANTS.END_HOUR) {
+            toast.error("La clase debe permanecer dentro del horario visible (06:00 - 22:00)");
+            return;
+        }
+        // Check for coach availability conflicts
+        const coachIds = cls.coaches?.map(c => c.id) || [];
+        if (coachIds.length > 0) {
+            try {
+                const check = await checkCoachAvailability(coachIds, targetDay, newStartTime, newEndTime, classId);
+                if (check.success && check.conflict) {
+                    const proceed = window.confirm(`¡Advertencia de Conflicto de Entrenador!:\n${check.message}\n\n¿Deseas reprogramarla de todas formas?`);
+                    if (!proceed) return;
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        try {
+            const res = await rescheduleClass(classId, targetDay, newStartTime, newEndTime);
+            if (res.success) {
+                toast.success(`Clase reprogramada para el ${targetDay.toLowerCase()} de ${newStartTime} a ${newEndTime}`);
+            } else {
+                toast.error(res.error || "Error al reprogramar la clase");
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error("Error al comunicarse con el servidor");
+        }
+    };
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -112,8 +182,10 @@ export function WeekView({ classes, events, currentDate }: Props) {
                     {DAYS.map((day, dayIndex) => (
                         <div
                             key={day}
+                            onDragOver={handleDragOver}
+                            onDrop={(e) => handleDrop(e, day)}
                             className={cn(
-                                "flex-1 border-r border-border/50 relative min-w-[140px]",
+                                "flex-1 border-r border-border/50 relative min-w-[140px] transition-colors",
                                 isSameDay(weekDays[dayIndex], new Date()) && "bg-primary/5"
                             )}
                             style={{ height: `${TOTAL_HEIGHT}px` }}
@@ -183,10 +255,18 @@ export function WeekView({ classes, events, currentDate }: Props) {
                                     <div
                                         key={cls.id}
                                         onClick={() => handleClassClick(cls.id)}
+                                        onMouseEnter={() => setHoveredClassId(cls.id)}
+                                        onMouseLeave={() => setHoveredClassId(null)}
+                                        draggable={true}
+                                        onDragStart={(e) => {
+                                            e.dataTransfer.setData("text/plain", cls.id);
+                                            e.dataTransfer.effectAllowed = "move";
+                                        }}
                                         className={cn(
-                                            "absolute left-[4px] right-[4px] px-2 py-1.5 cursor-pointer z-10 rounded-r-lg border border-border border-l-[3px] bg-zinc-950/80 hover:bg-zinc-900 transition-all",
+                                            "absolute left-[4px] right-[4px] px-2 py-1.5 cursor-pointer z-10 rounded-r-lg border border-border border-l-[3px] bg-zinc-950/80 hover:bg-zinc-900 transition-all active:cursor-grabbing",
                                             isCompleted && "opacity-55 grayscale-[0.2]",
-                                            isInProgress && "ring-1 ring-white/30 scale-[1.01]"
+                                            isInProgress && "ring-1 ring-white/30 scale-[1.01]",
+                                            hoveredClassId !== null && hoveredClassId !== cls.id && "opacity-25 blur-[0.3px] scale-[0.98]"
                                         )}
                                         style={{
                                             ...style,

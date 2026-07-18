@@ -12,6 +12,7 @@ export type Class = {
     date?: Date;
     isSubstitute?: boolean;
     overrideId?: string;
+    coaches?: { id: string; name: string }[];
 };
 
 export type CalendarEvent = {
