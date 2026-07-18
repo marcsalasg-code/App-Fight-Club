@@ -5,7 +5,9 @@ import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInte
 import { cn } from "@/lib/utils";
 import { ClassDetailModal } from "./class-detail-modal";
 import { MobileMonthSplitView } from "./mobile-month-split-view";
-import { Class, CalendarEvent, TYPE_COLORS } from "./types";
+import { Class, CalendarEvent } from "./types";
+import { useClassTypes } from "@/hooks/use-class-types";
+import { resolveClassColors, hexToRgba } from "./calendar-engine";
 
 type Props = {
     classes: Class[];
@@ -14,6 +16,7 @@ type Props = {
 };
 
 export function MonthView({ classes, events, currentDate }: Props) {
+    const { types: classTypes } = useClassTypes();
     const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
     const [detailsOpen, setDetailsOpen] = useState(false);
 
@@ -32,7 +35,7 @@ export function MonthView({ classes, events, currentDate }: Props) {
     };
 
     const getTypeColors = (type: string) => {
-        return TYPE_COLORS[type] || TYPE_COLORS.default;
+        return resolveClassColors(type, classTypes);
     };
 
     return (
@@ -112,14 +115,14 @@ export function MonthView({ classes, events, currentDate }: Props) {
                                             <button
                                                 key={cls.id}
                                                 onClick={(e) => handleClassClick(cls.id, e)}
-                                                className="text-[10px] text-left px-1.5 py-0.5 rounded border border-black/5 dark:border-white/5 truncate font-medium transition-all hover:scale-[1.02] hover:shadow-sm"
+                                                className="text-[10px] text-left px-1.5 py-0.5 rounded border border-black/5 dark:border-white/5 truncate font-semibold transition-all hover:scale-[1.02] hover:shadow-md"
                                                 style={{
-                                                    backgroundColor: cls.color || colors.bg,
-                                                    borderLeft: `2px solid ${colors.border}`,
-                                                    color: colors.text
+                                                    backgroundColor: hexToRgba(cls.color || colors.bg, 0.16),
+                                                    borderLeft: `2.5px solid ${colors.border}`,
+                                                    color: colors.border
                                                 }}
                                             >
-                                                <span className="font-mono opacity-80">{cls.startTime}</span>
+                                                <span className="font-mono opacity-85">{cls.startTime}</span>
                                                 <span className="mx-1 opacity-50">·</span>
                                                 <span>{cls.name}</span>
                                             </button>

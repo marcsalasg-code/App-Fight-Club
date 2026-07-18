@@ -8,6 +8,8 @@ import { es } from "date-fns/locale";
 import { Users, Clock } from "lucide-react";
 import { Class, CalendarEvent, TYPE_COLORS } from "./types";
 import { AgendaItem } from "./agenda-item";
+import { useClassTypes } from "@/hooks/use-class-types";
+import { resolveClassColors, hexToRgba } from "./calendar-engine";
 
 type Props = {
     classes: Class[];
@@ -21,6 +23,7 @@ const HOUR_HEIGHT = 72;
 const HOURS = Array.from({ length: END_HOUR - START_HOUR + 1 }, (_, i) => START_HOUR + i);
 
 export function DayView({ classes, currentDate }: Props) {
+    const { types: classTypes } = useClassTypes();
     const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
     const [detailsOpen, setDetailsOpen] = useState(false);
     const [now, setNow] = useState(new Date());
@@ -51,7 +54,7 @@ export function DayView({ classes, currentDate }: Props) {
         .sort((a, b) => a.startTime.localeCompare(b.startTime));
 
     const getTypeColors = (type: string) => {
-        return TYPE_COLORS[type] || TYPE_COLORS.default;
+        return resolveClassColors(type, classTypes);
     };
 
     return (
@@ -163,9 +166,9 @@ export function DayView({ classes, currentDate }: Props) {
                                         style={{
                                             top: `${top}px`,
                                             height: `${Math.max(height, 40)}px`,
-                                            backgroundColor: cls.color || colors.bg,
+                                            backgroundColor: hexToRgba(cls.color || colors.bg, 0.16),
                                             borderLeft: `4px solid ${colors.border}`,
-                                            color: colors.text
+                                            color: colors.border
                                         }}
                                     >
                                         <div className="flex justify-between items-start">

@@ -17,7 +17,7 @@ type Props = {
     currentDate: Date;
 };
 
-import { CALENDAR_CONSTANTS, TOTAL_HOURS, TOTAL_HEIGHT, calculateBlockDimensions, calculateEventDimensions, resolveClassColors } from "./calendar-engine";
+import { CALENDAR_CONSTANTS, TOTAL_HOURS, TOTAL_HEIGHT, calculateBlockDimensions, calculateEventDimensions, resolveClassColors, hexToRgba } from "./calendar-engine";
 
 export function WeekView({ classes, events, currentDate }: Props) {
     const { types: classTypes } = useClassTypes();
@@ -184,16 +184,16 @@ export function WeekView({ classes, events, currentDate }: Props) {
                                         key={cls.id}
                                         onClick={() => handleClassClick(cls.id)}
                                         className={cn(
-                                            "calendar-block absolute left-[3px] right-[3px] px-2 py-1 cursor-pointer overflow-hidden z-10",
+                                            "calendar-block absolute left-[3px] right-[3px] px-2 py-1.5 cursor-pointer overflow-hidden z-10",
                                             isCompleted && "opacity-60 grayscale-[0.3]",
                                             isInProgress && "ring-2 ring-primary ring-offset-1 scale-[1.01]"
                                         )}
                                         style={{
                                             ...style,
-                                            backgroundColor: cls.color || colors.bg,
+                                            backgroundColor: hexToRgba(cls.color || colors.bg, 0.16),
                                             borderColor: colors.border,
                                             borderLeftWidth: "4px",
-                                            color: colors.text
+                                            color: colors.border
                                         }}
                                     >
                                         <div className="flex justify-between items-start">

@@ -93,3 +93,11 @@ export function resolveClassColors(typeCode: string, dynamicTypes: any[]) {
     }
     return TYPE_COLORS[typeCode] || TYPE_COLORS.default;
 }
+
+export function hexToRgba(hex: string, alpha: number = 0.15): string {
+    const cleanHex = hex.replace("#", "");
+    const match = cleanHex.match(/.{1,2}/g);
+    if (!match) return hex;
+    const [r, g, b] = match.map(x => parseInt(x, 16));
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}

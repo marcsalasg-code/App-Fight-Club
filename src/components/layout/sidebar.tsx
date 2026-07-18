@@ -78,14 +78,14 @@ export function Sidebar({ isCollapsed = false, toggleCollapse }: SidebarProps) {
                                 href={item.href}
                                 title={isCollapsed ? item.name : undefined}
                                 className={cn(
-                                    "group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                                    "group relative flex items-center gap-3 rounded-lg py-2.5 text-sm font-medium transition-all duration-200",
                                     isActive
-                                        ? "bg-primary text-primary-foreground shadow-md"
-                                        : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                                    isCollapsed && "justify-center px-2"
+                                        ? "bg-primary/12 text-primary font-bold shadow-[0_0_12px_rgba(212,175,55,0.04)] border-l-2 border-primary pl-2.5 rounded-l-none"
+                                        : "text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground pl-3",
+                                    isCollapsed && "justify-center px-2 border-l-0 rounded-lg"
                                 )}
                             >
-                                <Icon className={cn("h-5 w-5 shrink-0", isCollapsed ? "h-6 w-6" : "")} />
+                                <Icon className={cn("h-5 w-5 shrink-0 transition-transform group-hover:scale-105", isCollapsed ? "h-6 w-6" : "")} />
                                 {!isCollapsed && <span>{item.name}</span>}
                             </Link>
                         )
@@ -109,14 +109,14 @@ export function Sidebar({ isCollapsed = false, toggleCollapse }: SidebarProps) {
                                 href={item.href}
                                 title={isCollapsed ? item.name : undefined}
                                 className={cn(
-                                    "group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                                    "group relative flex items-center gap-3 rounded-lg py-2.5 text-sm font-medium transition-all duration-200",
                                     isActive
-                                        ? "bg-primary text-primary-foreground shadow-md"
-                                        : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                                    isCollapsed && "justify-center px-2"
+                                        ? "bg-primary/12 text-primary font-bold shadow-[0_0_12px_rgba(212,175,55,0.04)] border-l-2 border-primary pl-2.5 rounded-l-none"
+                                        : "text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground pl-3",
+                                    isCollapsed && "justify-center px-2 border-l-0 rounded-lg"
                                 )}
                             >
-                                <Icon className={cn("h-5 w-5 shrink-0", isCollapsed ? "h-6 w-6" : "")} />
+                                <Icon className={cn("h-5 w-5 shrink-0 transition-transform group-hover:scale-105", isCollapsed ? "h-6 w-6" : "")} />
                                 {!isCollapsed && <span>{item.name}</span>}
                             </Link>
                         )

@@ -50,7 +50,7 @@ export function NextClassCard({ nextClass }: NextClassCardProps) {
     const timeToStart = formatDistanceToNow(classTime, { addSuffix: true, locale: es });
 
     return (
-        <Card className="h-full border-l-4 overflow-hidden relative" style={{ borderLeftColor: nextClass.color }}>
+        <Card className="premium-card hover-premium h-full border-l-4 overflow-hidden relative" style={{ borderLeftColor: nextClass.color }}>
             {/* Background Accent */}
             <div
                 className="absolute right-0 top-0 h-full w-1/3 opacity-[0.03] pointer-events-none"

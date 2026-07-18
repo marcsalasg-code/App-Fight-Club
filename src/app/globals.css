@@ -276,14 +276,56 @@ html {
 
 /* Calendar specific */
 .calendar-block {
-  @apply rounded-xl border border-black/5 dark:border-white/5 shadow-sm transition-all duration-200 backdrop-blur-[1px];
-  @apply hover:shadow-lg hover:scale-[1.02] hover:z-25;
+  @apply rounded-xl border border-black/10 dark:border-white/10 shadow-lg transition-all duration-300 backdrop-blur-md;
+  background-color: var(--card-bg-fallback, rgba(18, 18, 18, 0.75));
+  box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.25);
+}
+
+.calendar-block:hover {
+  @apply scale-[1.03] z-[25] shadow-xl;
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.12);
+  filter: brightness(1.1);
 }
 
 /* Card hover effect */
 .card-hover {
-  @apply transition-all duration-200;
-  @apply hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5;
+  @apply transition-all duration-300;
+  @apply hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5 hover:translate-y-[-2px];
+}
+
+/* Premium Card (Glassmorphism & Gold reflection) */
+.premium-card {
+  position: relative;
+  background: linear-gradient(135deg, rgba(20, 20, 23, 0.75) 0%, rgba(9, 9, 11, 0.85) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(212, 175, 55, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.premium-card:hover {
+  border-color: rgba(212, 175, 55, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(212, 175, 55, 0.03), 0 0 20px rgba(212, 175, 55, 0.02);
+}
+
+/* Hover premium scaling */
+.hover-premium {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hover-premium:hover {
+  transform: translateY(-2px) scale(1.015);
+}
+
+/* Golden text gradient */
+.text-gold-gradient {
+  @apply bg-gradient-to-r from-yellow-300 via-amber-400 to-amber-500 bg-clip-text text-transparent font-extrabold;
+}
+
+/* Red fight text gradient */
+.text-red-gradient {
+  @apply bg-gradient-to-r from-red-400 via-rose-500 to-red-700 bg-clip-text text-transparent font-extrabold;
 }
 
 /* Stat number styling */
@@ -294,7 +336,11 @@ html {
 
 /* Table improvements */
 .data-row {
-  @apply transition-colors hover:bg-muted/50;
+  @apply transition-all duration-205 hover:bg-muted/75;
+}
+
+.data-row:hover {
+  @apply translate-x-0.5;
 }
 
 /* Badge improvements */

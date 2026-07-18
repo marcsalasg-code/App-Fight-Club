@@ -15,12 +15,12 @@ type Props = {
 
 export function StatCard({ title, value, subtitle, icon: Icon, iconClassName }: Props) {
     return (
-        <Card className="hover:shadow-lg transition-all hover:border-primary/50 hover:scale-[1.02]">
+        <Card className="premium-card hover-premium">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">
                     {title}
                 </CardTitle>
-                <div className={`h-10 w-10 rounded-full flex items-center justify-center ${iconClassName || "bg-primary/10"}`}>
+                <div className={`h-10 w-10 rounded-full flex items-center justify-center border border-primary/20 bg-primary/10 shadow-[0_0_8px_rgba(212,175,55,0.1)]`}>
                     <Icon className="h-5 w-5 text-primary" aria-hidden="true" />
                 </div>
             </CardHeader>
