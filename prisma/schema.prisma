@@ -58,6 +58,7 @@ model Athlete {
   attendances   Attendance[]
   competitions  Competition[]
   evaluations   Evaluation[]
+  bookings      ClassBooking[]
   devices       Device[]
   weighIns      WeighIn[]
   tags          Tag[]
@@ -265,6 +266,7 @@ model Class {
   coaches     User[]       @relation("ClassCoaches")
   attendances Attendance[]
   substitutions ClassCoachSubstitution[]
+  bookings    ClassBooking[]
 }
 
 // ==========================================================
@@ -288,6 +290,24 @@ model Attendance {
   @@unique([athleteId, classId, date])
   @@index([date])
   @@index([athleteId, date])
+}
+
+// ==========================================================
+// CLASS BOOKINGS (Reservations)
+// ==========================================================
+model ClassBooking {
+  id        String   @id @default(cuid())
+  athleteId String
+  classId   String
+  date      DateTime
+  createdAt DateTime @default(now())
+
+  athlete Athlete @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+  class   Class   @relation(fields: [classId], references: [id], onDelete: Cascade)
+
+  @@unique([athleteId, classId, date])
+  @@index([athleteId, date])
+  @@index([classId, date])
 }
 
 // ==========================================================

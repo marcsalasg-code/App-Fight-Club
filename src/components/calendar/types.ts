@@ -9,6 +9,7 @@ export type Class = {
     endTime: string;
     color: string;
     _count: { attendances: number };
+    maxCapacity?: number;
     date?: Date;
     isSubstitute?: boolean;
     overrideId?: string;

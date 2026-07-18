@@ -21,6 +21,7 @@ import { CALENDAR_CONSTANTS, TOTAL_HOURS, TOTAL_HEIGHT, calculateBlockDimensions
 export function MobileThreeDayView({ classes, events, currentDate }: Props) {
     const { types: classTypes } = useClassTypes(); // Hook usage
     const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
+    const [hoveredClassId, setHoveredClassId] = useState<string | null>(null);
     const [detailsOpen, setDetailsOpen] = useState(false);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -32,10 +33,6 @@ export function MobileThreeDayView({ classes, events, currentDate }: Props) {
         if (scrollContainerRef.current) {
             const dayIndex = weekDays.findIndex(d => isSameDay(d, currentDate));
             if (dayIndex !== -1) {
-                // Approximate scroll to keep current day starting the view
-                // Each column is roughly 1/3 of view, but let's just scroll to the day index * (1/3 view width)
-                // Actually safer to scroll to dayIndex * (containerWidth / 3) assuming we set min-w properly
-                // Since min-w is relative to viewport (33vw), we can calculate:
                 const widthPerDay = window.innerWidth / 3;
                 scrollContainerRef.current.scrollTo({ left: dayIndex * widthPerDay, behavior: 'smooth' });
             }
@@ -56,23 +53,23 @@ export function MobileThreeDayView({ classes, events, currentDate }: Props) {
     }, {} as Record<string, Class[]>);
 
     return (
-        <div className="h-full flex flex-col">
+        <div className="h-full flex flex-col bg-zinc-950">
             <div
                 ref={scrollContainerRef}
-                className="flex-1 overflow-auto custom-scrollbar relative bg-background snap-x snap-mandatory"
+                className="flex-1 overflow-auto custom-scrollbar relative bg-zinc-950 snap-x snap-mandatory select-none"
             >
                 <div className="flex" style={{ width: '233.33%' }}> {/* 7 days / 3 = 2.333 */}
 
                     {/* Time Column (Sticky Left) */}
-                    <div className="sticky left-0 z-30 w-12 flex-none bg-background border-r border-border">
+                    <div className="sticky left-0 z-30 w-12 flex-none bg-zinc-950/80 backdrop-blur-md border-r border-zinc-900/60">
                         {/* Corner */}
-                        <div className="h-12 sticky top-0 bg-background z-40 border-b border-border" />
+                        <div className="h-12 sticky top-0 bg-zinc-950/90 z-40 border-b border-zinc-900/60" />
 
                         {/* Time labels */}
                         {Array.from({ length: TOTAL_HOURS }, (_, i) => (
                             <div
                                 key={i}
-                                className="border-b border-border/50 text-[10px] text-right pr-1 text-muted-foreground font-mono flex items-start justify-end pt-1 bg-background"
+                                className="border-b border-zinc-900/10 text-[9px] text-right pr-2 text-zinc-500 font-mono flex items-start justify-end pt-1 bg-zinc-950/45"
                                 style={{ height: `${CALENDAR_CONSTANTS.HOUR_HEIGHT}px` }}
                             >
                                 <span>{String(CALENDAR_CONSTANTS.START_HOUR + i).padStart(2, '0')}:00</span>
@@ -81,113 +78,142 @@ export function MobileThreeDayView({ classes, events, currentDate }: Props) {
                     </div>
 
                     {/* Day Columns */}
-                    {weekDays.map((day, i) => (
-                        <div
-                            key={i}
-                            className="flex-1 border-r border-border flex flex-col relative snap-start min-w-0" // min-w-0 helps flex sizing
-                        >
-                            {/* Header (Sticky Top) */}
-                            <div className={cn(
-                                "h-12 sticky top-0 z-20 border-b border-border bg-card/95 backdrop-blur-sm flex items-center justify-center gap-1.5",
-                                isSameDay(day, new Date()) && "bg-primary/5"
-                            )}>
-                                <span className="text-[10px] uppercase text-muted-foreground font-semibold">
-                                    {format(day, 'EEE', { locale: es })}
-                                </span>
-                                <span className={cn(
-                                    "text-sm font-bold h-6 w-6 flex items-center justify-center rounded-full",
-                                    isSameDay(day, new Date()) ? "bg-primary text-primary-foreground" : "text-foreground"
+                    {weekDays.map((day, i) => {
+                        const isToday = isSameDay(day, new Date());
+                        return (
+                            <div
+                                key={i}
+                                className={cn(
+                                    "flex-1 border-r border-zinc-900/40 flex flex-col relative snap-start min-w-0 transition-colors",
+                                    isToday ? "bg-amber-500/[0.015]" : ""
+                                )}
+                            >
+                                {/* Header (Sticky Top) */}
+                                <div className={cn(
+                                    "h-12 sticky top-0 z-20 border-b border-zinc-900/60 bg-zinc-900/40 backdrop-blur-md flex items-center justify-center gap-1.5 px-1",
+                                    isToday && "border-b border-amber-500/20"
                                 )}>
-                                    {format(day, 'd')}
-                                </span>
-                            </div>
+                                    <span className={cn(
+                                        "text-[9px] uppercase font-bold tracking-wider font-sans",
+                                        isToday ? "text-amber-400" : "text-zinc-500"
+                                    )}>
+                                        {format(day, 'EEE', { locale: es })}
+                                    </span>
+                                    <span className={cn(
+                                        "text-xs font-bold h-5 w-5 flex items-center justify-center rounded-full font-mono",
+                                        isToday ? "bg-amber-500 text-black shadow-[0_0_8px_rgba(245,158,11,0.25)]" : "text-zinc-300"
+                                    )}>
+                                        {format(day, 'd')}
+                                    </span>
+                                </div>
 
-                            {/* Body */}
-                            <div className="relative" style={{ height: `${TOTAL_HEIGHT}px` }}>
-                                {/* Horizontal Grid Lines */}
-                                {Array.from({ length: TOTAL_HOURS }, (_, h) => (
-                                    <div
-                                        key={h}
-                                        className="absolute w-full border-b border-border/40 pointer-events-none"
-                                        style={{ top: `${h * CALENDAR_CONSTANTS.HOUR_HEIGHT}px`, height: `${CALENDAR_CONSTANTS.HOUR_HEIGHT}px` }}
-                                    >
-                                        <div className="absolute w-full border-b border-border/10 top-1/2" />
-                                    </div>
-                                ))}
-
-                                {/* Events */}
-                                {events?.filter(e => isSameDay(e.date, day)).map(event => {
-                                    const eventStyle = calculateEventDimensions(event.date);
-
-                                    return (
+                                {/* Body */}
+                                <div className="relative" style={{ height: `${TOTAL_HEIGHT}px` }}>
+                                    {/* Horizontal Grid Lines */}
+                                    {Array.from({ length: TOTAL_HOURS }, (_, h) => (
                                         <div
-                                            key={event.id}
-                                            className="absolute left-0.5 right-0.5 px-1 py-1 z-20 rounded-sm border shadow-sm flex flex-col justify-center"
-                                            style={{
-                                                top: eventStyle.top,
-                                                height: eventStyle.height,
-                                                backgroundColor: "rgba(147, 51, 234, 0.9)",
-                                                borderColor: "#7e22ce",
-                                                color: "white"
-                                            }}
+                                            key={h}
+                                            className="absolute w-full border-b border-zinc-900/20 pointer-events-none"
+                                            style={{ top: `${h * CALENDAR_CONSTANTS.HOUR_HEIGHT}px`, height: `${CALENDAR_CONSTANTS.HOUR_HEIGHT}px` }}
                                         >
-                                            <div className="flex items-center gap-1 font-bold text-[10px] truncate leading-tight">
-                                                <Trophy className="h-3 w-3 text-yellow-300 shrink-0" />
-                                                <span className="truncate">{event.name}</span>
-                                            </div>
-                                            <div className="text-[9px] opacity-90 truncate -mt-0.5">
-                                                Competencia
-                                            </div>
+                                            <div className="absolute w-full border-b border-zinc-900/5 top-1/2" />
                                         </div>
-                                    );
-                                })}
+                                    ))}
 
-                                {/* Classes */}
-                                {classesByDay[day.toISOString()]?.map((cls) => {
-                                    const style = calculateBlockDimensions(cls.startTime, cls.endTime); // Use engine
-                                    const colors = getTypeColors(cls.type);
-                                    const status = getClassStatus(cls, day);
+                                    {/* Events */}
+                                    {events?.filter(e => isSameDay(e.date, day)).map(event => {
+                                        const eventStyle = calculateEventDimensions(event.date);
 
-                                    // Status Styles (Same as WeekView)
-                                    const isCompleted = status === 'COMPLETED';
-                                    const isPending = status === 'PENDING';
-                                    const isInProgress = status === 'IN_PROGRESS';
-
-                                    return (
-                                        <div
-                                            key={cls.id}
-                                            onClick={() => handleClassClick(cls.id)}
-                                            className={cn(
-                                                "calendar-block absolute left-[2px] right-[2px] px-1.5 py-1 cursor-pointer overflow-hidden z-10",
-                                                isCompleted && "opacity-75 grayscale-[0.2]",
-                                                isInProgress && "ring-1 ring-primary ring-offset-0 scale-[1.01]"
-                                            )}
-                                            style={{
-                                                ...style,
-                                                backgroundColor: cls.color || colors.bg,
-                                                borderColor: colors.border,
-                                                borderLeftWidth: "3px",
-                                                color: colors.text
-                                            }}
-                                        >
-                                            <div className="flex justify-between items-start gap-0.5">
-                                                <div className="font-bold text-[10px] truncate leading-tight">
-                                                    {cls.name}
+                                        return (
+                                            <div
+                                                key={event.id}
+                                                className="absolute left-0.5 right-0.5 px-2 py-1.5 z-20 rounded-lg border shadow-lg flex flex-col justify-center bg-purple-950/20 border-purple-500/30 text-purple-200"
+                                                style={{
+                                                    top: eventStyle.top,
+                                                    height: eventStyle.height,
+                                                    backdropFilter: "blur(2px)"
+                                                }}
+                                            >
+                                                <div className="flex items-center gap-1 font-bold text-[9px] truncate leading-tight">
+                                                    <Trophy className="h-3 w-3 text-purple-400 shrink-0" />
+                                                    <span className="truncate">{event.name}</span>
                                                 </div>
-                                                {isCompleted && <CheckCircle2 className="h-2.5 w-2.5 opacity-80 shrink-0" />}
-                                                {isInProgress && <Clock className="h-2.5 w-2.5 animate-pulse shrink-0" />}
-                                                {isPending && <div className="h-1 w-1 rounded-full bg-current opacity-60 mt-0.5 ml-auto shrink-0" />}
+                                                <div className="text-[8px] opacity-70 truncate font-sans tracking-wide">
+                                                    COMPETICIÓN
+                                                </div>
                                             </div>
+                                        );
+                                    })}
 
-                                            <div className="text-[9px] opacity-95 truncate -mt-0.5 font-mono tracking-tight">
-                                                {cls.startTime}
+                                    {/* Classes */}
+                                    {classesByDay[day.toISOString()]?.map((cls) => {
+                                        const style = calculateBlockDimensions(cls.startTime, cls.endTime);
+                                        const colors = getTypeColors(cls.type);
+                                        const status = getClassStatus(cls, day);
+
+                                        const isCompleted = status === 'COMPLETED';
+                                        const isPending = status === 'PENDING';
+                                        const isInProgress = status === 'IN_PROGRESS';
+
+                                        const hasActiveHover = hoveredClassId !== null;
+                                        const isThisHovered = hoveredClassId === cls.id;
+                                        const totalBooked = cls._count?.attendances || 0;
+
+                                        return (
+                                            <div
+                                                key={cls.id}
+                                                onClick={() => handleClassClick(cls.id)}
+                                                onMouseEnter={() => setHoveredClassId(cls.id)}
+                                                onMouseLeave={() => setHoveredClassId(null)}
+                                                className={cn(
+                                                    "calendar-block absolute left-[3px] right-[3px] px-2 py-1.5 cursor-pointer rounded-xl border z-10 transition-all duration-350 flex flex-col justify-between shadow-md",
+                                                    isCompleted && "grayscale-[0.3]",
+                                                    isInProgress && "ring-1 ring-amber-500/40 ring-offset-0 scale-[1.01] shadow-[0_0_12px_rgba(245,158,11,0.1)]",
+                                                    hasActiveHover && !isThisHovered ? "opacity-[0.25] blur-[0.3px]" : "opacity-100"
+                                                )}
+                                                style={{
+                                                    ...style,
+                                                    backgroundColor: cls.color || colors.bg,
+                                                    borderColor: colors.border,
+                                                    borderLeftWidth: "4px",
+                                                    color: colors.text,
+                                                    backdropFilter: "blur(4px)"
+                                                }}
+                                            >
+                                                <div className="space-y-0.5">
+                                                    <div className="flex justify-between items-start gap-1">
+                                                        <h4 className="font-extrabold text-[9px] md:text-[10px] truncate leading-snug tracking-tight text-white mb-0.5">
+                                                            {cls.name}
+                                                        </h4>
+                                                        {isCompleted && <CheckCircle2 className="h-3 w-3 text-green-400 opacity-90 shrink-0 mt-0.5" />}
+                                                        {isInProgress && <Clock className="h-3 w-3 text-amber-400 animate-pulse shrink-0 mt-0.5" />}
+                                                    </div>
+
+                                                    <div className="text-[8px] opacity-75 font-mono tracking-tight font-medium">
+                                                        {cls.startTime} - {cls.endTime}
+                                                    </div>
+                                                </div>
+
+                                                {/* Bottom info row (Coaches and Reserved count) */}
+                                                <div className="flex justify-between items-center gap-1 mt-1 text-[8px] opacity-60">
+                                                    {cls.coaches && cls.coaches.length > 0 ? (
+                                                        <span className="truncate max-w-[70%] font-medium">
+                                                            {cls.coaches.map(c => c.name.split(" ")[0]).join(", ")}
+                                                        </span>
+                                                    ) : (
+                                                        <span />
+                                                    )}
+                                                    <span className="font-mono bg-black/25 px-1 py-0.5 rounded border border-white/5">
+                                                        {totalBooked}/{cls.maxCapacity}
+                                                    </span>
+                                                </div>
                                             </div>
-                                        </div>
-                                    );
-                                })}
+                                        );
+                                    })}
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             </div>
 
